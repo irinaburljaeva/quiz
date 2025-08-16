@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Подбор программы — ШАГАЙ ДОМА</title>
+<title>Подбор программы</title>
 <style>
 :root{
   --bg:#ffffff; --paper:#ffffff; --ink:#1f2328; --muted:#6b7280;
@@ -15,9 +15,10 @@ html,body{height:100%}
 body{
   margin:0; color:var(--ink);
   font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial,sans-serif;
-  background:
-    radial-gradient(1200px 600px at 15% -10%, #fff6e8 0%, #fffaf3 40%, #fff 70%) fixed;
+  background:radial-gradient(1200px 600px at 15% -10%, #fff6e8 0%, #fffaf3 40%, #fff 70%) fixed;
 }
+
+/* card */
 .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:18px}
 .card{
   width:min(980px,100%);
@@ -27,24 +28,28 @@ body{
   box-shadow:0 30px 80px rgba(0,0,0,.06);
   overflow:hidden;
 }
+
+/* header */
 .header{padding:18px;display:flex;gap:12px;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:12px}
-.brand .logo{width:40px;height:40px;border-radius:50%;background:#ffe8ea;display:grid;place-content:center;font-size:22px}
-.brand .title{display:flex;flex-direction:column}
-.brand .title b{font-size:16px;color:var(--accent)}
-.brand .title span{font-size:12px;color:var(--muted)}
+.brand-img{height:40px;width:auto;display:block}
 h1{margin:0;font-size:26px;line-height:1.15}
 
+/* progress */
 .progress{padding:0 18px 14px}
 .bar{height:10px;border-radius:999px;background:#f0f2f5;position:relative;overflow:hidden;border:1px solid #ececec}
 .fill{position:absolute;inset:0 100% 0 0;border-radius:999px;
   background:linear-gradient(90deg,var(--accentGrad1),var(--accentGrad2));transition:inset .35s ease}
 .pct{margin-top:6px;font-size:12px;color:var(--muted)}
 
-.stage{position:relative;min-height:56vh;padding:16px 18px calc(var(--navH) + 16px)}
+/* stage & steps */
+.stage{position:relative;padding:16px 18px calc(var(--navH) + 16px);min-height:56vh}
 .step{position:absolute;inset:0;opacity:0;transform:translateY(8px);transition:.3s}
 .step.active{opacity:1;transform:none}
 .step.out{opacity:0;transform:translateY(-8px)}
+/* прокручиваемая зона с ответами/полями */
+.scroll{max-height:clamp(340px,56svh,640px);overflow:auto;padding-right:6px;scrollbar-width:thin}
+@supports not (height:1svh){ .scroll{max-height:clamp(340px,56vh,640px);} }
 
 .q{font-size:26px;line-height:1.15;margin:2px 0 12px}
 .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
@@ -53,21 +58,24 @@ h1{margin:0;font-size:26px;line-height:1.15}
   background:#fff;border:1px solid var(--line)
 }
 
+/* options */
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
 .opt{
-  display:flex;gap:10px;align-items:center;padding:14px;border:2px solid #1f4a7f33;border-radius:14px;
+  display:flex;gap:10px;align-items:center;padding:14px;border:2px dashed #1f4a7f55;border-radius:14px;
   background:#fffdf8;cursor:pointer;transition:.18s;
 }
-.opt:hover{border-color:#1f4a7f66;background:#fff8ef}
-.opt.sel{border:3px solid var(--accent);background:#fff1f1}
+.opt:hover{border-color:#1f4a7f88;background:#fff8ef}
+.opt.sel{border-style:solid;border-color:var(--accent);background:#fff1f1}
 .opt .ico{font-size:20px;width:26px;text-align:center}
 .opt .t{font-size:16px}
 
+/* inputs */
 .inputs{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .input{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column}
 .input label{font-size:12px;color:var(--muted);margin-bottom:6px}
 .input input{background:transparent;border:0;color:var(--ink);font-size:18px;outline:none}
 
+/* nav */
 .nav{
   position:sticky;bottom:0;display:flex;gap:12px;justify-content:space-between;align-items:center;
   padding:12px 18px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 35%,#fff 60%);
@@ -78,10 +86,12 @@ h1{margin:0;font-size:26px;line-height:1.15}
 .btn.primary{background:linear-gradient(90deg,var(--accentGrad1),var(--accentGrad2));color:#1a0b0b}
 .btn:disabled{opacity:.55;cursor:not-allowed}
 
+/* loading */
 .center{display:grid;place-content:center;text-align:center;height:100%}
 .spinner{width:46px;height:46px;border:4px solid #e9ecf1;border-top-color:#ff8a6b;border-radius:50%;margin:8px auto 12px;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* result */
 .result{padding:22px 18px 26px;text-align:center}
 .badge{
   width:170px;height:170px;margin:8px auto 10px;border-radius:50%;
@@ -106,8 +116,7 @@ h1{margin:0;font-size:26px;line-height:1.15}
   <div class="card" id="app">
     <div class="header">
       <div class="brand">
-        <div class="logo">🏃‍♀️</div>
-        <div class="title"><b>ШАГАЙ ДОМА</b><span>подбор программы</span></div>
+        <img src="logo.png" alt="Логотип" class="brand-img"/>
       </div>
       <h1>Найдём идеальный формат тренировок</h1>
     </div>
@@ -127,10 +136,9 @@ h1{margin:0;font-size:26px;line-height:1.15}
 </div>
 
 <script>
-/* ========= настройки ========= */
-const ASK_EMAIL = false;   // если захотите e-mail перед результатом — переведите в true
+/* ===== настройки ===== */
+const ASK_EMAIL = false;
 
-/* Программы (примерные тексты/ссылки — замените на реальные при необходимости) */
 const PLANS = {
   start45:{title:"Комфортный старт 45+",icon:"🫶",
     desc:"Щадящие тренировки без прыжков, мягкое жиросжигание, забота о суставах.",
@@ -152,7 +160,7 @@ const PLANS = {
     buy:"https://walk-walk.ru/checkout?plan=fast20"}
 };
 
-/* ========= шаги (первый — возраст с картинкой age.png) ========= */
+/* ===== шаги ===== */
 const STEPS = [
   {type:"choice", q:"Ваш возраст",
     image:"age.png",
@@ -215,10 +223,10 @@ const STEPS = [
   {type:"email", q:"Куда прислать план и первую тренировку?",
     sub:"Мы не пишем лишнего и не передаём адрес третьим лицам."
   },
-  {type:"loading"} // «анализ»
+  {type:"loading"}
 ];
 
-/* ========= состояние ========= */
+/* ===== состояние ===== */
 let step = 0;
 const scores = {};
 const data   = {};
@@ -228,7 +236,7 @@ const pct    = document.getElementById('pct');
 const nextBt = document.getElementById('next');
 const backBt = document.getElementById('back');
 
-/* ========= утилиты ========= */
+/* ===== утилиты ===== */
 const qs = (s,el=document)=>el.querySelector(s);
 function setProgress(){
   const total = STEPS.length;
@@ -245,7 +253,7 @@ function bmiScore(h, w){
   if(m < 22) bump('tone',1);
 }
 
-/* ========= рендер шага ========= */
+/* ===== рендер шага ===== */
 function render(){
   setProgress();
   const prev = qs('.step.active', stage);
@@ -264,11 +272,13 @@ function render(){
       ${cfg.image?`<img class="illustration" src="${cfg.image}" alt="Иллюстрация к вопросу">`:''}
       <div class="q">${cfg.q}</div>
       ${cfg.sub?`<div class="sub">${cfg.sub}</div>`:''}
-      <div class="grid">
-        ${cfg.options.map(o=>`
-          <button class="opt" data-plan="${o.plan||''}">
-            <div class="ico">${o.ico||'•'}</div><div class="t">${o.t}</div>
-          </button>`).join('')}
+      <div class="scroll">
+        <div class="grid">
+          ${cfg.options.map(o=>`
+            <button class="opt" data-plan="${o.plan||''}">
+              <div class="ico">${o.ico||'•'}</div><div class="t">${o.t}</div>
+            </button>`).join('')}
+        </div>
       </div>`;
     el.addEventListener('click',(e)=>{
       const btn = e.target.closest('.opt'); if(!btn) return;
@@ -285,13 +295,15 @@ function render(){
     el.innerHTML = `
       <div class="q">${cfg.q}</div>
       ${cfg.sub?`<div class="sub">${cfg.sub}</div>`:''}
-      <div class="inputs">
-        ${cfg.fields.map(f=>`
-          <div class="input">
-            <label for="${f.id}">${f.label}</label>
-            <input id="${f.id}" type="number" inputmode="decimal"
-              placeholder="${f.placeholder||''}" min="${f.min||''}" max="${f.max||''}"/>
-          </div>`).join('')}
+      <div class="scroll">
+        <div class="inputs">
+          ${cfg.fields.map(f=>`
+            <div class="input">
+              <label for="${f.id}">${f.label}</label>
+              <input id="${f.id}" type="number" inputmode="decimal"
+                placeholder="${f.placeholder||''}" min="${f.min||''}" max="${f.max||''}"/>
+            </div>`).join('')}
+        </div>
       </div>`;
     const h=qs('#height',el), w=qs('#weight',el);
     const validate = ()=>{
@@ -309,10 +321,12 @@ function render(){
     el.innerHTML = `
       <div class="q">${cfg.q}</div>
       ${cfg.sub?`<div class="sub">${cfg.sub}</div>`:''}
-      <div class="inputs" style="max-width:520px">
-        <div class="input" style="grid-column:1/-1">
-          <label for="email">Ваш e-mail</label>
-          <input id="email" type="email" placeholder="name@example.com"/>
+      <div class="scroll" style="max-height:260px">
+        <div class="inputs" style="max-width:520px">
+          <div class="input" style="grid-column:1/-1">
+            <label for="email">Ваш e-mail</label>
+            <input id="email" type="email" placeholder="name@example.com"/>
+          </div>
         </div>
       </div>`;
     const em=qs('#email',el);
@@ -338,7 +352,7 @@ function render(){
   requestAnimationFrame(()=>el.classList.add('active'));
 }
 
-/* ========= управление ========= */
+/* ===== управление ===== */
 document.getElementById('next').addEventListener('click',()=>{
   step = Math.min(step+1, STEPS.length-1);
   render();
@@ -348,7 +362,7 @@ document.getElementById('back').addEventListener('click',()=>{
   step--; render();
 });
 
-/* ========= результат ========= */
+/* ===== результат ===== */
 function showResult(){
   const app = document.getElementById('app');
   const search = location.search ? '&'+ location.search.slice(1) : '';
@@ -359,8 +373,7 @@ function showResult(){
   app.innerHTML = `
     <div class="header">
       <div class="brand">
-        <div class="logo">🏃‍♀️</div>
-        <div class="title"><b>ШАГАЙ ДОМА</b><span>персональная рекомендация</span></div>
+        <img src="logo.png" alt="Логотип" class="brand-img"/>
       </div>
       <h1>Ваш результат готов!</h1>
     </div>
@@ -378,4 +391,4 @@ function showResult(){
 render();
 </script>
 </body>
-</html>
+  </html>
