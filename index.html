@@ -6,85 +6,99 @@
 <title>Подбор программы — ШАГАЙ ДОМА</title>
 <style>
 :root{
-  --bg:#0b1020;--card:#101629;--ink:#eaf0ff;--muted:#9fb1d9;
-  --accent:#ff4b4b;--accent2:#ffd46b;--ok:#22c55e;
-  --line:#26314c;--rad:18px;
+  --bg:#ffffff; --paper:#ffffff; --ink:#1f2328; --muted:#6b7280;
+  --line:#eaeaea; --accent:#b22222; --accentGrad1:#ff6d6d; --accentGrad2:#ffb86b;
+  --rad:18px; --navH:96px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-  margin:0;background:
-    radial-gradient(1000px 600px at 20% -10%,#1b2750 0%,#0f1733 60%,#0b1020 100%),
-    linear-gradient(#0b1020,#0b1020);
-  color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial,sans-serif;
+  margin:0; color:var(--ink);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial,sans-serif;
+  background:
+    radial-gradient(1200px 600px at 15% -10%, #fff6e8 0%, #fffaf3 40%, #fff 70%) fixed;
 }
 .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:18px}
 .card{
-  width:min(960px,100%);background:linear-gradient(180deg,#111735,#0e142c);
-  border:1px solid var(--line);border-radius:var(--rad);box-shadow:0 30px 80px rgba(0,0,0,.5);
-  padding:0;overflow:hidden;
+  width:min(980px,100%);
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--rad);
+  box-shadow:0 30px 80px rgba(0,0,0,.06);
+  overflow:hidden;
 }
-.header{padding:18px 18px 10px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between}
-h1{margin:0;font-size:22px;font-weight:800;letter-spacing:.2px}
-.brand{display:flex;align-items:center;gap:10px}
-.brand .logo{width:36px;height:36px;border-radius:50%;background:#fff;display:grid;place-content:center;font-weight:900;color:#111}
+.header{padding:18px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .logo{width:40px;height:40px;border-radius:50%;background:#ffe8ea;display:grid;place-content:center;font-size:22px}
 .brand .title{display:flex;flex-direction:column}
-.brand .title b{font-size:15px}
+.brand .title b{font-size:16px;color:var(--accent)}
 .brand .title span{font-size:12px;color:var(--muted)}
+h1{margin:0;font-size:26px;line-height:1.15}
 
-.progress{padding:0 18px 16px}
-.bar{height:10px;border-radius:999px;background:#141b35;position:relative;overflow:hidden}
-.fill{position:absolute;inset:0 100% 0 0;background:linear-gradient(90deg,#ff6d6d,#ffb86b);border-radius:999px;transition:inset .35s}
+.progress{padding:0 18px 14px}
+.bar{height:10px;border-radius:999px;background:#f0f2f5;position:relative;overflow:hidden;border:1px solid #ececec}
+.fill{position:absolute;inset:0 100% 0 0;border-radius:999px;
+  background:linear-gradient(90deg,var(--accentGrad1),var(--accentGrad2));transition:inset .35s ease}
 .pct{margin-top:6px;font-size:12px;color:var(--muted)}
 
-.stage{position:relative;min-height:56vh;padding:16px 18px 100px}
-.step{position:absolute;inset:0;opacity:0;transform:translateY(8px);transition:.35s}
+.stage{position:relative;min-height:56vh;padding:16px 18px calc(var(--navH) + 16px)}
+.step{position:absolute;inset:0;opacity:0;transform:translateY(8px);transition:.3s}
 .step.active{opacity:1;transform:none}
 .step.out{opacity:0;transform:translateY(-8px)}
 
-.q{font-size:26px;line-height:1.15;margin:4px 0 14px}
-.sub{color:var(--muted);font-size:14px;margin:0 0 16px}
-
-.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-.opt{
-  display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:14px;
-  background:linear-gradient(180deg,#121939,#0f1531);cursor:pointer;transition:.2s
+.q{font-size:26px;line-height:1.15;margin:2px 0 12px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+.illustration{
+  display:block;width:100%;max-height:240px;object-fit:contain;margin:0 0 12px;border-radius:14px;
+  background:#fff;border:1px solid var(--line)
 }
-.opt:hover{border-color:#364469;background:#121a3f}
-.opt.sel{outline:3px solid var(--accent)}
-.opt .ico{font-size:22px;width:28px;text-align:center}
+
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.opt{
+  display:flex;gap:10px;align-items:center;padding:14px;border:2px solid #1f4a7f33;border-radius:14px;
+  background:#fffdf8;cursor:pointer;transition:.18s;
+}
+.opt:hover{border-color:#1f4a7f66;background:#fff8ef}
+.opt.sel{border:3px solid var(--accent);background:#fff1f1}
+.opt .ico{font-size:20px;width:26px;text-align:center}
 .opt .t{font-size:16px}
 
-.inputs{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
-.input{
-  background:#0f1733;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column
-}
+.inputs{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.input{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column}
 .input label{font-size:12px;color:var(--muted);margin-bottom:6px}
 .input input{background:transparent;border:0;color:var(--ink);font-size:18px;outline:none}
 
 .nav{
   position:sticky;bottom:0;display:flex;gap:12px;justify-content:space-between;align-items:center;
-  padding:12px 18px;background:linear-gradient(180deg,rgba(11,16,32,0),rgba(11,16,32,.9) 35%,#0b1020 60%);
+  padding:12px 18px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 35%,#fff 60%);
+  border-top:1px solid var(--line)
 }
 .btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;cursor:pointer}
-.btn.secondary{background:#1a2447;color:#e8eeff}
-.btn.primary{background:linear-gradient(90deg,#ff6d6d,#ff9f6b);color:#1a0b0b}
+.btn.secondary{background:#f3f4f6;color:#111827;border:1px solid #e5e7eb}
+.btn.primary{background:linear-gradient(90deg,var(--accentGrad1),var(--accentGrad2));color:#1a0b0b}
 .btn:disabled{opacity:.55;cursor:not-allowed}
 
 .center{display:grid;place-content:center;text-align:center;height:100%}
-.spinner{width:46px;height:46px;border:4px solid #2a3357;border-top-color:#ff8a6b;border-radius:50%;margin:8px auto 12px;animation:spin 1s linear infinite}
+.spinner{width:46px;height:46px;border:4px solid #e9ecf1;border-top-color:#ff8a6b;border-radius:50%;margin:8px auto 12px;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .result{padding:22px 18px 26px;text-align:center}
-.badge{width:170px;height:170px;margin:8px auto 10px;border-radius:50%;
-  background:radial-gradient(circle at 50% 40%,#ffe6ea,#ff98ac 60%,#ff617d);box-shadow:0 18px 40px rgba(255,77,94,.25)}
-.badge b{font-size:64px;display:block;line-height:170px}
-.plan{font-size:24px;margin:6px 0 8px}
-.desc{color:#f3f6ff;opacity:.92;max-width:720px;margin:0 auto 12px;line-height:1.55}
+.badge{
+  width:170px;height:170px;margin:8px auto 10px;border-radius:50%;
+  background:radial-gradient(circle at 50% 40%,#ffe6ea,#ff98ac 60%,#ff617d);
+  box-shadow:0 18px 40px rgba(255,77,94,.25); color:#fff;display:grid;place-content:center;font-size:64px
+}
+.plan{font-size:24px;margin:6px 0 8px;color:var(--accent)}
+.desc{max-width:720px;margin:0 auto 12px;line-height:1.55}
 .buy{display:inline-block;margin-top:10px;padding:14px 24px;border-radius:999px;
-  background:linear-gradient(90deg,#ff6d6d,#ffb86b);color:#1a0b0b;text-decoration:none;font-weight:900}
-.alt{display:block;margin-top:10px;color:#c5d2ff;text-decoration:underline}
-.note{font-size:12px;color:#9fb1d9;margin-top:8px}
+  background:linear-gradient(90deg,var(--accentGrad1),var(--accentGrad2));color:#1a0b0b;text-decoration:none;font-weight:900}
+.alt{display:block;margin-top:10px;color:#374151;text-decoration:underline}
+.note{font-size:12px;color:#6b7280;margin-top:8px}
+
+@media (max-width:420px){
+  h1{font-size:22px}
+  .q{font-size:22px}
+}
 </style>
 </head>
 <body>
@@ -113,16 +127,16 @@ h1{margin:0;font-size:22px;font-weight:800;letter-spacing:.2px}
 </div>
 
 <script>
-/* ====== настройки ====== */
-const ASK_EMAIL = false; // если нужно как в примере — поставь true (перед результатом появится ввод e-mail)
+/* ========= настройки ========= */
+const ASK_EMAIL = false;   // если захотите e-mail перед результатом — переведите в true
 
-/* Программы и ссылки (замени buy на свои) */
+/* Программы (примерные тексты/ссылки — замените на реальные при необходимости) */
 const PLANS = {
   start45:{title:"Комфортный старт 45+",icon:"🫶",
     desc:"Щадящие тренировки без прыжков, мягкое жиросжигание, забота о суставах.",
     buy:"https://walk-walk.ru/checkout?plan=start45"},
   fatburn:{title:"Жиросжигание Light",icon:"🔥",
-    desc:"Шагательные и танцевальные кардио-связки в комфортном темпе для снижения веса.",
+    desc:"Шагательные и танцевальные кардио-связки для снижения веса в комфортном темпе.",
     buy:"https://walk-walk.ru/checkout?plan=fatburn"},
   tone:{title:"Тонус и осанка",icon:"🎯",
     desc:"Функциональные комплексы на спину и корпус: подтянутая осанка и крепкий центр.",
@@ -131,35 +145,38 @@ const PLANS = {
     desc:"Музыка, простые ритмы, много шагов — худеем «на радостях».",
     buy:"https://walk-walk.ru/checkout?plan=party"},
   mobility:{title:"Подвижность и растяжка",icon:"🧘‍♀️",
-    desc:"Гибкость, суставная мобилизация и расслабление — прекрасное дополнение к любому плану.",
+    desc:"Гибкость, суставная мобилизация и расслабление — отличное дополнение к любому плану.",
     buy:"https://walk-walk.ru/checkout?plan=mobility"},
   fast20:{title:"Быстрый старт 20–25 минут",icon:"⏱️",
     desc:"Короткие, но эффективные занятия, когда нет времени на длинные тренировки.",
     buy:"https://walk-walk.ru/checkout?plan=fast20"}
 };
 
-/* Шаги — максимально «как в примере»: один экран = один вопрос */
+/* ========= шаги (первый — возраст с картинкой age.png) ========= */
 const STEPS = [
-  {type:"choice", q:"Ваша главная цель на 4 недели:", options:[
-    {t:"Похудеть комфортно",plan:"fatburn",ico:"🔥"},
-    {t:"Начать мягко (45+)",plan:"start45",ico:"🫶"},
-    {t:"Подтянуть корпус/осанку",plan:"tone",ico:"🎯"},
-    {t:"Движение под музыку",plan:"party",ico:"🎵"},
-    {t:"Гибкость и лёгкость",plan:"mobility",ico:"🧘‍♀️"},
-    {t:"Короткие занятия 20–25 мин",plan:"fast20",ico:"⏱️"}
+  {type:"choice", q:"Ваш возраст",
+    image:"age.png",
+    options:[
+      {t:"18–29 лет", plan:null, ico:"✨"},
+      {t:"30–39 лет", plan:null, ico:"🌿"},
+      {t:"40–49 лет", plan:null, ico:"🌸"},
+      {t:"50+ лет",   plan:null, ico:"💫"}
+    ]
+  },
+  {type:"choice", q:"Главная цель на 4 недели:", options:[
+    {t:"Похудеть комфортно", plan:"fatburn", ico:"🔥"},
+    {t:"Начать мягко (45+)", plan:"start45", ico:"🫶"},
+    {t:"Подтянуть корпус/осанку", plan:"tone", ico:"🎯"},
+    {t:"Движение под музыку", plan:"party", ico:"🎵"},
+    {t:"Гибкость и лёгкость", plan:"mobility", ico:"🧘‍♀️"},
+    {t:"Короткие занятия 20–25 мин", plan:"fast20", ico:"⏱️"}
   ]},
   {type:"choice", q:"Текущий уровень активности:", options:[
-    {t:"Новичок / перерыв",plan:"start45",ico:"🌱"},
-    {t:"Редко двигаюсь",plan:"fast20",ico:"⌛"},
-    {t:"Средний",plan:"fatburn",ico:"🙂"},
-    {t:"Хороший, но хочу без прыжков",plan:"party",ico:"🎶"},
-    {t:"Нужен акцент на спину/корпус",plan:"tone",ico:"🎯"}
-  ]},
-  {type:"choice", q:"Сколько времени комфортно уделять в день?", options:[
-    {t:"10–15 минут",plan:"fast20",ico:"⏱️"},
-    {t:"20–25 минут",plan:"fast20",ico:"⏱️"},
-    {t:"30–40 минут",plan:"fatburn",ico:"🔥"},
-    {t:"40+ минут",plan:"tone",ico:"🎯"}
+    {t:"Новичок / перерыв", plan:"start45", ico:"🌱"},
+    {t:"Редко двигаюсь", plan:"fast20", ico:"⌛"},
+    {t:"Средний", plan:"fatburn", ico:"🙂"},
+    {t:"Хороший, но без прыжков", plan:"party", ico:"🎶"},
+    {t:"Нужен акцент на спину/корпус", plan:"tone", ico:"🎯"}
   ]},
   {type:"inputs", q:"Параметры для индивидуального подбора",
     sub:"Рост и вес помогут корректнее подобрать темп. (Можно приблизительно)",
@@ -169,39 +186,39 @@ const STEPS = [
     ]
   },
   {type:"choice", q:"Есть ли ограничения?", options:[
-    {t:"Колени/суставы, нужна щадящая нагрузка",plan:"start45",ico:"🦵"},
-    {t:"Чувствительная спина/шея",plan:"tone",ico:"🧍‍♀️"},
-    {t:"Нет серьёзных ограничений",plan:"fatburn",ico:"💪"},
-    {t:"Предпочитаю низкую ударную нагрузку",plan:"mobility",ico:"🧘‍♀️"}
+    {t:"Колени/суставы, нужна щадящая нагрузка", plan:"start45", ico:"🦵"},
+    {t:"Чувствительная спина/шея", plan:"tone", ico:"🧍‍♀️"},
+    {t:"Нет серьёзных ограничений", plan:"fatburn", ico:"💪"},
+    {t:"Предпочитаю низкую ударную нагрузку", plan:"mobility", ico:"🧘‍♀️"}
   ]},
   {type:"choice", q:"Какие форматы нравятся больше?", options:[
-    {t:"Шагательные/танцевальные",plan:"party",ico:"🎵"},
-    {t:"Функциональные на корпус",plan:"tone",ico:"🎯"},
-    {t:"Кардио + немного силовых",plan:"fatburn",ico:"🔥"},
-    {t:"Растяжка и дыхание",plan:"mobility",ico:"🧘‍♀️"},
-    {t:"Короткие экспресс-занятия",plan:"fast20",ico:"⏱️"},
-    {t:"Мягко 45+",plan:"start45",ico:"🫶"}
+    {t:"Шагательные/танцевальные", plan:"party", ico:"🎵"},
+    {t:"Функциональные на корпус", plan:"tone", ico:"🎯"},
+    {t:"Кардио + немного силовых", plan:"fatburn", ico:"🔥"},
+    {t:"Растяжка и дыхание", plan:"mobility", ico:"🧘‍♀️"},
+    {t:"Короткие экспресс-занятия", plan:"fast20", ico:"⏱️"},
+    {t:"Мягко 45+", plan:"start45", ico:"🫶"}
   ]},
   {type:"choice", q:"Инвентарь:", options:[
-    {t:"Без инвентаря",plan:"party",ico:"🚫"},
-    {t:"Только коврик",plan:"mobility",ico:"🧘"},
-    {t:"Резинки/гантели light",plan:"fatburn",ico:"🏋️"},
-    {t:"Мяч/ролл/лента",plan:"tone",ico:"🧶"}
+    {t:"Без инвентаря", plan:"party", ico:"🚫"},
+    {t:"Только коврик", plan:"mobility", ico:"🧘"},
+    {t:"Резинки/гантели light", plan:"fatburn", ico:"🏋️"},
+    {t:"Мяч/ролл/лента", plan:"tone", ico:"🧶"}
   ]},
   {type:"choice", q:"Темп занятий:", options:[
-    {t:"Спокойный",plan:"mobility",ico:"🫧"},
-    {t:"Мягкий, без прыжков",plan:"start45",ico:"🫶"},
-    {t:"Средний, комфортный",plan:"fatburn",ico:"🙂"},
-    {t:"Энергичный, но без сложности",plan:"party",ico:"🎶"},
-    {t:"С акцентом на технику",plan:"tone",ico:"🎯"}
+    {t:"Спокойный", plan:"mobility", ico:"🫧"},
+    {t:"Мягкий, без прыжков", plan:"start45", ico:"🫶"},
+    {t:"Средний, комфортный", plan:"fatburn", ico:"🙂"},
+    {t:"Энергичный, но без сложности", plan:"party", ico:"🎶"},
+    {t:"С акцентом на технику", plan:"tone", ico:"🎯"}
   ]},
   {type:"email", q:"Куда прислать план и первую тренировку?",
-    sub:"Мы не пишем лишнего и не передаём адрес третьим лицам.",
+    sub:"Мы не пишем лишнего и не передаём адрес третьим лицам."
   },
   {type:"loading"} // «анализ»
 ];
 
-/* ====== состояние ====== */
+/* ========= состояние ========= */
 let step = 0;
 const scores = {};
 const data   = {};
@@ -211,15 +228,15 @@ const pct    = document.getElementById('pct');
 const nextBt = document.getElementById('next');
 const backBt = document.getElementById('back');
 
-/* ====== утилиты ====== */
+/* ========= утилиты ========= */
 const qs = (s,el=document)=>el.querySelector(s);
 function setProgress(){
   const total = STEPS.length;
-  const p = Math.round((Math.min(step, total-1))/ (total-1) * 100);
+  const p = Math.round((Math.min(step, total-1))/(total-1)*100);
   fill.style.insetInlineEnd = (100-p)+'%';
   pct.textContent = p + '%';
 }
-function bump(plan, n=1){ scores[plan]=(scores[plan]||0)+n; }
+function bump(plan, n=1){ if(!plan) return; scores[plan]=(scores[plan]||0)+n; }
 function bmiScore(h, w){
   if(!h||!w) return;
   const m = w / Math.pow(h/100,2);
@@ -228,11 +245,11 @@ function bmiScore(h, w){
   if(m < 22) bump('tone',1);
 }
 
-/* ====== рендер шага ====== */
+/* ========= рендер шага ========= */
 function render(){
   setProgress();
   const prev = qs('.step.active', stage);
-  if(prev){ prev.classList.remove('active'); prev.classList.add('out'); setTimeout(()=>prev.remove(),300); }
+  if(prev){ prev.classList.remove('active'); prev.classList.add('out'); setTimeout(()=>prev.remove(),280); }
 
   const cfg = STEPS[step];
   const el  = document.createElement('div');
@@ -244,11 +261,12 @@ function render(){
 
   if(cfg.type==='choice'){
     el.innerHTML = `
+      ${cfg.image?`<img class="illustration" src="${cfg.image}" alt="Иллюстрация к вопросу">`:''}
       <div class="q">${cfg.q}</div>
       ${cfg.sub?`<div class="sub">${cfg.sub}</div>`:''}
       <div class="grid">
         ${cfg.options.map(o=>`
-          <button class="opt" data-plan="${o.plan}">
+          <button class="opt" data-plan="${o.plan||''}">
             <div class="ico">${o.ico||'•'}</div><div class="t">${o.t}</div>
           </button>`).join('')}
       </div>`;
@@ -257,7 +275,9 @@ function render(){
       el.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
       btn.classList.add('sel'); nextBt.disabled=false;
       data['step'+step] = btn.textContent.trim();
-      bump(btn.dataset.plan,1);
+      const p = btn.dataset.plan || null;
+      if(p) bump(p,1);
+      btn.scrollIntoView({block:'nearest',behavior:'smooth'});
     });
   }
 
@@ -311,17 +331,15 @@ function render(){
         <div class="sub">Анализируем ответы…</div>
       </div>`;
     nextBt.disabled = true; backBt.disabled = true;
-    // подсчёт с учётом BMI
     if(data.height && data.weight) bmiScore(data.height, data.weight);
-    setTimeout(showResult, 1400);
+    setTimeout(showResult, 1300);
   }
 
   requestAnimationFrame(()=>el.classList.add('active'));
 }
 
-/* ====== управление ====== */
+/* ========= управление ========= */
 document.getElementById('next').addEventListener('click',()=>{
-  // если был шаг inputs — просто дальше; если был email — уже отработал в render
   step = Math.min(step+1, STEPS.length-1);
   render();
 });
@@ -330,11 +348,10 @@ document.getElementById('back').addEventListener('click',()=>{
   step--; render();
 });
 
-/* ====== результат ====== */
+/* ========= результат ========= */
 function showResult(){
   const app = document.getElementById('app');
   const search = location.search ? '&'+ location.search.slice(1) : '';
-  // победитель (при равенстве — приоритет как объявлены в PLANS)
   let bestKey = Object.keys(PLANS)[0], bestVal = -1;
   for(const k of Object.keys(PLANS)){ const v=scores[k]||0; if(v>bestVal){bestVal=v; bestKey=k;} }
   const plan = PLANS[bestKey];
@@ -348,7 +365,7 @@ function showResult(){
       <h1>Ваш результат готов!</h1>
     </div>
     <div class="result">
-      <div class="badge"><b>${plan.icon||'⭐'}</b></div>
+      <div class="badge">${plan.icon||'⭐'}</div>
       <div class="plan">Вам подходит: <b>${plan.title}</b></div>
       <p class="desc">${plan.desc}</p>
       <a class="buy" href="${plan.buy}${search ? search : ''}" target="_blank" rel="noopener">Купить программу</a>
