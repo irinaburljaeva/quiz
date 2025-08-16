@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Подбор программы</title>
+<title>Подбор программы — ШАГАЙ ДОМА</title>
 <style>
 :root{
   --bg:#ffffff; --paper:#ffffff; --ink:#1f2328; --muted:#6b7280;
@@ -15,7 +15,7 @@ html,body{height:100%}
 body{
   margin:0; color:var(--ink);
   font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial,sans-serif;
-  background:radial-gradient(1200px 600px at 15% -10%, #fff6e8 0%, #fffaf3 40%, #fff 70%) fixed;
+  background:#fff;
 }
 .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:18px}
 .card{
@@ -26,27 +26,32 @@ body{
   box-shadow:0 30px 80px rgba(0,0,0,.06);
   overflow:hidden;
 }
-.header{padding:18px;display:flex;gap:12px;align-items:center;justify-content:space-between}
-.brand{display:flex;align-items:center;gap:12px}
-.brand-img{height:40px;width:auto;display:block}
+.header{
+  padding:18px;display:flex;align-items:center;justify-content:flex-start;column-gap:22px;row-gap:10px;flex-wrap:wrap
+}
+.brand-img{height:44px;width:auto;display:block}
 h1{margin:0;font-size:26px;line-height:1.15}
 .progress{padding:0 18px 14px}
 .bar{height:10px;border-radius:999px;background:#f2f4f7;position:relative;overflow:hidden;border:1px solid #eef0f3}
 .fill{position:absolute;inset:0 100% 0 0;border-radius:999px;
   background:linear-gradient(90deg,var(--grad1),var(--grad2));transition:inset .35s ease}
 .pct{margin-top:6px;font-size:12px;color:var(--muted)}
+
 .stage{position:relative;padding:16px 18px calc(var(--navH) + 16px);min-height:56vh}
-.step{position:absolute;inset:0;opacity:0;transform:translateY(8px);transition:.28s}
+
+/* шаг теперь flex-колонка, чтобы область с ответами занимала остаток и скроллилась */
+.step{
+  position:absolute;inset:0;opacity:0;transform:translateY(8px);transition:.28s;
+  display:flex;flex-direction:column;min-height:0;
+}
 .step.active{opacity:1;transform:none}
 .step.out{opacity:0;transform:translateY(-8px)}
 .scroll{
-  max-height:calc(70svh - var(--navH));
-  overflow:auto; padding-right:6px; padding-bottom:calc(var(--navH) + 12px);
-  -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
-  scrollbar-width:thin; scrollbar-gutter:stable both-edges;
+  flex:1;min-height:0;overflow:auto;padding-right:6px;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-gutter:stable both-edges;
 }
-@supports not (height:1svh){ .scroll{max-height:calc(70vh - var(--navH));} }
-.q{font-size:26px;line-height:1.2;margin:2px 0 12px}
+
+.q{font-size:26px;line-height:1.2;margin:6px 0 12px}
 .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
 .illustration{
   display:block;width:100%;max-height:240px;object-fit:contain;margin:0 0 12px;border-radius:14px;
@@ -61,10 +66,12 @@ h1{margin:0;font-size:26px;line-height:1.15}
 .opt.sel{border:2px solid var(--accent);background:#fff1f1}
 .opt .ico{font-size:20px;width:26px;text-align:center}
 .opt .t{font-size:16px}
+
 .inputs{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .input{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column}
 .input label{font-size:12px;color:var(--muted);margin-bottom:6px}
 .input input{background:transparent;border:0;color:var(--ink);font-size:18px;outline:none}
+
 .nav{
   position:sticky;bottom:0;display:flex;gap:12px;justify-content:space-between;align-items:center;
   padding:12px 18px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 35%,#fff 60%);
@@ -74,9 +81,13 @@ h1{margin:0;font-size:26px;line-height:1.15}
 .btn.secondary{background:#f3f4f6;color:#111827;border:1px solid #e5e7eb}
 .btn.primary{background:linear-gradient(90deg,var(--grad1),var(--grad2));color:#1a0b0b}
 .btn:disabled{opacity:.55;cursor:not-allowed}
+
 .center{display:grid;place-content:center;text-align:center;height:100%}
 .spinner{width:46px;height:46px;border:4px solid #e9ecf1;border-top-color:#ff8a6b;border-radius:50%;margin:8px auto 12px;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.infoText{font-size:24px;text-align:center;margin:6px 0 16px}
+.infoText .hl{color:var(--accent);font-weight:900}
+
 .result{padding:22px 18px 26px;text-align:center}
 .badge{
   width:170px;height:170px;margin:8px auto 10px;border-radius:50%;
@@ -91,7 +102,7 @@ h1{margin:0;font-size:26px;line-height:1.15}
 .note{font-size:12px;color:#6b7280;margin-top:8px}
 .tools{margin-top:12px;display:flex;gap:10px;justify-content:center}
 .tools .btn{font-weight:700}
-.infoText{font-size:24px;text-align:center;margin:6px 0 16px}
+
 @media (max-width:420px){ h1{font-size:22px} .q{font-size:22px} .infoText{font-size:22px} }
 </style>
 </head>
@@ -99,8 +110,8 @@ h1{margin:0;font-size:26px;line-height:1.15}
 <div class="wrap">
   <div class="card" id="app">
     <div class="header">
-      <div class="brand"><img src="logo.png" alt="Логотип" class="brand-img"/></div>
-      <h1>Найдём идеальный формат тренировок</h1>
+      <img src="logo.png" alt="Логотип" class="brand-img"/>
+      <h1>Найдём ваш идеальный формат тренировок</h1>
     </div>
 
     <div class="progress">
@@ -118,7 +129,7 @@ h1{margin:0;font-size:26px;line-height:1.15}
 </div>
 
 <script>
-const ANALYTICS_ENDPOINT = "";
+const ANALYTICS_ENDPOINT = ""; // при необходимости вставьте свой backend
 
 const PLANS = {
   start45:{title:"Комфортный старт 45+",icon:"🫶",
@@ -135,17 +146,13 @@ const PLANS = {
     buy:"https://walk-walk.ru/checkout?plan=party"},
   mobility:{title:"Подвижность и растяжка",icon:"🧘‍♀️",
     desc:"Гибкость, суставная мобилизация и расслабление — отличное дополнение к любому плану.",
-    buy:"https://walk-walk.ru/checkout?plan=mobility"},
+    buy:"https://walk-w-walk.ru/checkout?plan=mobility".replace('-w-w','-w')},
   fast20:{title:"Быстрый старт 20–25 минут",icon:"⏱️",
     desc:"Короткие, но эффективные занятия, когда нет времени на длинные тренировки.",
     buy:"https://walk-walk.ru/checkout?plan=fast20"}
 };
 
-/* ——— ШАГИ ———
-   0) возраст (age.png)
-   1) инфо-слайд с 2.jpg и текстом
-   далее — как было
-*/
+/* ШАГИ */
 const STEPS = [
   {type:"choice", q:"Ваш возраст", image:"age.png",
     options:[
@@ -156,12 +163,12 @@ const STEPS = [
     ]
   },
   {type:"info", image:"2.jpg",
-    text:"Больше 8000+ женщин уже занимаются с ШАГАЙ ДОМА⚡"
+    text:'Больше <span class="hl">8000+</span> женщин уже занимаются с ШАГАЙ ДОМА⚡'
   },
-  {type:"choice", q:"Главная цель на 4 недели:", options:[
+  {type:"choice", q:"Какая твоя главная цель?", image:"3.png", options:[
     {t:"Похудеть комфортно", plan:"fatburn", ico:"🔥"},
-    {t:"Начать мягко (45+)", plan:"start45", ico:"🫶"},
-    {t:"Подтянуть корпус/осанку", plan:"tone", ico:"🎯"},
+    {t:"Начать мягко", plan:"start45", ico:"🫶"},
+    {t:"Подтянуть тело", plan:"tone", ico:"🎯"},
     {t:"Движение под музыку", plan:"party", ico:"🎵"},
     {t:"Гибкость и лёгкость", plan:"mobility", ico:"🧘‍♀️"},
     {t:"Короткие занятия 20–25 мин", plan:"fast20", ico:"⏱️"}
@@ -273,12 +280,11 @@ function render(){
   }
 
   if(cfg.type==='info'){
-    nextBt.disabled=false; // сразу можно дальше
+    nextBt.disabled=false;
     el.innerHTML=`
       ${cfg.image?`<img class="illustration" src="${cfg.image}" alt="">`:''}
       <div class="infoText">${cfg.text}</div>`;
-    // необязательный лог
-    logAnswer(step,'Инфо-слайд', 'seen', null);
+    logAnswer(step,'Инфо-слайд','seen',null);
   }
 
   if(cfg.type==='inputs'){
@@ -338,11 +344,6 @@ function sendToEndpoint(payload){
   if(!ANALYTICS_ENDPOINT) return;
   try{ fetch(ANALYTICS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{}); }catch(_){}
 }
-
-function getUTM(){ const p=new URLSearchParams(location.search); return {
-  source:p.get('utm_source')||'', medium:p.get('utm_medium')||'', campaign:p.get('utm_campaign')||'',
-  content:p.get('utm_content')||'', term:p.get('utm_term')||''}; }
-
 function showResult(){
   let bestKey=Object.keys(PLANS)[0], bestVal=-1;
   for(const k of Object.keys(PLANS)){ const v=scores[k]||0; if(v>bestVal){bestVal=v; bestKey=k;} }
@@ -352,7 +353,9 @@ function showResult(){
     createdAt:new Date().toISOString(),
     answers:data.answers,
     user:{height:data.height||null,weight:data.weight||null},
-    utm:getUTM(),
+    utm:(()=>{const p=new URLSearchParams(location.search);return{
+      source:p.get('utm_source')||'', medium:p.get('utm_medium')||'', campaign:p.get('utm_campaign')||'',
+      content:p.get('utm_content')||'', term:p.get('utm_term')||''};})(),
     derived:{bestPlan:bestKey,scores:{...scores}},
     meta:{ua:navigator.userAgent,w:innerWidth,h:innerHeight}
   };
@@ -363,7 +366,7 @@ function showResult(){
   const search=location.search ? '&'+location.search.slice(1) : '';
   app.innerHTML=`
     <div class="header">
-      <div class="brand"><img src="logo.png" alt="Логотип" class="brand-img"/></div>
+      <img src="logo.png" alt="Логотип" class="brand-img"/>
       <h1>Ваш результат готов!</h1>
     </div>
     <div class="result">
