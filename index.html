@@ -7,7 +7,7 @@
 <style>
 :root{
   --bg:#ffffff; --paper:#ffffff; --ink:#1f2328; --muted:#6b7280;
-  --line:#eaeaea; --accent:#b22222; --accentGrad1:#ff6d6d; --accentGrad2:#ffb86b;
+  --line:#ececec; --accent:#b22222; --grad1:#ff6d6d; --grad2:#ffb86b;
   --rad:18px; --navH:96px;
 }
 *{box-sizing:border-box}
@@ -17,8 +17,6 @@ body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial,sans-serif;
   background:radial-gradient(1200px 600px at 15% -10%, #fff6e8 0%, #fffaf3 40%, #fff 70%) fixed;
 }
-
-/* card */
 .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:18px}
 .card{
   width:min(980px,100%);
@@ -28,54 +26,45 @@ body{
   box-shadow:0 30px 80px rgba(0,0,0,.06);
   overflow:hidden;
 }
-
-/* header */
 .header{padding:18px;display:flex;gap:12px;align-items:center;justify-content:space-between}
 .brand{display:flex;align-items:center;gap:12px}
 .brand-img{height:40px;width:auto;display:block}
 h1{margin:0;font-size:26px;line-height:1.15}
-
-/* progress */
 .progress{padding:0 18px 14px}
-.bar{height:10px;border-radius:999px;background:#f0f2f5;position:relative;overflow:hidden;border:1px solid #ececec}
+.bar{height:10px;border-radius:999px;background:#f2f4f7;position:relative;overflow:hidden;border:1px solid #eef0f3}
 .fill{position:absolute;inset:0 100% 0 0;border-radius:999px;
-  background:linear-gradient(90deg,var(--accentGrad1),var(--accentGrad2));transition:inset .35s ease}
+  background:linear-gradient(90deg,var(--grad1),var(--grad2));transition:inset .35s ease}
 .pct{margin-top:6px;font-size:12px;color:var(--muted)}
-
-/* stage & steps */
 .stage{position:relative;padding:16px 18px calc(var(--navH) + 16px);min-height:56vh}
-.step{position:absolute;inset:0;opacity:0;transform:translateY(8px);transition:.3s}
+.step{position:absolute;inset:0;opacity:0;transform:translateY(8px);transition:.28s}
 .step.active{opacity:1;transform:none}
 .step.out{opacity:0;transform:translateY(-8px)}
-/* прокручиваемая зона с ответами/полями */
-.scroll{max-height:clamp(340px,56svh,640px);overflow:auto;padding-right:6px;scrollbar-width:thin}
-@supports not (height:1svh){ .scroll{max-height:clamp(340px,56vh,640px);} }
-
-.q{font-size:26px;line-height:1.15;margin:2px 0 12px}
+.scroll{
+  max-height:calc(70svh - var(--navH));
+  overflow:auto; padding-right:6px; padding-bottom:calc(var(--navH) + 12px);
+  -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+  scrollbar-width:thin; scrollbar-gutter:stable both-edges;
+}
+@supports not (height:1svh){ .scroll{max-height:calc(70vh - var(--navH));} }
+.q{font-size:26px;line-height:1.2;margin:2px 0 12px}
 .sub{color:var(--muted);font-size:14px;margin:0 0 14px}
 .illustration{
   display:block;width:100%;max-height:240px;object-fit:contain;margin:0 0 12px;border-radius:14px;
   background:#fff;border:1px solid var(--line)
 }
-
-/* options */
 .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
 .opt{
   display:flex;gap:10px;align-items:center;padding:14px;border:2px dashed #1f4a7f55;border-radius:14px;
   background:#fffdf8;cursor:pointer;transition:.18s;
 }
 .opt:hover{border-color:#1f4a7f88;background:#fff8ef}
-.opt.sel{border-style:solid;border-color:var(--accent);background:#fff1f1}
+.opt.sel{border:2px solid var(--accent);background:#fff1f1}
 .opt .ico{font-size:20px;width:26px;text-align:center}
 .opt .t{font-size:16px}
-
-/* inputs */
 .inputs{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
 .input{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column}
 .input label{font-size:12px;color:var(--muted);margin-bottom:6px}
 .input input{background:transparent;border:0;color:var(--ink);font-size:18px;outline:none}
-
-/* nav */
 .nav{
   position:sticky;bottom:0;display:flex;gap:12px;justify-content:space-between;align-items:center;
   padding:12px 18px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 35%,#fff 60%);
@@ -83,15 +72,11 @@ h1{margin:0;font-size:26px;line-height:1.15}
 }
 .btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;cursor:pointer}
 .btn.secondary{background:#f3f4f6;color:#111827;border:1px solid #e5e7eb}
-.btn.primary{background:linear-gradient(90deg,var(--accentGrad1),var(--accentGrad2));color:#1a0b0b}
+.btn.primary{background:linear-gradient(90deg,var(--grad1),var(--grad2));color:#1a0b0b}
 .btn:disabled{opacity:.55;cursor:not-allowed}
-
-/* loading */
 .center{display:grid;place-content:center;text-align:center;height:100%}
 .spinner{width:46px;height:46px;border:4px solid #e9ecf1;border-top-color:#ff8a6b;border-radius:50%;margin:8px auto 12px;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* result */
 .result{padding:22px 18px 26px;text-align:center}
 .badge{
   width:170px;height:170px;margin:8px auto 10px;border-radius:50%;
@@ -101,23 +86,20 @@ h1{margin:0;font-size:26px;line-height:1.15}
 .plan{font-size:24px;margin:6px 0 8px;color:var(--accent)}
 .desc{max-width:720px;margin:0 auto 12px;line-height:1.55}
 .buy{display:inline-block;margin-top:10px;padding:14px 24px;border-radius:999px;
-  background:linear-gradient(90deg,var(--accentGrad1),var(--accentGrad2));color:#1a0b0b;text-decoration:none;font-weight:900}
+  background:linear-gradient(90deg,var(--grad1),var(--grad2));color:#1a0b0b;text-decoration:none;font-weight:900}
 .alt{display:block;margin-top:10px;color:#374151;text-decoration:underline}
 .note{font-size:12px;color:#6b7280;margin-top:8px}
-
-@media (max-width:420px){
-  h1{font-size:22px}
-  .q{font-size:22px}
-}
+.tools{margin-top:12px;display:flex;gap:10px;justify-content:center}
+.tools .btn{font-weight:700}
+.infoText{font-size:24px;text-align:center;margin:6px 0 16px}
+@media (max-width:420px){ h1{font-size:22px} .q{font-size:22px} .infoText{font-size:22px} }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card" id="app">
     <div class="header">
-      <div class="brand">
-        <img src="logo.png" alt="Логотип" class="brand-img"/>
-      </div>
+      <div class="brand"><img src="logo.png" alt="Логотип" class="brand-img"/></div>
       <h1>Найдём идеальный формат тренировок</h1>
     </div>
 
@@ -128,7 +110,7 @@ h1{margin:0;font-size:26px;line-height:1.15}
 
     <div class="stage" id="stage"></div>
 
-    <div class="nav">
+    <div class="nav" id="nav">
       <button class="btn secondary" id="back">Назад</button>
       <button class="btn primary" id="next" disabled>Далее</button>
     </div>
@@ -136,8 +118,7 @@ h1{margin:0;font-size:26px;line-height:1.15}
 </div>
 
 <script>
-/* ===== настройки ===== */
-const ASK_EMAIL = false;
+const ANALYTICS_ENDPOINT = "";
 
 const PLANS = {
   start45:{title:"Комфортный старт 45+",icon:"🫶",
@@ -160,16 +141,22 @@ const PLANS = {
     buy:"https://walk-walk.ru/checkout?plan=fast20"}
 };
 
-/* ===== шаги ===== */
+/* ——— ШАГИ ———
+   0) возраст (age.png)
+   1) инфо-слайд с 2.jpg и текстом
+   далее — как было
+*/
 const STEPS = [
-  {type:"choice", q:"Ваш возраст",
-    image:"age.png",
+  {type:"choice", q:"Ваш возраст", image:"age.png",
     options:[
-      {t:"18–29 лет", plan:null, ico:"✨"},
-      {t:"30–39 лет", plan:null, ico:"🌿"},
-      {t:"40–49 лет", plan:null, ico:"🌸"},
-      {t:"50+ лет",   plan:null, ico:"💫"}
+      {t:"18–29 лет", ico:"✨"},
+      {t:"30–39 лет", ico:"🌿"},
+      {t:"40–49 лет", ico:"🌸"},
+      {t:"50+ лет",   ico:"💫", plan:"start45"}
     ]
+  },
+  {type:"info", image:"2.jpg",
+    text:"Больше 8000+ женщин уже занимаются с ШАГАЙ ДОМА⚡"
   },
   {type:"choice", q:"Главная цель на 4 недели:", options:[
     {t:"Похудеть комфортно", plan:"fatburn", ico:"🔥"},
@@ -183,7 +170,7 @@ const STEPS = [
     {t:"Новичок / перерыв", plan:"start45", ico:"🌱"},
     {t:"Редко двигаюсь", plan:"fast20", ico:"⌛"},
     {t:"Средний", plan:"fatburn", ico:"🙂"},
-    {t:"Хороший, но без прыжков", plan:"party", ico:"🎶"},
+    {t:"Энергичный, но без прыжков", plan:"party", ico:"🎶"},
     {t:"Нужен акцент на спину/корпус", plan:"tone", ico:"🎯"}
   ]},
   {type:"inputs", q:"Параметры для индивидуального подбора",
@@ -194,7 +181,7 @@ const STEPS = [
     ]
   },
   {type:"choice", q:"Есть ли ограничения?", options:[
-    {t:"Колени/суставы, нужна щадящая нагрузка", plan:"start45", ico:"🦵"},
+    {t:"Колени/суставы — щадящая нагрузка", plan:"start45", ico:"🦵"},
     {t:"Чувствительная спина/шея", plan:"tone", ico:"🧍‍♀️"},
     {t:"Нет серьёзных ограничений", plan:"fatburn", ico:"💪"},
     {t:"Предпочитаю низкую ударную нагрузку", plan:"mobility", ico:"🧘‍♀️"}
@@ -217,178 +204,184 @@ const STEPS = [
     {t:"Спокойный", plan:"mobility", ico:"🫧"},
     {t:"Мягкий, без прыжков", plan:"start45", ico:"🫶"},
     {t:"Средний, комфортный", plan:"fatburn", ico:"🙂"},
-    {t:"Энергичный, но без сложности", plan:"party", ico:"🎶"},
+    {t:"Энергичный, но не сложный", plan:"party", ico:"🎶"},
     {t:"С акцентом на технику", plan:"tone", ico:"🎯"}
   ]},
-  {type:"email", q:"Куда прислать план и первую тренировку?",
-    sub:"Мы не пишем лишнего и не передаём адрес третьим лицам."
-  },
   {type:"loading"}
 ];
 
-/* ===== состояние ===== */
-let step = 0;
-const scores = {};
-const data   = {};
-const stage  = document.getElementById('stage');
-const fill   = document.getElementById('fill');
-const pct    = document.getElementById('pct');
-const nextBt = document.getElementById('next');
-const backBt = document.getElementById('back');
+let step=0;
+const scores={};
+const data={answers:[]};
+const sessionId=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 
-/* ===== утилиты ===== */
-const qs = (s,el=document)=>el.querySelector(s);
+const stage=document.getElementById('stage');
+const fill=document.getElementById('fill');
+const pct=document.getElementById('pct');
+const nextBt=document.getElementById('next');
+const backBt=document.getElementById('back');
+const navEl=document.getElementById('nav');
+
+function updateNavH(){ const h=(navEl?.offsetHeight||84)+'px'; document.documentElement.style.setProperty('--navH',h);}
+window.addEventListener('resize',updateNavH); setTimeout(updateNavH,0);
+
 function setProgress(){
-  const total = STEPS.length;
-  const p = Math.round((Math.min(step, total-1))/(total-1)*100);
-  fill.style.insetInlineEnd = (100-p)+'%';
-  pct.textContent = p + '%';
+  const total=STEPS.length;
+  const p=Math.round((Math.min(step,total-1))/(total-1)*100);
+  fill.style.insetInlineEnd=(100-p)+'%';
+  pct.textContent=p+'%';
 }
-function bump(plan, n=1){ if(!plan) return; scores[plan]=(scores[plan]||0)+n; }
-function bmiScore(h, w){
-  if(!h||!w) return;
-  const m = w / Math.pow(h/100,2);
-  if(m >= 27) bump('fatburn',2);
-  else if(m >= 24) bump('fatburn',1);
-  if(m < 22) bump('tone',1);
+function bump(plan,n=1){ if(!plan) return; scores[plan]=(scores[plan]||0)+n; }
+function bmiScore(h,w){ if(!h||!w) return; const m=w/Math.pow(h/100,2); if(m>=27)bump('fatburn',2); else if(m>=24)bump('fatburn',1); if(m<22)bump('tone',1);}
+function getUTM(){ const p=new URLSearchParams(location.search); return {
+  source:p.get('utm_source')||'', medium:p.get('utm_medium')||'', campaign:p.get('utm_campaign')||'',
+  content:p.get('utm_content')||'', term:p.get('utm_term')||''}; }
+function logAnswer(stepIdx,qText,answerText,planKey){
+  const rec={step:stepIdx,q:qText,answer:answerText,plan:(planKey||null),ts:new Date().toISOString()};
+  const i=data.answers.findIndex(x=>x.step===stepIdx);
+  if(i>=0) data.answers[i]=rec; else data.answers.push(rec);
 }
 
-/* ===== рендер шага ===== */
 function render(){
-  setProgress();
-  const prev = qs('.step.active', stage);
-  if(prev){ prev.classList.remove('active'); prev.classList.add('out'); setTimeout(()=>prev.remove(),280); }
+  setProgress(); updateNavH();
+  const prev=stage.querySelector('.step.active');
+  if(prev){ prev.classList.remove('active'); prev.classList.add('out'); setTimeout(()=>prev.remove(),260); }
 
-  const cfg = STEPS[step];
-  const el  = document.createElement('div');
-  el.className = 'step';
-  stage.appendChild(el);
-
-  nextBt.disabled = true;
-  backBt.disabled = (step===0);
+  const cfg=STEPS[step];
+  const el=document.createElement('div'); el.className='step'; stage.appendChild(el);
+  nextBt.disabled=true; backBt.disabled=(step===0);
 
   if(cfg.type==='choice'){
-    el.innerHTML = `
-      ${cfg.image?`<img class="illustration" src="${cfg.image}" alt="Иллюстрация к вопросу">`:''}
+    el.innerHTML=`
+      ${cfg.image?`<img class="illustration" src="${cfg.image}" alt="">`:''}
       <div class="q">${cfg.q}</div>
       ${cfg.sub?`<div class="sub">${cfg.sub}</div>`:''}
-      <div class="scroll">
-        <div class="grid">
-          ${cfg.options.map(o=>`
-            <button class="opt" data-plan="${o.plan||''}">
-              <div class="ico">${o.ico||'•'}</div><div class="t">${o.t}</div>
-            </button>`).join('')}
-        </div>
-      </div>`;
+      <div class="scroll"><div class="grid">
+        ${cfg.options.map(o=>`
+          <button class="opt" data-plan="${o.plan||''}">
+            <div class="ico">${o.ico||'•'}</div><div class="t">${o.t}</div>
+          </button>`).join('')}
+      </div></div>`;
     el.addEventListener('click',(e)=>{
-      const btn = e.target.closest('.opt'); if(!btn) return;
+      const btn=e.target.closest('.opt'); if(!btn) return;
       el.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
       btn.classList.add('sel'); nextBt.disabled=false;
-      data['step'+step] = btn.textContent.trim();
-      const p = btn.dataset.plan || null;
-      if(p) bump(p,1);
+      const text=btn.querySelector('.t').textContent.trim(); const p=btn.dataset.plan||null;
+      if(p) bump(p,1); logAnswer(step,cfg.q,text,p);
       btn.scrollIntoView({block:'nearest',behavior:'smooth'});
     });
   }
 
-  if(cfg.type==='inputs'){
-    el.innerHTML = `
-      <div class="q">${cfg.q}</div>
-      ${cfg.sub?`<div class="sub">${cfg.sub}</div>`:''}
-      <div class="scroll">
-        <div class="inputs">
-          ${cfg.fields.map(f=>`
-            <div class="input">
-              <label for="${f.id}">${f.label}</label>
-              <input id="${f.id}" type="number" inputmode="decimal"
-                placeholder="${f.placeholder||''}" min="${f.min||''}" max="${f.max||''}"/>
-            </div>`).join('')}
-        </div>
-      </div>`;
-    const h=qs('#height',el), w=qs('#weight',el);
-    const validate = ()=>{
-      const hv = Number(h?.value||h?.placeholder||0);
-      const wv = Number(w?.value||w?.placeholder||0);
-      nextBt.disabled = !(hv>=130 && hv<=220 && wv>=35 && wv<=180);
-      if(!nextBt.disabled){ data.height=hv; data.weight=wv; }
-    };
-    el.addEventListener('input', validate);
-    validate();
+  if(cfg.type==='info'){
+    nextBt.disabled=false; // сразу можно дальше
+    el.innerHTML=`
+      ${cfg.image?`<img class="illustration" src="${cfg.image}" alt="">`:''}
+      <div class="infoText">${cfg.text}</div>`;
+    // необязательный лог
+    logAnswer(step,'Инфо-слайд', 'seen', null);
   }
 
-  if(cfg.type==='email'){
-    if(!ASK_EMAIL){ step++; render(); return; }
-    el.innerHTML = `
+  if(cfg.type==='inputs'){
+    el.innerHTML=`
       <div class="q">${cfg.q}</div>
       ${cfg.sub?`<div class="sub">${cfg.sub}</div>`:''}
-      <div class="scroll" style="max-height:260px">
-        <div class="inputs" style="max-width:520px">
-          <div class="input" style="grid-column:1/-1">
-            <label for="email">Ваш e-mail</label>
-            <input id="email" type="email" placeholder="name@example.com"/>
-          </div>
-        </div>
-      </div>`;
-    const em=qs('#email',el);
-    const validate = ()=>{
-      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value);
-      nextBt.disabled=!ok; if(ok) data.email=em.value;
+      <div class="scroll"><div class="inputs">
+        ${cfg.fields.map(f=>`
+          <div class="input">
+            <label for="${f.id}">${f.label}</label>
+            <input id="${f.id}" type="number" inputmode="decimal"
+              placeholder="${f.placeholder||''}" min="${f.min||''}" max="${f.max||''}"/>
+          </div>`).join('')}
+      </div></div>`;
+    const h=el.querySelector('#height'), w=el.querySelector('#weight');
+    const validate=()=>{
+      const hv=Number(h?.value||h?.placeholder||0);
+      const wv=Number(w?.value||w?.placeholder||0);
+      nextBt.disabled=!(hv>=130&&hv<=220&&wv>=35&&wv<=180);
+      if(!nextBt.disabled){ data.height=hv; data.weight=wv; }
     };
-    el.addEventListener('input', validate);
-    validate();
+    el.addEventListener('input',validate); validate();
   }
 
   if(cfg.type==='loading'){
-    el.innerHTML = `
-      <div class="center">
-        <div class="spinner"></div>
-        <div class="sub">Анализируем ответы…</div>
-      </div>`;
-    nextBt.disabled = true; backBt.disabled = true;
-    if(data.height && data.weight) bmiScore(data.height, data.weight);
-    setTimeout(showResult, 1300);
+    el.innerHTML=`<div class="center"><div class="spinner"></div><div class="sub">Анализируем ответы…</div></div>`;
+    nextBt.disabled=true; backBt.disabled=true;
+    if(data.height&&data.weight) bmiScore(data.height,data.weight);
+    setTimeout(showResult,1100);
   }
 
   requestAnimationFrame(()=>el.classList.add('active'));
 }
 
-/* ===== управление ===== */
-document.getElementById('next').addEventListener('click',()=>{
-  step = Math.min(step+1, STEPS.length-1);
-  render();
-});
-document.getElementById('back').addEventListener('click',()=>{
-  if(step===0) return;
-  step--; render();
-});
+document.getElementById('next').addEventListener('click',()=>{ step=Math.min(step+1,STEPS.length-1); render(); });
+document.getElementById('back').addEventListener('click',()=>{ if(step===0) return; step--; render(); });
 
-/* ===== результат ===== */
+function toCSVRows(items){
+  const rows=[], head=['sessionId','createdAt','bestPlan','height','weight','utm_source','utm_medium','utm_campaign','utm_content','utm_term','userAgent','screenW','screenH','answersJSON','scoresJSON'];
+  rows.push(head);
+  for(const it of items){
+    rows.push([
+      it.sessionId,it.createdAt,it.derived.bestPlan,it.user.height||'',it.user.weight||'',
+      it.utm.source,it.utm.medium,it.utm.campaign,it.utm.content,it.utm.term,
+      it.meta.ua,it.meta.w,it.meta.h,JSON.stringify(it.answers),JSON.stringify(it.derived.scores)
+    ]);
+  }
+  return rows.map(r=>r.map(v=>{const s=String(v??'');return /[",\n;]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;}).join(';')).join('\n');
+}
+function downloadCSV(all){
+  const csv=toCSVRows(all);
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`quiz_export_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); a.remove();
+}
+function sendToEndpoint(payload){
+  if(!ANALYTICS_ENDPOINT) return;
+  try{ fetch(ANALYTICS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{}); }catch(_){}
+}
+
+function getUTM(){ const p=new URLSearchParams(location.search); return {
+  source:p.get('utm_source')||'', medium:p.get('utm_medium')||'', campaign:p.get('utm_campaign')||'',
+  content:p.get('utm_content')||'', term:p.get('utm_term')||''}; }
+
 function showResult(){
-  const app = document.getElementById('app');
-  const search = location.search ? '&'+ location.search.slice(1) : '';
-  let bestKey = Object.keys(PLANS)[0], bestVal = -1;
+  let bestKey=Object.keys(PLANS)[0], bestVal=-1;
   for(const k of Object.keys(PLANS)){ const v=scores[k]||0; if(v>bestVal){bestVal=v; bestKey=k;} }
-  const plan = PLANS[bestKey];
+  const plan=PLANS[bestKey];
+  const payload={
+    sessionId,
+    createdAt:new Date().toISOString(),
+    answers:data.answers,
+    user:{height:data.height||null,weight:data.weight||null},
+    utm:getUTM(),
+    derived:{bestPlan:bestKey,scores:{...scores}},
+    meta:{ua:navigator.userAgent,w:innerWidth,h:innerHeight}
+  };
+  const key='quizLogs'; const existing=JSON.parse(localStorage.getItem(key)||'[]'); existing.push(payload); localStorage.setItem(key,JSON.stringify(existing));
+  sendToEndpoint(payload);
 
-  app.innerHTML = `
+  const app=document.getElementById('app');
+  const search=location.search ? '&'+location.search.slice(1) : '';
+  app.innerHTML=`
     <div class="header">
-      <div class="brand">
-        <img src="logo.png" alt="Логотип" class="brand-img"/>
-      </div>
+      <div class="brand"><img src="logo.png" alt="Логотип" class="brand-img"/></div>
       <h1>Ваш результат готов!</h1>
     </div>
     <div class="result">
       <div class="badge">${plan.icon||'⭐'}</div>
       <div class="plan">Вам подходит: <b>${plan.title}</b></div>
       <p class="desc">${plan.desc}</p>
-      <a class="buy" href="${plan.buy}${search ? search : ''}" target="_blank" rel="noopener">Купить программу</a>
-      <a class="alt" href="#" onclick="location.reload();return false;">Пройти ещё раз</a>
-      <div class="note">UTM-метки из адресной строки автоматически добавятся к ссылке покупки.</div>
+      <a class="buy" href="${plan.buy}${search?search:''}" target="_blank" rel="noopener">Купить программу</a>
+      <div class="tools">
+        <button class="btn secondary" id="again">Пройти ещё раз</button>
+        <button class="btn secondary" id="export">Скачать ответы (CSV)</button>
+      </div>
+      <div class="note">UTM-метки из адресной строки автоматически добавятся к ссылке покупки. Данные сохраняются локально — их можно выгрузить кнопкой выше.</div>
     </div>`;
+  document.getElementById('again').addEventListener('click',()=>location.reload());
+  document.getElementById('export').addEventListener('click',()=>downloadCSV(JSON.parse(localStorage.getItem('quizLogs')||'[]')));
 }
 
-/* старт */
 render();
 </script>
 </body>
-  </html>
+</html>
