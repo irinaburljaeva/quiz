@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Подбор программы — ШАГАЙ ДОМА</title>
+<style>
+:root{
+  --ink:#1f262a; --paper:#fffaf2; --card:#fffefb; --line:#e8e0d0;
+  --accent:#b22222; --accent-2:#0ea5e9; --muted:#6b7280;
+  --ok:#16a34a; --warn:#f59e0b;
+  --rad:16px; --shadow:0 18px 40px rgba(0,0,0,.08);
+  --navPad:180px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink); font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial,sans-serif;
+  background:radial-gradient(1200px 600px at top left,#fff6dc 0%,#fff8ec 35%,#fff 60%) fixed;
+}
+.page{max-width:920px;margin:22px auto;padding:18px}
+.header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+h1{margin:0;font-size:28px;line-height:1.15;color:var(--accent)}
+.progress{display:flex;gap:6px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;background:#e5e7eb;transition:.2s}
+.dot.on{background:var(--accent)}
+.card{
+  background:linear-gradient(#fffefb,#fffaf2); border:1px solid var(--line); border-radius:var(--rad);
+  box-shadow:var(--shadow); padding:16px;
+}
+#stage{position:relative;min-height:440px}
+.slide{position:absolute;inset:0;opacity:0;transform:translateY(10px);transition:.35s}
+.slide.active{opacity:1;transform:none}
+.slide.out{opacity:0;transform:translateY(-10px)}
+
+.q{font-size:22px;line-height:1.25;margin:6px 0 14px}
+.answers{
+  max-height:72vh; overflow:auto; padding:0 8px calc(var(--navPad) + env(safe-area-inset-bottom)) 8px;
+  scroll-padding-bottom:calc(var(--navPad) + 24px);
+}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.answer{
+  padding:12px 14px; border:2px dashed #1f4a7f; border-radius:12px; background:#fff9ec;
+  cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.06); text-align:left;
+}
+.answer:hover{background:#fff3d6}
+.answer.sel{background:#fff7ea; border:3px solid var(--accent); box-shadow:0 6px 16px rgba(178,34,34,.22)}
+
+.nav{
+  position:sticky; bottom:0; z-index:3; display:flex; justify-content:space-between; align-items:center;
+  gap:10px; padding:10px 6px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,transparent,#fffaf2 45%); border-bottom-left-radius:var(--rad); border-bottom-right-radius:var(--rad);
+}
+#prev,#next{
+  border:0; border-radius:11px; padding:12px 18px; font-weight:700; box-shadow:0 10px 24px rgba(0,0,0,.08); cursor:pointer;
+}
+#prev{background:#e5e7eb;color:#111827}
+#next{background:var(--accent);color:#fff}
+#next:disabled{opacity:.6;box-shadow:none;cursor:not-allowed}
+
+.small{color:var(--muted);font-size:13px}
+
+.result{display:none;text-align:center}
+.badge{width:200px;height:200px;margin:8px auto 12px}
+.plan-name{color:var(--accent);margin:6px 0 6px}
+.plan-desc{max-width:680px;margin:0 auto 14px;line-height:1.55}
+.perks{max-width:720px;margin:10px auto 12px;text-align:left}
+.cta{display:inline-block;margin-top:8px;padding:12px 22px;background:var(--accent);color:#fff;border-radius:24px;text-decoration:none;font-weight:800}
+.alt{display:block;margin-top:8px;text-decoration:underline;color:#111827}
+
+/* старт-обложка */
+.intro{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border:0;background:transparent;cursor:pointer;z-index:4}
+.intro img{max-width:100%;max-height:100%;border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.18);pointer-events:none}
+.intro.hide{opacity:0;pointer-events:none;transition:.25s}
+
+/* адаптив */
+@media (max-width:420px){
+  h1{font-size:24px}
+  .q{font-size:20px}
+  #prev,#next{padding:10px 16px}
+}
+</style>
+</head>
+<body class="prestart">
+  <div class="page">
+    <div class="header">
+      <h1>Подбор программы — ШАГАЙ ДОМА</h1>
+      <div id="dots" class="progress"></div>
+    </div>
+
+    <section class="card" id="quiz" aria-live="polite">
+      <!-- обложка (по клику скрывается, стартуем квиз) -->
+      <button id="intro" class="intro" type="button" onclick="startQuiz()">
+        <img src="intro.png" alt="Нажмите, чтобы начать">
+      </button>
+
+      <div id="stage"></div>
+      <div class="nav" id="nav">
+        <button id="prev" type="button">Назад</button>
+        <div class="small" id="stepText"></div>
+        <button id="next" type="button" disabled>Далее</button>
+      </div>
+    </section>
+
+    <section id="result" class="card result">
+      <div id="badge" class="badge"></div>
+      <h2 id="planName" class="plan-name"></h2>
+      <p id="planDesc" class="plan-desc"></p>
+
+      <ul class="perks">
+        <li><b>Домашние тренировки</b> без сложного инвентаря — в вашем ритме</li>
+        <li><b>Шагательные и танцевальные</b> форматы — сжигаем калории «на радостях»</li>
+        <li><b>Поддержка</b> и чаты: не бросите на середине</li>
+        <li><b>45+</b> — отдельные щадящие опции без прыжков</li>
+      </ul>
+
+      <p style="margin:10px 0 0"><b>Присоединяйтесь к интенсиву «Летний лагерь» от ШАГАЙ ДОМА⚡️ — чтобы худеть легко и с удовольствием!</b></p>
+      <p><a id="buy" class="cta" href="#" target="_blank" rel="noopener">Купить программу</a></p>
+      <a id="retry" class="alt" href="#">Пройти ещё раз</a>
+    </section>
+  </div>
+
+<script>
+/* ---------------- CONFIG ---------------- */
+const PLANS = {
+  start45: {
+    title: "Комфортный старт 45+",
+    desc: "Щадящие тренировки без прыжков, поддержка суставов и мягкое жиросжигание. Подойдёт, если давно не занимались или есть ограничения по коленям/давлению.",
+    icon: "🫶",
+    buy: "https://walk-walk.ru/checkout?plan=start45&src=quiz"
+  },
+  fatburnLight: {
+    title: "Жиросжигание Light",
+    desc: "Бодрые шагательные и танцевальные связки, умеренный пульс, заметный расход калорий — идеальный баланс для снижения веса без изматывающих марафонов.",
+    icon: "🔥",
+    buy: "https://walk-walk.ru/checkout?plan=fatburnLight&src=quiz"
+  },
+  tonePosture: {
+    title: "Тонус и осанка",
+    desc: "Функциональные комплексы для спины и центра тела: упругая спина, лучшая осанка, меньше напряжения в шее и пояснице.",
+    icon: "🎯",
+    buy: "https://walk-walk.ru/checkout?plan=tonePosture&src=quiz"
+  },
+  stepParty: {
+    title: "Шагательные дискотеки",
+    desc: "Любимая музыка, простые ритмы, много шагов — худеем «на радостях». Подходит, если хочется движения без сложной техники.",
+    icon: "🎵",
+    buy: "https://walk-walk.ru/checkout?plan=stepParty&src=quiz"
+  },
+  mobility: {
+    title: "Растяжка и подвижность",
+    desc: "Мягкая мобилизация суставов, гибкость и лёгкость в теле. Отлично компонуется с любым другим планом.",
+    icon: "🧘‍♀️",
+    buy: "https://walk-walk.ru/checkout?plan=mobility&src=quiz"
+  },
+  fast20: {
+    title: "Быстрый старт: 20 минут",
+    desc: "Короткие, но эффективные 15–25-минутные тренировки. Для занятых и новичков — дисциплина без перегруза.",
+    icon: "⏱️",
+    buy: "https://walk-walk.ru/checkout?plan=fast20&src=quiz"
+  }
+};
+
+/* Вопросы.
+   У каждого ответа есть ключ plan — балл пойдёт в соответствующую программу */
+const QUESTIONS = [
+  { q: "Какая главная цель на ближайший месяц?",
+    a: [
+      {t:"Похудеть комфортно", plan:"fatburnLight"},
+      {t:"Прийти в тонус", plan:"tonePosture"},
+      {t:"Гибкость и лёгкость", plan:"mobility"},
+      {t:"Начать мягко после паузы / 45+", plan:"start45"},
+      {t:"Главное — двигаться с музыкой", plan:"stepParty"},
+      {t:"Уложиться в 20–25 минут", plan:"fast20"}
+    ]},
+  { q: "Текущий уровень активности?",
+    a: [
+      {t:"Новичок / давно не занималась", plan:"start45"},
+      {t:"Низкий (мало двигаюсь)", plan:"fast20"},
+      {t:"Средний (гуляю/иногда тренировки)", plan:"fatburnLight"},
+      {t:"Хочу нагрузку на корпус/спину", plan:"tonePosture"},
+      {t:"Люблю танцевальные/шагательные форматы", plan:"stepParty"},
+      {t:"Хочу мягко без прыжков", plan:"start45"}
+    ]},
+  { q: "Сколько времени комфортно уделять в день?",
+    a: [
+      {t:"10–15 минут", plan:"fast20"},
+      {t:"20–25 минут", plan:"fast20"},
+      {t:"30–40 минут", plan:"fatburnLight"},
+      {t:"40+ минут", plan:"tonePosture"},
+      {t:"Нерегулярно — но охота двигаться под музыку", plan:"stepParty"},
+      {t:"Лучше мягко и без спешки", plan:"start45"}
+    ]},
+  { q: "Какие зоны хочется прокачать в первую очередь?",
+    a: [
+      {t:"Живот/талия", plan:"fatburnLight"},
+      {t:"Спина/осанка", plan:"tonePosture"},
+      {t:"Бёдра/ягодицы", plan:"fatburnLight"},
+      {t:"Общая подвижность", plan:"mobility"},
+      {t:"Кардио без сложной техники", plan:"stepParty"},
+      {t:"Всё по чуть-чуть, мягко", plan:"start45"}
+    ]},
+  { q: "Есть ли ограничения?",
+    a: [
+      {t:"Колени/суставы — нужна щадящая нагрузка", plan:"start45"},
+      {t:"Чувствительная спина/шея", plan:"tonePosture"},
+      {t:"Нет серьёзных ограничений", plan:"fatburnLight"},
+      {t:"Нужна низкая ударная нагрузка", plan:"mobility"},
+      {t:"Предпочитаю без прыжков, в ритме", plan:"stepParty"},
+      {t:"Нехватка времени — главное коротко", plan:"fast20"}
+    ]},
+  { q: "Какой формат приятнее?",
+    a: [
+      {t:"Шагательные/танцевальные связки", plan:"stepParty"},
+      {t:"Функциональные на корпус", plan:"tonePosture"},
+      {t:"Кардио + немного силовых", plan:"fatburnLight"},
+      {t:"Растяжка и дыхание", plan:"mobility"},
+      {t:"Мягко 45+ без прыжков", plan:"start45"},
+      {t:"Короткие экспресс-занятия", plan:"fast20"}
+    ]},
+  { q: "Инвентарь?",
+    a: [
+      {t:"Без инвентаря", plan:"stepParty"},
+      {t:"Только коврик", plan:"mobility"},
+      {t:"Резинки/гантели light", plan:"fatburnLight"},
+      {t:"Мяч/ролл/лента для осанки", plan:"tonePosture"},
+      {t:"Что угодно, но мягко", plan:"start45"},
+      {t:"Минимум, чтобы уложиться во время", plan:"fast20"}
+    ]},
+  { q: "Когда удобнее тренироваться?",
+    a: [
+      {t:"Утро", plan:"fast20"},
+      {t:"День", plan:"fatburnLight"},
+      {t:"Вечер", plan:"tonePosture"},
+      {t:"В разное время — как пойдёт", plan:"stepParty"},
+      {t:"Когда есть силы — без надрыва", plan:"start45"},
+      {t:"После разминки — растяжка", plan:"mobility"}
+    ]},
+  { q: "Темп занятий?",
+    a: [
+      {t:"Спокойный", plan:"mobility"},
+      {t:"Мягкий, без прыжков", plan:"start45"},
+      {t:"Средний, комфортный", plan:"fatburnLight"},
+      {t:"Энергичный, но без сложности", plan:"stepParty"},
+      {t:"С акцентом на технику", plan:"tonePosture"},
+      {t:"Коротко и по делу", plan:"fast20"}
+    ]},
+  { q: "Что важнее всего сохранить на дистанции?",
+    a: [
+      {t:"Регулярность при дефиците времени", plan:"fast20"},
+      {t:"Комфорт суставов/давления", plan:"start45"},
+      {t:"Вес и объёмы", plan:"fatburnLight"},
+      {t:"Осанку и здоровье спины", plan:"tonePosture"},
+      {t:"Радость и настроение", plan:"stepParty"},
+      {t:"Подвижность и лёгкость", plan:"mobility"}
+    ]}
+];
+
+/* -------------- ЛОГИКА -------------- */
+const dotsEl = document.getElementById('dots');
+const stage = document.getElementById('stage');
+const nextBtn = document.getElementById('next');
+const prevBtn = document.getElementById('prev');
+const stepText = document.getElementById('stepText');
+const introBtn = document.getElementById('intro');
+
+const resultCard = document.getElementById('result');
+const quizCard   = document.getElementById('quiz');
+const planNameEl = document.getElementById('planName');
+const planDescEl = document.getElementById('planDesc');
+const buyEl      = document.getElementById('buy');
+const retryEl    = document.getElementById('retry');
+const badgeEl    = document.getElementById('badge');
+
+let i=0, pick=null, scores={}, started=false;
+
+function buildDots(){
+  dotsEl.innerHTML='';
+  QUESTIONS.forEach((_q,idx)=>{
+    const d=document.createElement('span');
+    d.className='dot'+(idx<i?' on':'');
+    dotsEl.appendChild(d);
+  });
+}
+function updateDots(){ [...dotsEl.children].forEach((d,idx)=>d.classList.toggle('on', idx<i)); }
+
+function render(){
+  const q=QUESTIONS[i];
+  const current = stage.querySelector('.slide.active');
+  if(current){ current.classList.remove('active'); current.classList.add('out'); setTimeout(()=>current.remove(),300); }
+
+  const el=document.createElement('div');
+  el.className='slide';
+  el.innerHTML = `
+    <div class="q">${q.q}</div>
+    <div class="answers"><div class="grid">
+      ${q.a.map(a=>`<button class="answer" data-plan="${a.plan}">${a.t}</button>`).join('')}
+    </div></div>
+  `;
+  stage.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('active'));
+
+  const grid=el.querySelector('.grid');
+  pick=null; nextBtn.disabled=true;
+  grid.addEventListener('click',(e)=>{
+    const btn=e.target.closest('.answer'); if(!btn) return;
+    grid.querySelectorAll('.answer').forEach(b=>b.classList.remove('sel'));
+    btn.classList.add('sel'); pick=btn.dataset.plan; nextBtn.disabled=false;
+    btn.scrollIntoView({block:'nearest',behavior:'smooth'});
+  });
+
+  stepText.textContent = `Шаг ${i+1} из ${QUESTIONS.length}`;
+  updateDots();
+  prevBtn.disabled = (i===0);
+}
+
+function startQuiz(){
+  if(started) return; started=true;
+  if(introBtn){ introBtn.classList.add('hide'); setTimeout(()=>introBtn.remove(),250); }
+  buildDots(); render();
+}
+
+nextBtn.addEventListener('click',()=>{
+  if(!pick) return;
+  scores[pick]=(scores[pick]||0)+1;
+  i++;
+  if(i<QUESTIONS.length){ render(); }
+  else { showResult(); }
+});
+prevBtn.addEventListener('click',()=>{
+  if(i===0) return;
+  i--; render();
+});
+retryEl.addEventListener('click',(e)=>{e.preventDefault(); location.reload();});
+
+function showResult(){
+  quizCard.style.display='none';
+  resultCard.style.display='block';
+  // выбираем победителя; при равенстве — приоритет по порядку PLANS
+  const order = Object.keys(PLANS);
+  let winner = order[0], best=-1;
+  for(const k of order){ const v=scores[k]||0; if(v>best){best=v; winner=k;} }
+
+  const plan = PLANS[winner];
+  planNameEl.textContent = `Вы — ${plan.title}`;
+  planDescEl.textContent = plan.desc;
+  buyEl.href = plan.buy;
+
+  // Бейдж
+  badgeEl.innerHTML = `
+<svg viewBox="0 0 220 220" width="100%" height="100%">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#ffe6ea"/><stop offset="60%" stop-color="#ff90a5"/><stop offset="100%" stop-color="#ff5a78"/>
+    </radialGradient>
+    <filter id="ds"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000" flood-opacity=".22"/></filter>
+  </defs>
+  <circle cx="110" cy="110" r="86" fill="url(#g)" filter="url(#ds)" stroke="#fff" stroke-width="6"/>
+  <text x="110" y="116" text-anchor="middle" dominant-baseline="middle" font-size="72" font-weight="700">${plan.icon||"⭐"}</text>
+</svg>`;
+}
+
+/* автозапуск, если нет интро */
+if(!introBtn){ startQuiz(); }
+</script>
+</body>
+</html>
