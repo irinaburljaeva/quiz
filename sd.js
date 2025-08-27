@@ -1,4 +1,4 @@
-// sd.js — логика и разметка квиза «ШАГАЙ ДОМА» (mobile-friendly)
+// sd.js — квиз «ШАГАЙ ДОМА» (обновлён под правки)
 // Требуется в index.html: <canvas id="confetti"></canvas>, <div id="progress"></div>, <div id="screens"></div>
 
 (() => {
@@ -6,7 +6,7 @@
   const $$ = s => Array.from(document.querySelectorAll(s));
   const vibrate = n => { try { navigator.vibrate && navigator.vibrate(n || 12); } catch(e) {} };
 
-  // ——— Конфетти без зависимостей
+  // ——— Конфетти
   const Confetti = (() => {
     const cnv = $('#confetti');
     const ctx = cnv.getContext('2d');
@@ -35,22 +35,23 @@
     return { burst };
   })();
 
-  // ——— Данные и справочники
-  const A = JSON.parse(localStorage.getItem('sdq') || '{}'); // ответы
+  // ——— Данные
+  const A = JSON.parse(localStorage.getItem('sdq') || '{}');
   const save = () => localStorage.setItem('sdq', JSON.stringify(A));
 
+  // ——— Справочники
   const AGE    = ['18–29','30–39','40–49','50+'];
   const BODY   = [['Худощавое','slim'],['Среднее','avg'],['Крупное','large'],['Избыточный вес','obese']];
   const LIFE   = ['Сидячая работа','Умеренно активная','Активная'];
   const EXP    = ['Никогда не занималась','Иногда дома / по видео','Регулярно'];
-  const GOAL   = ['Сбросить 3–5 кг','Сбросить 5–10 кг','10+ кг','Поддерживать фигуру / вернуть тонус'];
+  const GOAL   = ['Сбросить 3–5 кг','Сбросить 5–10 кг','Сбросить 10+ кг','Поддерживать фигуру / вернуть тонус'];
   const MOT    = ['Для здоровья','Для внешности','Для энергии и лёгкости','Для уверенности в себе'];
   const HARD   = ['Долгая прогулка утомляет','Каждый пролёт по лестнице — испытание','Стыдно включаться в активные игры','Прыжки','Ничего из этого'];
   const HEALTH = ['Диабет','Проблемы со щитовидкой','Гипертония','Боль в суставах','Беременность','Нет'];
   const BAD    = ['Сладкая газировка','Выпечка','Фастфуд','Колбаса/сосиски','Сыр 45%+','Ночные перекусы','Алкоголь чаще 2 р/нед','Сладкий чай/кофе','Очень солёная пища'];
   const GOOD   = ['1.5–2 л воды','Овощи 400 г/день','Фрукты ежедневно','Белок в каждом приёме пищи','10–20 мин растяжки','8 000+ шагов уже сейчас'];
 
-  // ——— Построение экранов внутрь #screens
+  // ——— Генерация экранов
   const screensRoot = $('#screens');
   const section = (id, html) => `<section class="screen${id==='intro'?' is':''}" data-id="${id}">${html}</section>`;
   const chips   = (id, arr)   => `<div class="chips" id="${id}">` + arr.map(t => `<button type="button" class="chip" data-v="${t}">${t}</button>`).join('') + `</div>`;
@@ -78,13 +79,15 @@
     section('age', `<h2>Ваш возраст</h2>${opts('ageOpts', AGE)}${actions()}`) +
     section('body', `<h2>Телосложение сейчас</h2>${opts('bodyOpts', BODY.map(([l,k])=>({label:l,key:k})))}${actions()}`) +
     section('steps', `
-      <h2>Сколько шагов вы проходите сейчас в день?</h2>
+      <h2>Сколько шагов вы проходите сейчас в день (примерно)?</h2>
       <input id="steps" type="range" min="0" max="25000" step="250" value="4000">
-      <div class="hint">Сейчас: <b><span id="sv">4000</span> шагов</b>. Добавим мягко +2000.</div>
+      <div class="hint">Сейчас: <b><span id="sv">4000</span> шагов</b></div>
+      <p class="hint"><b>Подсказка:</b> найти шаги можно в приложении вашего телефона/браслета</p>
       ${actions()}
     `) +
     section('bmi', `
-      <h2>Давайте посчитаем ИМТ</h2>
+      <h2>Давайте посчитаем ваш ИМТ</h2>
+      <p class="hint">Укажите ваш рост и вес — можно приблизительно.</p>
       <div class="grid cols2">
         <div><div class="hint">Рост, см</div><input id="h" type="number" class="text" placeholder="165"></div>
         <div><div class="hint">Вес, кг</div><input id="w" type="number" class="text" placeholder="72"></div>
@@ -94,18 +97,20 @@
     `) +
     section('life', `<h2>Образ жизни</h2>${opts('lifeOpts', LIFE)}${actions()}`) +
     section('exp',  `<h2>Опыт тренировок</h2>${opts('expOpts',  EXP)}${actions()}`) +
-    section('goal', `<h2>Цель</h2>${opts('goalOpts', GOAL)}${actions()}`) +
-    section('motivation', `<h2>Что вас мотивирует больше всего?</h2>${chips('motChips', MOT)}${actions()}`) +
+    section('goal', `<h2>Ваша цель</h2>${opts('goalOpts', GOAL)}${actions()}`) +
+    section('motivation', `<h2>Почему вы хотите заниматься спортом?</h2>${chips('motChips', MOT)}${actions()}`) +
     section('perweek',    `<h2>Сколько готовы тренироваться в неделю?</h2>${chips('pwChips', ['2 раза','3 раза','4–5 раз','Каждый день 20–30 мин'])}${actions()}`) +
     section('hard',       `<h2>Что сейчас даётся тяжелее всего?</h2>${opts('hardOpts', HARD)}${actions()}`) +
     section('health',     `<h2>Есть ли состояния, которые важно учитывать?</h2>${chips('healthChips', HEALTH)}<p class="hint">Если есть сомнения — проконсультируйтесь с врачом.</p>${actions()}`) +
-    section('nutrition',  `<h2>Включим работу с питанием?</h2>${opts('nutriOpts', [{label:'Буду питаться по меню-конструктору в клубе',key:'menu'},{label:'Хочу научиться правильно составлять тарелку',key:'plate'},{label:'Нет, пока без питания',key:'no'}])}${actions()}`) +
+    section('nutrition',  `<h2>Питание</h2>${opts('nutriOpts', [
+      {label:'Буду питаться по меню-конструктору в клубе',key:'menu'},
+      {label:'Хочу научиться правильно составлять тарелку',key:'plate'},
+      {label:'Нет, пока без питания',key:'no'}
+    ])}${actions()}`) +
     section('food', `
-      <h2>Калькулятор продуктов</h2>
-      <p class="hint">Отметьте то, что делаете <b>каждый день</b>.</p>
-      ${chips('bad', BAD)}
-      <div class="hint" style="margin-top:6px">А это — привычки, которые ускоряют результат:</div>
-      ${chips('good', GOOD)}
+      <h2>Продукты и привычки</h2>
+      <div class="box"><h3>Ежедневные продукты</h3>${chips('bad', BAD)}</div>
+      <div class="box"><h3>Привычки, ускоряющие результат</h3>${chips('good', GOOD)}</div>
       <div class="actions sticky">
         <button class="btn ghost" data-prev>Назад</button>
         <button class="btn primary" id="calc">Рассчитать результат →</button>
@@ -119,11 +124,11 @@
     `) +
     section('result', `
       <h2 id="rTitle">Готово!</h2>
-      <div class="counter" id="nums">0 кг · 0 недель</div>
+      <div class="counter" id="nums">0 кг за 0 недель</div>
       <p class="hint" id="rSub"></p>
       <div class="actions sticky">
         <button class="btn ghost" data-prev>Назад</button>
-        <button class="btn primary" id="toCTA">Перейти к абонементу →</button>
+        <button class="btn primary" id="toCTA">Хочу такой результат!</button>
       </div>
     `) +
     section('sale', `
@@ -144,28 +149,34 @@
 
   screensRoot.innerHTML = html;
 
-  // ——— Прогресс-бар «дорожка + кроссовок»
-  const progress = $('#progress');
-  // инжектим минимальные стили (на случай, если их нет в sd.css)
-  (function injectProgressCSS(){
+  // ——— Мини-стили (инжект): карточки food и адаптация результата + прогресс
+  (function injectCSS(){
     const css = `
-      #progress{position:relative;height:18px;margin:0 0 12px}
+      .box{border:2px solid #FFBA08;border-radius:14px;padding:12px;margin:8px 0}
+      .box h3{margin:.2rem 0 .6rem 0}
+      .counter{font-size:clamp(26px,6vw,48px);line-height:1.15;text-wrap:balance}
+      #progress{position:relative;height:18px;margin:0 0 12px;visibility:hidden}
       #progress .track{height:8px;border-radius:999px;background:#eee;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.06)}
       #progress .fill{height:100%;width:0%;background:linear-gradient(135deg,var(--r,#CF2C02),var(--o,#E85D04));transition:width .35s ease}
       #progress .runner{position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);font-size:18px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));transition:left .35s ease}
     `;
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
   })();
+
+  // ——— Прогресс-бар (показывается со 2-го экрана)
+  const progress = $('#progress');
   progress.innerHTML = '<div class="track"><div class="fill"></div></div><div class="runner" aria-hidden="true">👟</div>';
   const pgFill = () => $('#progress .fill');
   const pgRun  = () => $('#progress .runner');
 
-  // ——— Навигация между экранами
+  // ——— Навигация / прогресс
   let idx = 0;
   const S = $$('#screens .screen');
   const need = k => !A[k];
 
   function setProgress(i){
+    // скрываем прогресс на первом экране (ввод имени)
+    progress.style.visibility = (i === 0) ? 'hidden' : 'visible';
     const total = S.length - 1;
     const pct = Math.round((i/total)*100);
     pgFill().style.width = pct + '%';
@@ -218,7 +229,9 @@
     if (h>0 && w>0) {
       A.h = h; A.w = w; const m = h/100; A.bmi = +(w/(m*m)).toFixed(1);
       save();
-      $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b>`;
+      $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b><br>ИМТ (индекс массы тела) помогает определить, есть ли у вас избыточный вес.`;
+    } else {
+      $('#bmiI').textContent = '';
     }
   }
 
@@ -314,11 +327,14 @@
     const t    = fSteps().t;
 
     $('#rTitle').textContent = `${name}, ваш прогноз готов ✨`;
-    animateNumber(12, wks, 1400, v => { $('#nums').textContent = `${kg} кг · ${v} недель`; });
-    $('#rSub').innerHTML = `Темп <b>${rt} кг/нед</b>, шагов в день: <b>${t.toLocaleString('ru-RU')}</b>`;
+    animateNumber(12, wks, 1400, v => { $('#nums').textContent = `−${kg} кг за ${v} недель`; });
 
+    // Итоговые шаги и темп (без упоминаний про +2000 в вопросах)
+    $('#rSub').innerHTML = `С тренировками ШАГАЙ ДОМА ⚡️ вы будете проходить <b>${t.toLocaleString('ru-RU')}</b> шагов каждый день!<br><span class="hint">Рекомендуемый темп: <b>${rt} кг/нед</b>.</span>`;
+
+    // Продающий экран — формулировка с минусом
     $('#sTitle').textContent = `${name}, присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`;
-    $('#sLead').innerHTML = `Чтобы прийти к цели ≈<b>${kg} кг</b> за <b>${wks} недель</b>, используйте готовые планы и поддержку — первые изменения уже через 1–2 недели.`;
+    $('#sLead').innerHTML = `Чтобы прийти к цели <b>−${kg} кг</b> за <b>${wks} недель</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.`;
 
     // замените на свой лендинг
     $('#cta').href = 'https://walk-walk.ru/?utm_source=quiz&utm_medium=cta&utm_campaign=sd_weight_calc';
@@ -340,34 +356,12 @@
   const idxBy = id => $$('#screens .screen').findIndex(s => s.dataset.id === id);
   $('#toCTA').onclick = () => show(idxBy('sale'));
 
-  // ——— Техрежим (?edit=1) — редактируй тексты на странице
-  (function techEdit(){
-    const qs = new URLSearchParams(location.search);
-    if (qs.get('edit') === '1') {
-      const list = $$('#screens h1, #screens h2, #screens p, #screens .hint, .btn');
-      list.forEach((el, n) => {
-        el.setAttribute('contenteditable','true');
-        el.dataset.e = 't' + n;
-        el.oninput = () => {
-          const m = JSON.parse(localStorage.getItem('sd_copy') || '{}');
-          m[el.dataset.e] = el.textContent;
-          localStorage.setItem('sd_copy', JSON.stringify(m));
-        };
-      });
-      const m = JSON.parse(localStorage.getItem('sd_copy') || '{}');
-      Object.entries(m).forEach(([k,v]) => {
-        const el = document.querySelector('[data-e="'+k+'"]');
-        if (el) el.textContent = v;
-      });
-    }
-  })();
-
   // ——— Восстановление значений
   if (A.name)  $('#name').value = A.name;
   if (A.steps) { $('#steps').value = A.steps; $('#sv').textContent = A.steps; }
   if (A.h)     $('#h').value = A.h;
   if (A.w)     $('#w').value = A.w;
-  if (A.bmi)   $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b>`;
+  if (A.bmi)   $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b><br>ИМТ (индекс массы тела) помогает определить, есть ли у вас избыточный вес.`;
 
   // ——— Удобная клавиатура на ПК
   addEventListener('keydown', e => {
