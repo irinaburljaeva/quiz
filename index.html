@@ -123,7 +123,7 @@ input[type="range"]{ width:100% }
         </div>
       </div>
       <div class="actions sticky">
-        <button class="btn btn-primary" data-next>Поехали →</button>
+        <button class="btn btn-primary" id="startBtn" type="button" data-next>Поехали →</button>
       </div>
     </section>
 
@@ -327,6 +327,8 @@ input[type="range"]{ width:100% }
 </div>
 
   </div>  <script>
+  // Гарантируем инициализацию после загрузки DOM (важно для встраивания на платформы, которые переносят скрипт в <head>)
+  window.addEventListener('load', function(){
     /* ————— Utilities ————— */
     const $ = (s, el=document) => el.querySelector(s);
     const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
@@ -457,8 +459,4 @@ input[type="range"]{ width:100% }
     const hardOpts = ['Долгая прогулка утомляет','Каждый пролёт по лестнице — испытание','Стыдно включаться в активные игры','Прыжки','Ничего из этого'];
     buildOptions($('#hardOptions'), hardOpts, 'hard');
 
-    const health = ['Диабет','Проблемы со щитовидкой','Гипертония','Боль в суставах','Беременность','Нет'];
-    buildChips($('#healthChips'), health, 'health', true);
-
-    const nutri = [
-      {label:'Буду питаться по меню‑конст
+    const health = ['Диабет','Про
