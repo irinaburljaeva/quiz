@@ -57,13 +57,19 @@
 
     .sticky{ position:sticky; bottom:0; background:linear-gradient(0deg,#fff 70%,rgba(255,255,255,0)); padding-top:8px; z-index:9 }
 
-    /* Лоадер */
-    .loader{ display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center }
-    .pulse{ width:64px; height:64px; border-radius:50%;
-      background:radial-gradient(circle at 30% 30%,#fff 0 30%, var(--y) 31%);
-      box-shadow:0 0 0 0 rgba(255,186,8,.5); animation:pulse 1.5s infinite }
-    @keyframes pulse{ to{ box-shadow:0 0 0 26px rgba(255,186,8,0) } }
-
+   /* Новый экран загрузки результата */
+.loader2{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:28px 8px 12px }
+.loader2 .ring{
+  --p:0%;
+  width:88px; height:88px; border-radius:50%;
+  background: conic-gradient(var(--o) var(--p), #eee 0);
+  position:relative; box-shadow:0 8px 20px rgba(0,0,0,.08);
+}
+.loader2 .ring::after{
+  content:""; position:absolute; inset:10px; background:#fff; border-radius:50%;
+}
+.loader2 .pct{ position:absolute; inset:0; display:grid; place-items:center; font-weight:800 }
+.loader2 .lmsg{ margin-top:14px; font-weight:700; font-size:1.05rem }
     .counter{ font-size:clamp(26px,6vw,48px); line-height:1.15; letter-spacing:-.02em; text-wrap:balance }
 
     /* Продукты */
@@ -132,7 +138,6 @@
   </style>
 </head>
 <body>
-  <canvas id="confetti"></canvas>
 
   <div class="app">
     <div class="card">
@@ -145,18 +150,6 @@
     const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
     const vibrate = n => { try{ navigator.vibrate && navigator.vibrate(n||12) }catch(e){} };
 
-    // Конфетти
-    const Confetti = (()=>{ const cnv=$('#confetti'), ctx=cnv.getContext('2d');
-      let W,H,parts=[],running=false; const colors=['#CF2C02','#E85D04','#FFBA08','#fff'];
-      function resize(){ W=cnv.width=innerWidth; H=cnv.height=innerHeight }
-      function spawn(n=180){ for(let i=0;i<n;i++) parts.push({x:Math.random()*W,y:-10-Math.random()*H*.5,r:4+Math.random()*6,c:colors[(Math.random()*colors.length)|0],v:1+Math.random()*3,a:Math.random()*Math.PI*2,s:.02+Math.random()*.04}); }
-      function draw(){ if(!running) return; ctx.clearRect(0,0,W,H);
-        for(const p of parts){ p.y+=p.v; p.x+=Math.sin(p.a+=p.s); ctx.fillStyle=p.c; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }
-        parts=parts.filter(p=>p.y<H+20); requestAnimationFrame(draw);
-      }
-      function burst(){ resize(); spawn(); if(!running){ running=true; draw(); } setTimeout(()=>running=false,1600); }
-      addEventListener('resize',resize); resize(); return { burst };
-    })();
 
     // Данные
     const A = JSON.parse(localStorage.getItem('sdq')||'{}');
@@ -256,12 +249,13 @@
         <div class="box"><h3>Привычки, ускоряющие результат</h3>${chips('good', GOOD)}</div>
         <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="calc">Рассчитать результат →</button></div>
       `)+
-      section('loading', `
-        <div class="loader"><div class="pulse"></div>
-          <h2>Прогноз загружается…</h2>
-          <p class="hint">Учитываем возраст, ИМТ, активность, шаги и питание.</p>
-        </div>
-      `)+
+     section('loading', 
+  <div class="loader2">
+    <div class="ring" id="lring"><div class="pct" id="lpct">0%</div></div>
+    <div class="lmsg" id="lmsg">Собираем данные…</div>
+    <p class="hint" id="lsub">Возраст • ИМТ • Активность • Цель</p>
+  </div>
+)+
       section('result', `
         <h2 id="rTitle">Готово!</h2>
         <div class="counter" id="nums">0 кг за 0 недель</div>
@@ -394,8 +388,38 @@
     selectList($('#nutriOpts'),'nutri',true);
 
     // Расчёт
-    $('#calc').onclick = ()=>{ show(idx+1); setTimeout(calculate,700); };
+   $('#calc').onclick = ()=>{ show(idx+1); runLoading(calculate); };
 
+    function runLoading(done){
+  const ring = $('#lring'), lpct = $('#lpct'), lmsg = $('#lmsg'), lsub = $('#lsub');
+  const steps = [
+    'Учитываем ваш возраст',
+    'Смотрим телосложение и ИМТ',
+    'Проверяем активность и опыт',
+    'Добавляем шаги и питание',
+    'Готовим персональный прогноз…'
+  ];
+  let si = 0;
+  lmsg.textContent = steps[0];
+  lsub.textContent = 'Возраст • ИМТ • Активность • Цель';
+
+  const D = 1500;                            // длительность анимации, мс
+  const t0 = performance.now();
+  function tick(now){
+    const p = Math.min(1, (now - t0)/D);     // 0..1
+    const ease = 1 - Math.pow(1 - p, 3);     // плавное ускорение
+    const pct = Math.round(5 + 95 * ease);   // красивый процент 5→100
+    ring.style.setProperty('--p', pct + '%');
+    lpct.textContent = pct + '%';
+
+    const idx = Math.min(steps.length - 1, Math.floor(p * steps.length));
+    if(idx !== si){ si = idx; lmsg.textContent = steps[si]; }
+
+    if(p < 1) requestAnimationFrame(tick);
+    else setTimeout(()=>done(), 200);        // маленькая пауза — и показываем результат
+  }
+  requestAnimationFrame(tick);
+}
     function goalKg(){ const g=A.goal||''; if(g.includes('3–5'))return 4; if(g.includes('5–10'))return 8; if(g.includes('10+'))return 12; return 3; }
     const fAge = ()=> (/50/.test(A.age||'')) ? .88 : (/40/.test(A.age||'')) ? .94 : (/30/.test(A.age||'')) ? .98 : 1.06;
     const fLife= ()=> (/Сидячая/.test(A.life||'')) ? .90 : (/Умеренно/.test(A.life||'')) ? 1.00 : 1.08;
@@ -420,8 +444,6 @@
       $('#sLead').innerHTML=`Чтобы прийти к цели <b>−${kg} кг</b> за <b>${wks} недель</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.`;
 
       $('#cta').href='https://walk-walk.ru/?utm_source=quiz&utm_medium=cta&utm_campaign=sd_weight_calc';
-
-      Confetti.burst();
       show(idxBy('result'));
     }
 
