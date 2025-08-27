@@ -222,8 +222,8 @@
         <h2>Давайте посчитаем ваш ИМТ</h2>
         <p class="hint">Укажите ваш рост и вес — можно приблизительно.</p>
         <div class="grid cols2">
-          <div><div class="hint">Рост, см</div><input id="h" type="number" class="text" placeholder="165"></div>
-          <div><div class="hint">Вес, кг</div><input id="w" type="number" class="text" placeholder="72"></div>
+          <div><div class="hint">Рост, см</div><input id="h" type="number" class="text" placeholder="Например, 165"></div>
+          <div><div class="hint">Вес, кг</div><input id="w" type="number" class="text" placeholder="Например, 72"></div>
         </div>
         <div id="bmiI" class="hint"></div>
         ${actions()}
@@ -275,7 +275,7 @@
 
     // Прогресс-бар (круг + процент, пружинная анимация)
     const progress = $('#progress');
-    progress.innerHTML = '<div class="pcirc"><div class="pct">0%</div></div><div class="plabel" id="plabel">Шаг 1 из 1</div>';
+    progress.innerHTML = '<div class="pcirc"><div class="pct">0%</div></div><div class="plabel" id="plabel"> Узнай, как быстро ты похудеешь на шагах</div>';
     const pcirc  = () => $('#progress .pcirc');
     const pcText = () => $('#progress .pct');
     const plabel = () => $('#plabel');
@@ -302,7 +302,7 @@
       const total = S.length - 1, step = Math.max(1, Math.min(i, total));
       const pct = Math.round((i/total)*100);
       animateProgress(pct);
-      plabel().textContent = `Шаг ${step} из ${total}`;
+     
     }
     function show(n){
       S[idx].classList.remove('is');
