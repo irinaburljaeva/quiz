@@ -82,10 +82,6 @@
     /* Экран результата — крупные цифры */
     .counter{ font-size:clamp(26px,6vw,48px); line-height:1.15; letter-spacing:-.02em; text-wrap:balance }
 
-    /* Вспомогательные боксы (необязательные) */
-    .box{ border:2px solid var(--y); border-radius:14px; padding:12px; margin:8px 0 }
-    .box h3{ margin:.2rem 0 .6rem 0 }
-
     /* Круговой прогресс + логотип */
     #progress{
       position:relative; height:auto; margin:0 0 12px;
@@ -139,7 +135,7 @@
     .bmi-warn{ background:#fff4e6; color:#a04b00 }
     .bmi-bad{  background:#ffe8e6; color:#a11000 }
 
-    /* ===== Экран «Привычки и продукты» (вау) ===== */
+    /* ===== Экран «Привычки и продукты» ===== */
     .habit{ display:grid; gap:14px }
     .habit-grid{ display:grid; gap:12px; grid-template-columns:1fr 1fr }
     @media (max-width:720px){ .habit-grid{ grid-template-columns:1fr } }
@@ -198,7 +194,15 @@
     @media (max-width:780px){ .goal-top{ grid-template-columns:1fr } }
 
     .goal-card{ border:2px solid var(--g); border-radius:16px; padding:14px; background:#fff }
-    .goal-fig{ border:2px solid var(--g); border-radius:16px; padding:16px; background:#fff; display:grid; place-items:center }
+    .goal-fig{
+      border:2px solid var(--g);
+      border-radius:16px;
+      padding:16px;
+      background:#fff;
+      display:grid;
+      place-items:center;
+      overflow:hidden; /* не вылезает за границы */
+    }
 
     .goal-range{ --pct:0%; }
     .goal-range .val{ font-size:clamp(22px,5.6vw,34px); font-weight:800; letter-spacing:-.03em }
@@ -244,18 +248,36 @@
     .goal-mid{  background:#fff3cc; color:#9a6b00 }
     .goal-hard{ background:#ffe9e6; color:#a11000 }
 
-    /* Абстрактная «фигура»: сужается по оси X с ростом цели */
+    /* Абстрактная «фигура»: адаптивная, сужается по оси X с ростом цели */
     .goal-body{
       --sx: 1;
-      width:160px; height:220px;
-      border-radius:80px/110px;
+      position:relative;
+      width:min(62vw, 260px);     /* ужимаем на мобильных */
+      aspect-ratio: 3 / 4;        /* стабильная пропорция */
+      border-radius:46% 46% 40% 40% / 55% 55% 45% 45%;
       background:
-        radial-gradient(40% 20% at 50% 18%, #f0f0f0 35%, transparent 36%) top center,
-        linear-gradient(#f7f7f7,#ececec);
+        radial-gradient(40% 18% at 50% 18%, rgba(0,0,0,.06) 0 70%, transparent 71%) top center,
+        linear-gradient(180deg, #f9f9f9 0%, #f0f0f0 40%, #ececec 100%);
       background-repeat:no-repeat;
-      box-shadow:inset 0 -10px 30px rgba(0,0,0,.06), 0 10px 26px rgba(0,0,0,.08);
+      box-shadow:
+        inset 0 -18px 34px rgba(0,0,0,.08),
+        inset 0 14px 30px rgba(255,255,255,.65),
+        0 10px 26px rgba(0,0,0,.08);
       transform:scaleX(var(--sx));
       transition:transform .35s cubic-bezier(.2,.7,.2,1);
+    }
+    .goal-body::after{
+      content:"";
+      position:absolute; left:50%; top:46%;
+      width:60%; height:10%;
+      transform:translate(-50%,-50%);
+      background:radial-gradient(60% 80% at 50% 50%, rgba(0,0,0,.06), transparent 70%);
+      filter:blur(10px);
+    }
+    .goal-body::before{
+      content:""; position:absolute; inset:0;
+      background:radial-gradient(120% 60% at 0% 0%, rgba(255,255,255,.8), transparent 60%);
+      mix-blend-mode:soft-light; pointer-events:none;
     }
     .goal-note{ color:#666; font-size:.9rem; text-align:center }
 
@@ -291,7 +313,6 @@
     ];
     const LIFE=['Сидячая работа','Умеренно активная','Активная'];
     const EXP=['Никогда не занималась','Иногда дома / по видео','Регулярно'];
-    const GOAL_BUCKETS=['Сбросить 3–5 кг','Сбросить 5–10 кг','Сбросить 10+ кг','Поддерживать фигуру / вернуть тонус'];
     const MOT=['Для здоровья','Для внешности','Для энергии и лёгкости','Для уверенности в себе'];
     const HARD=['Долгая прогулка утомляет','Каждый пролёт по лестнице — испытание','Стыдно включаться в активные игры','Прыжки','Ничего из этого'];
     const HEALTH=['Диабет','Проблемы со щитовидкой','Гипертония','Боль в суставах','Беременность','Нет'];
@@ -360,7 +381,7 @@
       + section('life', `<h2>Образ жизни</h2>${opts('lifeOpts', LIFE)}${actions()}`)
       + section('exp',  `<h2>Опыт тренировок</h2>${opts('expOpts', EXP)}${actions()}`)
       + section('goal', `
-        <h2>Ваша цель</h2>
+           <h2>Ваша цель</h2>
 
         <div class="goalw">
           <div class="goal-top">
@@ -371,6 +392,7 @@
                 <div class="sub"><span id="goalBadge" class="goal-badge goal-mid">умеренно</span></div>
               </div>
               <input id="goalRange" type="range" min="0" max="20" step="0.5" value="5">
+              <p class="hint" id="goalExpl">То есть ваша цель: −5.0 кг</p>
               <div class="hint">Потяните ползунок: 0 — поддерживать форму · 20 — амбициозная цель</div>
               <label class="goal-switch" style="margin-top:10px">
                 <input id="goalKeep" type="checkbox">
@@ -560,7 +582,7 @@
       } else { $('#bmiI').textContent=''; }
     }
 
-    /* Универсальный селектор (с защитой, если блока нет) */
+    /* Универсальный селектор (с защитой) */
     function selectList(root,key,single){
       if(!root) return;
       root.addEventListener('click',e=>{
@@ -575,8 +597,6 @@
         save(); vibrate(8);
       });
     }
-
-    /* Привязка списков (без goalOpts — у нас новая цель) */
     selectList($('#ageOpts'),'age',true);
     selectList($('#bodyOpts'),'body',true);
     selectList($('#lifeOpts'),'life',true);
@@ -638,7 +658,7 @@
     }
     setupHabitMeter();
 
-    /* ===== Цель: логика «абстрактной фигуры» и слайдера ===== */
+    /* ===== Цель: логика фигуры и слайдера ===== */
     function mapGoalBucket(kg){
       const v = +kg;
       if(v <= 0) return 'Поддерживать фигуру / вернуть тонус';
@@ -649,6 +669,7 @@
     function updateGoalVisuals(){
       const kg = +A.goalKg || 0;
       $('#goalVal').textContent = kg.toFixed(1);
+      const expl = $('#goalExpl'); if(expl) expl.textContent = `То есть ваша цель: −${kg.toFixed(1)} кг`;
 
       const badge = $('#goalBadge');
       let cls='goal-mid', txt='умеренно';
@@ -664,7 +685,7 @@
       rng.style.setProperty('--pct', pct+'%');
 
       const body = $('#goalBody');
-      const sx = Math.max(0.75, 1 - kg / 40); // ограничиваем 0.75 для деликатности
+      const sx = Math.max(0.75, 1 - kg / 40);
       body.style.setProperty('--sx', sx);
     }
     function setGoalFromRange(val){
@@ -738,7 +759,7 @@
     function fBody(){ switch(A.body){ case 'slim':return .92; case 'avg':return 1.00; case 'large':return .96; case 'obese':return .92; default:return 1.00; } }
     function fSteps(){ const now=+A.steps||4000; const add=2000; const t=now+add; let boost=1+add/10000; if(now<3000)boost+=.08; if(now>9000)boost-=.06; return { f:Math.max(.95,Math.min(1.28,boost)), t }; }
     function fNutri(){ let f=1; if(A.nutri==='menu')f+=.22; else if(A.nutri==='plate')f+=.12; else f-=.12; f-=((A.bad||[]).length)*.03; f+=Math.min(((A.good||[]).length)*.02,.10); return Math.max(.7,Math.min(1.35,f)); }
-    function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06; if(h.has('Боль в суставах'))f-=.04; return Math.max(.8,f); }
+    function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония'))ф-=.06; if(h.has('Боль в суставах'))ф-=.04; return Math.max(.8,f); }
     function rate(){ let r=.5; const bmi=A.bmi||26; if(bmi>=30)r+=.08; else if(bmi<23)r-=.08; r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth(); return Math.max(.25,Math.min(.9,+r.toFixed(2))); }
 
     function calculate(){
