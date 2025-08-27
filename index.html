@@ -27,7 +27,7 @@
     .hero-skel.hide{ opacity:0; pointer-events:none; transition:opacity .25s ease }
 
     /* Экраны */
-    .screen{ display:none; animation:.35s fs ease both }
+    .screen{ display:none; animation:.35s fs ease both; padding-bottom:96px; } /* запас под липкие кнопки */
     .screen.is{ display:block }
     @keyframes fs{ from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:translateY(0)} }
 
@@ -53,7 +53,7 @@
     .btn{ border:none; border-radius:12px; padding:12px 16px; font-weight:700; cursor:pointer }
     .primary{ background:linear-gradient(135deg,var(--r),var(--o)); color:#fff; box-shadow:0 10px 18px rgba(207,44,2,.25) }
     .ghost{ background:#fff; border:2px solid var(--g) }
-    .sticky{ position:sticky; bottom:0; background:linear-gradient(0deg,#fff 70%,rgba(255,255,255,0)); padding-top:8px; z-index:9 }
+    .sticky{ position:sticky; bottom:0; background:linear-gradient(0deg,#fff 70%,rgba(255,255,255,0)); padding-top:8px; z-index:20 }
 
     /* Круговой прогресс + логотип */
     #progress{ position:relative; height:auto; margin:0 0 12px; display:flex; align-items:center; gap:10px }
@@ -72,7 +72,7 @@
     #steps::-webkit-slider-thumb{ -webkit-appearance:none; width:28px; height:28px; border-radius:50%; background:#fff; border:3px solid var(--o); box-shadow:0 4px 10px rgba(232,93,4,.25); margin-top:-8px; transition:transform .12s ease }
     #steps:active::-webkit-slider-thumb{ transform:scale(1.06) }
     #steps::-moz-range-track{ height:12px; border-radius:999px; background:#e9e9e9 }
-    #steps::-moz-range-progress{ height:12px; border-radius:999px; background:linear-gradient(135deg,var(--fill-start),var(--end)) }
+    #steps::-moz-range-progress{ height:12px; border-radius:999px; background:linear-gradient(135deg,var(--fill-start),var(--fill-end)) }
     #steps::-moz-range-thumb{ width:28px; height:28px; border-radius:50%; background:#fff; border:3px solid var(--o); box-shadow:0 4px 10px rgba(232,93,4,.25) }
 
     /* BMI */
@@ -106,46 +106,32 @@
     .hm-badge{ display:inline-block; padding:4px 8px; border-radius:999px; font-weight:700; font-size:.85rem; margin-left:8px }
     .hm-bad{ background:#ffe9e6; color:#a11000 } .hm-ok{ background:#fff3cc; color:#9a6b00 } .hm-good{ background:#e7f7ef; color:#0f7a42 }
 
-    /* ВАУ-вопрос: тяжелее всего */
+    /* ВАУ-вопрос: тяжелее всего (без ползунка) */
     .hardw{ display:grid; gap:14px }
     .hard-cards{ display:grid; gap:12px; grid-template-columns:1fr 1fr }
     @media (max-width:760px){ .hard-cards{ grid-template-columns:1fr } }
-    .hcard{ position:relative; border:2px solid var(--g); border-radius:16px; background:#fff; padding:14px; cursor:pointer; transform-style:preserve-3d; transition:transform .15s ease, box-shadow .2s ease, border-color .2s; box-shadow:0 10px 18px rgba(0,0,0,.05) }
-    .hcard:hover{ box-shadow:0 14px 26px rgba(0,0,0,.08) }
-    .hcard.is{ border-color:var(--o); box-shadow:0 14px 28px rgba(232,93,4,.16) }
+    .hcard{ position:relative; border:2px solid var(--g); border-radius:16px; background:#fff; padding:14px; cursor:pointer; transform-style:preserve-3d; transition:transform .15s ease, box-shadow .2s ease, border-color .2s; box-shadow:0 8px 18px rgba(0,0,0,.05) }
+    .hcard:hover{ box-shadow:0 12px 26px rgba(0,0,0,.08) }
+    .hcard.is{ border-color:var(--o); background:linear-gradient(180deg,#fff 0,#fff9f3 100%); box-shadow:0 12px 26px rgba(232,93,4,.18) }
     .hhead{ display:flex; gap:10px; align-items:center; font-weight:800; letter-spacing:-.02em }
     .hicon{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-size:22px; background:#fff6f1; border:2px solid #ffd5c2 }
-    .hbody{ margin-top:10px; display:none }
-    .hcard.is .hbody{ display:block }
-    .hmeter{ display:flex; align-items:center; gap:10px; margin-top:6px }
-    .hmeter .lvl{ font-weight:800; font-size:.92rem; padding:4px 8px; border-radius:999px }
-    .hlvl-easy{ background:#e9f7ef; color:#0f7a42 } .hlvl-mid{ background:#fff3cc; color:#9a6b00 } .hlvl-hard{ background:#ffe9e6; color:#a11000 }
-    .hslider{ --pct:0%; --track:#e9e9e9; --fill-start:var(--r); --fill-end:var(--o) }
-    .hslider input[type=range]{ width:100%; height:40px; background:transparent; accent-color:var(--o) }
-    .hslider input[type=range]:focus{ outline:none }
-    .hslider input[type=range]::-webkit-slider-runnable-track{ height:12px; border-radius:999px; background:linear-gradient(90deg,var(--fill-start) 0 var(--pct),var(--track) var(--pct) 100%); box-shadow:inset 0 1px 2px rgba(0,0,0,.08) }
-    .hslider input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:28px; height:28px; border-radius:50%; background:#fff; border:3px solid var(--o); box-shadow:0 4px 10px rgba(232,93,4,.25); margin-top:-8px; transition:transform .12s ease }
-    .hslider input[type=range]:active::-webkit-slider-thumb{ transform:scale(1.06) }
-    .hslider input[type=range]::-moz-range-track{ height:12px; border-radius:999px; background:#e9e9e9 }
-    .hslider input[type=range]::-moz-range-progress{ height:12px; border-radius:999px; background:linear-gradient(135deg,var(--fill-start),var(--fill-end)) }
-    .hslider input[type=range]::-moz-range-thumb{ width:28px; height:28px; border-radius:50%; background:#fff; border:3px solid var(--o); box-shadow:0 4px 10px rgba(232,93,4,.25) }
 
-    /* ВАУ-цель: карточка + фигура */
+    /* ВАУ-цель: карточка + фигура (компактнее) */
     .goalw{ display:grid; gap:12px }
-    .goal-top{ display:grid; gap:10px; grid-template-columns:1.05fr .95fr }
+    .goal-top{ display:grid; gap:8px; grid-template-columns:1.05fr .95fr }
     @media (max-width:780px){ .goal-top{ grid-template-columns:1fr } }
-    .goal-card{ border:2px solid var(--g); border-radius:16px; padding:12px; background:#fff }
-    .goal-fig{ border:2px solid var(--g); border-radius:16px; padding:12px; background:#fff; display:grid; place-items:center; overflow:hidden }
-    .goal-range .val{ display:flex; align-items:baseline; gap:8px; font-size:clamp(22px,5.2vw,32px); font-weight:800; letter-spacing:-.03em }
+    .goal-card{ border:2px solid var(--g); border-radius:16px; padding:10px; background:#fff }
+    .goal-fig{ border:2px solid var(--g); border-radius:16px; padding:8px; background:#fff; display:grid; place-items:center; overflow:hidden }
+    .goal-range .val{ display:flex; align-items:baseline; gap:8px; font-size:clamp(18px,4.6vw,28px); font-weight:800; letter-spacing:-.03em }
     .goal-range .sub{ color:#666; margin-top:2px }
-    #goalRange{ width:100%; height:44px; background:transparent; accent-color:var(--o); --track:#e9e9e9; --fill-start:var(--r); --fill-end:var(--o) }
+    #goalRange{ width:100%; height:38px; background:transparent; accent-color:var(--o); --track:#e9e9e9; --fill-start:var(--r); --fill-end:var(--o) }
     #goalRange:focus{ outline:none }
-    #goalRange::-webkit-slider-runnable-track{ height:14px; border-radius:999px; background:linear-gradient(90deg,var(--fill-start) 0 var(--pct),var(--track) var(--pct) 100%); box-shadow:inset 0 1px 2px rgba(0,0,0,.08) }
-    #goalRange::-webkit-slider-thumb{ -webkit-appearance:none; width:30px; height:30px; border-radius:50%; background:#fff; border:3px solid var(--o); box-shadow:0 4px 12px rgba(232,93,4,.25); margin-top:-8px; transition:transform .12s ease }
+    #goalRange::-webkit-slider-runnable-track{ height:12px; border-radius:999px; background:linear-gradient(90deg,var(--fill-start) 0 var(--pct),var(--track) var(--pct) 100%); box-shadow:inset 0 1px 2px rgba(0,0,0,.08) }
+    #goalRange::-webkit-slider-thumb{ -webkit-appearance:none; width:26px; height:26px; border-radius:50%; background:#fff; border:3px solid var(--o); box-shadow:0 4px 12px rgba(232,93,4,.25); margin-top:-7px; transition:transform .12s ease }
     #goalRange:active::-webkit-slider-thumb{ transform:scale(1.06) }
-    #goalRange::-moz-range-track{ height:14px; border-radius:999px; background:#e9e9e9 }
-    #goalRange::-moz-range-progress{ height:14px; border-radius:999px; background:linear-gradient(135deg,var(--fill-start),var(--fill-end)) }
-    #goalRange::-moz-range-thumb{ width:30px; height:30px; border-radius:50%; background:#fff; border:3px solid var(--o); box-shadow:0 4px 12px rgba(232,93,4,.25) }
+    #goalRange::-moz-range-track{ height:12px; border-radius:999px; background:#e9e9e9 }
+    #goalRange::-moz-range-progress{ height:12px; border-radius:999px; background:linear-gradient(135deg,var(--fill-start),var(--fill-end)) }
+    #goalRange::-moz-range-thumb{ width:26px; height:26px; border-radius:50%; background:#fff; border:3px solid var(--o); box-shadow:0 4px 12px rgba(232,93,4,.25) }
     .goal-switch{ display:flex; align-items:center; gap:10px; padding:8px 12px; border:2px solid var(--g); border-radius:12px; background:#fff; cursor:pointer; user-select:none; width:max-content }
     .goal-switch input{ appearance:none; width:42px; height:24px; border-radius:999px; background:#e9e9e9; position:relative; outline:none; transition:.2s }
     .goal-switch input::after{ content:""; position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.15); transition:.2s }
@@ -158,7 +144,7 @@
     .goal-body{
       --sx:1;
       position:relative;
-      width:min(64vw,232px);
+      width:min(56vw,200px);
       aspect-ratio:3/4;
       border-radius:46% 46% 40% 40% / 55% 55% 45% 45%;
       background:
@@ -174,7 +160,7 @@
     }
     .goal-body::after{ content:""; position:absolute; left:50%; top:46%; width:60%; height:10%; transform:translate(-50%,-50%); background:radial-gradient(60% 80% at 50% 50%, rgba(0,0,0,.06), transparent 70%); filter:blur(10px) }
     .goal-body::before{ content:""; position:absolute; inset:0; background:radial-gradient(120% 60% at 0% 0%, rgba(255,255,255,.8), transparent 60%); mix-blend-mode:soft-light; pointer-events:none }
-    .goal-note{ color:#666; font-size:.9rem; text-align:center }
+    .goal-note{ color:#666; font-size:.88rem; text-align:center; margin:6px 0 4px }
 
     /* Загрузка результата */
     .loader2{ display:flex; flex-direction:column; align-items:center; text-align:center; padding:28px 8px 12px }
@@ -188,6 +174,10 @@
     /* Финальный экран */
     .sale-hero{ margin:0 0 12px; border-radius:16px; overflow:hidden }
     .sale-hero img{ width:100%; display:block; border-radius:16px; object-fit:cover }
+
+    /* Чуть компактнее общий каркас */
+    .card{ padding:16px; }
+    .grid{ gap:10px; }
   </style>
 </head>
 <body>
@@ -255,7 +245,7 @@
         ${actions()}
       `)
       + section('bmi',`
-           <h2>Давайте посчитаем ваш ИМТ</h2>
+        <h2>Давайте посчитаем ваш ИМТ</h2>
         <p class="hint">Укажите ваш рост и вес — можно приблизительно.</p>
         <div class="grid cols2">
           <div><div class="hint">Рост, см</div><input id="h" type="number" class="text" placeholder="Например: 165"></div>
@@ -284,7 +274,7 @@
             </div>
             <div class="goal-fig"><div class="goal-body" id="goalBody"></div></div>
           </div>
-          <p class="goal-note">Цель можно уточнить позже — расчёт адаптируется под ваш темп и самочувствие.</p>
+           p class="goal-note">Цель можно уточнить позже — расчёт адаптируется под ваш темп и самочувствие.</p>
           ${actions()}
         </div>
       `)
@@ -296,43 +286,18 @@
           <div class="hard-cards" id="hardCards">
             <div class="hcard" data-k="walk">
               <div class="hhead"><div class="hicon">🚶‍♀️</div><div>Долгая прогулка утомляет</div></div>
-              <div class="hbody">
-                <div class="hint">Насколько это чувствуется?</div>
-                <div class="hslider"><input type="range" min="0" max="100" step="5" value="40"></div>
-                <div class="hmeter"><span class="lvl hlvl-mid">средне</span><span class="hint">(0 — почти не мешает, 100 — очень сложно)</span></div>
-              </div>
             </div>
             <div class="hcard" data-k="stairs">
               <div class="hhead"><div class="hicon">🪜</div><div>Каждый пролёт по лестнице — испытание</div></div>
-              <div class="hbody">
-                <div class="hint">Насколько это чувствуется?</div>
-                <div class="hslider"><input type="range" min="0" max="100" step="5" value="50"></div>
-                <div class="hmeter"><span class="lvl hlvl-mid">средне</span><span class="hint">(0 — почти не мешает, 100 — очень сложно)</span></div>
-              </div>
             </div>
             <div class="hcard" data-k="games">
               <div class="hhead"><div class="hicon">🎯</div><div>Стыдно включаться в активные игры</div></div>
-              <div class="hbody">
-                <div class="hint">Насколько это чувствуется?</div>
-                <div class="hslider"><input type="range" min="0" max="100" step="5" value="45"></div>
-                <div class="hmeter"><span class="lvl hlvl-mid">средне</span><span class="hint">(0 — почти не мешает, 100 — очень сложно)</span></div>
-              </div>
             </div>
             <div class="hcard" data-k="jumps">
               <div class="hhead"><div class="hicon">🦘</div><div>Прыжки</div></div>
-              <div class="hbody">
-                <div class="hint">Насколько это чувствуется?</div>
-                <div class="hslider"><input type="range" min="0" max="100" step="5" value="60"></div>
-                <div class="hmeter"><span class="lvl hlvl-mid">средне</span><span class="hint">(0 — почти не мешает, 100 — очень сложно)</span></div>
-              </div>
             </div>
             <div class="hcard" data-k="none">
               <div class="hhead"><div class="hicon">✅</div><div>Ничего из этого</div></div>
-              <div class="hbody">
-                <div class="hint">Отлично!</div>
-                <div class="hslider"><input type="range" min="0" max="100" step="5" value="0"></div>
-                <div class="hmeter"><span class="lvl hlvl-easy">легко</span></div>
-              </div>
             </div>
           </div>
           ${actions()}
@@ -427,8 +392,7 @@
         if(pctNow!==to) rafId=requestAnimationFrame(frame);
       } rafId=requestAnimationFrame(frame);
     }
-
-    /* Навигация */
+   /* Навигация */
     let idx=0; const S=$$('#screens .screen'); const need=k=>!A[k];
     function setProgress(i){ progress.classList.toggle('hide', i===0); const pct=Math.round((i/(S.length-1))*100); animateProgress(pct); }
     function show(n){ S[idx].classList.remove('is'); idx=Math.max(0,Math.min(S.length-1,n)); S[idx].classList.add('is'); setProgress(idx); scrollTo({top:0,behavior:'smooth'}); }
@@ -447,7 +411,7 @@
       show(idx+1);
     }
 
-    /* Привязки */
+    /* Привязки ввода */
     $('#name').oninput = e=>{ A.name=e.target.value.trim(); save(); };
 
     const steps=$('#steps'), sv=$('#sv');
@@ -510,36 +474,38 @@
     }
     function setupHabitMeter(){ ['bad','good'].forEach(id=>{ const el=$('#'+id); if(!el)return; el.addEventListener('click',()=>setTimeout(updateHabitMeter,0),true); }); updateHabitMeter(); }
     setupHabitMeter();
-
-    /* ВАУ «тяжелее всего» */
-    function labelForHard(k){ return k==='walk'?'Долгая прогулка утомляет':k==='stairs'?'Каждый пролёт по лестнице — испытание':k==='games'?'Стыдно включаться в активные игры':k==='jumps'?'Прыжки':'Ничего из этого'; }
+        /* «Тяжелее всего» — карточки без ползунка */
+    function labelForHard(k){
+      return k==='walk'  ? 'Долгая прогулка утомляет'
+           : k==='stairs'? 'Каждый пролёт по лестнице — испытание'
+           : k==='games' ? 'Стыдно включаться в активные игры'
+           : k==='jumps' ? 'Прыжки'
+           : 'Ничего из этого';
+    }
     function setupHardWow(){
       const wrap = $('#hardCards'); if(!wrap) return;
       const cards = $$('.hcard', wrap);
 
-      if(A.hardKey){ const cur=cards.find(c=>c.dataset.k===A.hardKey); if(cur){ cur.classList.add('is'); } }
-      if(A.hardLvl!=null){ const cur=cards.find(c=>c.classList.contains('is')); if(cur){ const r=cur.querySelector('input[type=range]'); if(r){ r.value=+A.hardLvl; updateHardUI(cur); } } }
+      if(A.hardKey){ const cur=cards.find(c=>c.dataset.k===A.hardKey); if(cur) cur.classList.add('is'); }
 
       wrap.addEventListener('click', e=>{
-        const card=e.target.closest('.hcard'); if(!card||!wrap.contains(card))return;
+        const card=e.target.closest('.hcard'); if(!card) return;
         cards.forEach(c=>c.classList.toggle('is', c===card));
         A.hardKey=card.dataset.k; A.hard=labelForHard(A.hardKey);
-        if(A.hardKey==='none'){ A.hardLvl=0; const r=card.querySelector('input[type=range]'); if(r) r.value=0; }
-        save(); vibrate(8); updateHardUI(card);
+        delete A.hardLvl; save(); vibrate(8);
       });
 
+      // красивый лёгкий наклон
       cards.forEach(c=>{
-        const r=c.querySelector('input[type=range]'); if(!r) return;
-        r.oninput=e=>{ const val=+e.target.value; const pct=(val/100)*100; e.target.parentElement.style.setProperty('--pct', pct+'%'); if(c.classList.contains('is')){ A.hardLvl=val; save(); } updateHardUI(c); };
-        r.dispatchEvent(new Event('input'));
-      });
-
-      cards.forEach(c=>{
-        c.addEventListener('pointermove', e=>{ const r=c.getBoundingClientRect(); const x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height; const rx=(.5-y)*8, ry=(x-.5)*10; c.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`; });
-        ['pointerleave','pointercancel','blur'].forEach(ev=>c.addEventListener(ev,()=>{ c.style.transform='rotateX(0) rotateY(0)'; }));
+        c.addEventListener('pointermove', e=>{
+          const r=c.getBoundingClientRect();
+          const x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
+          const rx=(.5-y)*8, ry=(x-.5)*10;
+          c.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+        });
+        ['pointerleave','pointercancel','blur'].forEach(ev=>c.addEventListener(ev,()=>{ c.style.transform=''; }));
       });
     }
-    function updateHardUI(card){ const r=card.querySelector('input[type=range]'); if(!r) return; const lvl=+r.value; const tag=card.querySelector('.lvl'); let cls='hlvl-mid', txt='средне'; if(lvl<=20){cls='hlvl-easy';txt='легко'} else if(lvl>=70){cls='hlvl-hard';txt='сложно'} tag.className='lvl '+cls; tag.textContent=txt; }
     setupHardWow();
 
     /* Цель */
@@ -572,10 +538,10 @@
         if(p<1) requestAnimationFrame(tick); else setTimeout(()=>done(),200);
       } requestAnimationFrame(tick);
     }
-
     // Кнопка рассчёта
     const idxBy = id => $$('#screens .screen').findIndex(s=>s.dataset.id===id);
     $('#calc').onclick = ()=>{ show(idx+1); runLoading(calculate); };
+
     // Факторы
     function goalKg(){ if(A.goalKg!=null) return Math.max(0,Math.min(20,+A.goalKg)); const g=A.goal||''; if(g.includes('3–5'))return 4; if(g.includes('5–10'))return 8; if(g.includes('10+'))return 12; return 3; }
     const fAge = ()=> (/50/.test(A.age||'')) ? .88 : (/40/.test(A.age||'')) ? .94 : (/30/.test(A.age||'')) ? .98 : 1.06;
@@ -585,10 +551,7 @@
     function fSteps(){ const now=+A.steps||4000; const add=2000; const t=now+add; let boost=1+add/10000; if(now<3000)boost+=.08; if(now>9000)boost-=.06; return { f:Math.max(.95,Math.min(1.28,boost)), t }; }
     function fNutri(){ let f=1; if(A.nutri==='menu')f+=.22; else if(A.nutri==='plate')f+=.12; else f-=.12; f-=((A.bad||[]).length)*.03; f+=Math.min(((A.good||[]).length)*.02,.10); return Math.max(.7,Math.min(1.35,f)); }
     function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония')) f-=.06; if(h.has('Боль в суставах')) f-=.04; return Math.max(.8,f); }
-    function fPain(){ if(!A.hardKey) return 1; const lvl=(+A.hardLvl||0)/100; let base=0;
-      if(A.hardKey==='walk') base=-0.06; else if(A.hardKey==='stairs') base=-0.07; else if(A.hardKey==='games') base=-0.04; else if(A.hardKey==='jumps') base=-0.05; else if(A.hardKey==='none') return 1.02;
-      const f=1+base*lvl; return Math.max(0.9, Math.min(1.02, f));
-    }
+    function fPain(){ switch(A.hardKey){ case 'walk':return .94; case 'stairs':return .93; case 'games':return .96; case 'jumps':return .95; case 'none':return 1.02; default:return 1.00; } }
     function rate(){ let r=.5; const bmi=A.bmi||26; if(bmi>=30)r+=.08; else if(bmi<23)r-=.08; r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth()*fPain(); return Math.max(.25,Math.min(.9,+r.toFixed(2))); }
 
     function calculate(){
