@@ -57,13 +57,13 @@
 
 /* Антиконфликт: гарантируем клики внутри наших экранов */
 #screens .screen.is, #screens .opt.is, #screens .chip.is { pointer-events:auto !important }
-  /* Dev export toolbar (optional) */
-.devbar{ position:fixed; bottom:16px; right:16px; z-index:99999; background:#fff; border:2px solid var(--y); border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.12); padding:8px; display:flex; gap:8px; align-items:center }
-.devbar .btn{ padding:8px 10px; border-radius:10px; font-weight:700 }
   /* HERO video/image */
 .hero-wrap{ margin:0 0 12px 0; border-radius:20px; overflow:hidden; box-shadow:0 10px 18px rgba(0,0,0,.08) }
 .hero-media{ display:block; width:100%; height:260px; object-fit:cover }
 @media (max-width:480px){ .hero-media{ height:200px } }
+  /* Confetti canvas overlays page (so it НЕ сдвигает контент) */
+#confetti{ position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:50; display:block }
+body{ overflow-x:hidden }
 
   </style>
 </head>
@@ -99,7 +99,16 @@
     const screensRoot = $('#screens');
     const section = (id,html)=>`<section class="screen${id==='intro'?' is':''}" data-id="${id}">${html}</section>`;
     const chips = (id,arr)=>`<div class="chips" id="${id}">`+arr.map(t=>`<button type="button" class="chip" data-v="${t}">${t}</button>`).join('')+`</div>`;
-    const opts = (id,arr)=>`<div class="grid cols2" id="${id}">`+arr.map(t=>{ const label=t.label||t[0]||t; const key=t.key||t[1]||t; return `<label class="opt" data-v="${key}"><span>${label}</span></label>`; }).join('')+`</div>`;
+    const opts = (id, arr) => `<div class="grid cols2" id="${id}">`
+      + arr.map(t => {
+          let label, key;
+          if (typeof t === 'string') { label = t; key = t; }
+          else if (Array.isArray(t)) { label = t[0]; key = (t[1] ?? t[0]); }
+          else if (t && typeof t === 'object') { label = t.label ?? t.value ?? t.key ?? ''; key = t.key ?? t.value ?? t.label ?? ''; }
+          else { label = String(t); key = String(t); }
+          return `<label class="opt" data-v="${String(key)}"><span>${String(label)}</span></label>`;
+        }).join('')
+      + `</div>`;
     const actions = ()=>`<div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" data-next>Далее</button></div>`;
 
     const html =
@@ -217,9 +226,9 @@
     $('#calc').onclick = ()=>{ show(idx+1); setTimeout(calculate,700); };
 
     function goalKg(){ const g=A.goal||''; if(g.includes('3–5'))return 4; if(g.includes('5–10'))return 8; if(g.includes('10+'))return 12; return 3; }
-    const fAge = ()=> /50/.test(A.age||'')?.88 : /40/.test(A.age||'')?.94 : /30/.test(A.age||'')?.98 : 1.06; // не теряем на молодых
-    const fLife= ()=> /Сидячая/.test(A.life||'')?.90 : /Умеренно/.test(A.life||'')?1.00 : 1.08;
-    const fExp = ()=> /Никогда/.test(A.exp||'')?.95 : /Регулярно/.test(A.exp||'')?1.08 : 1.00;
+    const fAge = () => (/50/.test(A.age||'')) ? .88 : (/40/.test(A.age||'')) ? .94 : (/30/.test(A.age||'')) ? .98 : 1.06; // не теряем на молодых
+    const fLife = () => (/Сидячая/.test(A.life||'')) ? .90 : (/Умеренно/.test(A.life||'')) ? 1.00 : 1.08;
+    const fExp = () => (/Никогда/.test(A.exp||'')) ? .95 : (/Регулярно/.test(A.exp||'')) ? 1.08 : 1.00;
     function fBody(){ switch(A.body){ case 'slim':return .92; case 'avg':return 1.00; case 'large':return .96; case 'obese':return .92; default:return 1.00; } }
     function fSteps(){ const now=+A.steps||4000; const add=2000; const t=now+add; let boost=1+add/10000; if(now<3000)boost+=.08; if(now>9000)boost-=.06; return { f:Math.max(.95,Math.min(1.28,boost)), t }; }
     function fNutri(){ let f=1; if(A.nutri==='menu')f+=.22; else if(A.nutri==='plate')f+=.12; else f-=.12; f-=((A.bad||[]).length)*.03; f+=Math.min(((A.good||[]).length)*.02,.10); return Math.max(.7,Math.min(1.35,f)); }
@@ -239,54 +248,5 @@
 
     // Навигация с клавиатуры
     addEventListener('keydown', e=>{ if(e.key==='ArrowRight') goNext(); if(e.key==='ArrowLeft') show(idx-1); });
-  </script>  <!-- Dev: export helper, shows only with ?dev=1 -->  <script>
-    (function(){
-      const qs = new URLSearchParams(location.search);
-      if(qs.get('dev')==='1'){
-        const bar = document.createElement('div');
-        bar.className = 'devbar';
-        bar.innerHTML = `
-          <button class="btn ghost" id="exCss" type="button">Скачать sd.css</button>
-          <button class="btn ghost" id="exJs" type="button">Скачать sd.js</button>
-          <button class="btn primary" id="exIdx" type="button">Скачать index.html (split)</button>
-          <button class="btn ghost" id="exHide" type="button">Скрыть</button>
-        `;
-        document.body.appendChild(bar);
-        function download(name, text){
-          const a = document.createElement('a');
-          a.download = name;
-          a.href = URL.createObjectURL(new Blob([text], {type:'text/plain'}));
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
-        }
-        const styleEl = document.querySelector('head style');
-        const scripts = Array.from(document.querySelectorAll('script')).filter(s=>!s.src);
-        const mainScript = scripts[scripts.length-1];
-        document.getElementById('exCss').onclick = ()=> download('sd.css', styleEl? styleEl.textContent : '');
-        document.getElementById('exJs').onclick  = ()=> download('sd.js',  mainScript? mainScript.textContent : '');
-        document.getElementById('exIdx').onclick = ()=>{
-          const html = `<!doctype html>
-<html lang="ru">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>ШАГАЙ ДОМА · Квиз-калькулятор</title>
-<link rel="stylesheet" href="sd.css"/>
-</head>
-<body>
-<canvas id="confetti"></canvas>
-<div class="app"><div class="card"><div id="progress"></div><div id="screens"></div></div></div>
-<script src="sd.js" defer><\/script>
-</body>
-</html>`;
-          download('index.html', html);
-        };
-        document.getElementById('exHide').onclick = ()=>{
-          const u = new URL(location.href); u.searchParams.delete('dev'); location.href = u.toString();
-        };
-      }
-    })();
-  </script>
-</body>
+  </script></body>
 </html>
