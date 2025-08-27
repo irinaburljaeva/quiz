@@ -164,16 +164,15 @@
     const screensRoot = $('#screens');
     const section = (id,html)=>`<section class="screen${id==='intro'?' is':''}" data-id="${id}">${html}</section>`;
     const chips = (id,arr)=>`<div class="chips" id="${id}">`+arr.map(t=>`<button type="button" class="chip" data-v="${t}">${t}</button>`).join('')+`</div>`;
-    const opts = (id,arr)=>`<div class="grid cols2" id="${id}">`
-      + arr.map(t=>{
-          let label,key;
-          if (typeof t==='string'){ label=t; key=t; }
-          else if (Array.isArray(t)){ label=t[0]; key=(t[1]??t[0]); }
-          else if (t && typeof t==='object'){ label=t.label ?? t.value ?? t.key ?? ''; key=t.key ?? t.value ?? t.label ?? ''; }
-          else { label=String(t); key=String(t); }
-          return `<label class="opt" data-v="${String(key)}"><span>${String(label)}</span></label>`;
-        }).join('')
-      + `</div>`;
+    const opts = (id,arr)=>`<div class="grid cols2" id="${id}">`+
+      arr.map(t=>{
+        let label,key;
+        if (typeof t==='string'){ label=t; key=t; }
+        else if (Array.isArray(t)){ label=t[0]; key=(t[1]??t[0]); }
+        else if (t && typeof t==='object'){ label=t.label ?? t.value ?? t.key ?? ''; key=t.key ?? t.value ?? t.label ?? ''; }
+        else { label=String(t); key=String(t); }
+        return `<label class="opt" data-v="${String(key)}"><span>${String(label)}</span></label>`;
+      }).join('')+`</div>`;
     const actions = ()=>`<div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" data-next>Далее</button></div>`;
 
     const html =
@@ -188,9 +187,9 @@
         <p class="hint">Ответьте на несколько вопросов — это займёт 1–2 минуты.</p>
         <div class="grid"><div><div class="hint">Как к вам обращаться?</div><input id="name" class="text" placeholder="Например: Ирина"></div></div>
         <div class="actions sticky"><button class="btn primary" id="start" type="button" data-next>Поехали →</button></div>
-      `)+
-      section('age', `<h2>Ваш возраст</h2>${opts('ageOpts', AGE)}${actions()}`)+
-      section('body', `
+      `)
+      + section('age', `<h2>Ваш возраст</h2>${opts('ageOpts', AGE)}${actions()}`)
+      + section('body', `
         <h2>Телосложение сейчас</h2>
         <div class="grid cols2" id="bodyOpts">
           ${BODY.map(o => `
@@ -201,15 +200,15 @@
           `).join('')}
         </div>
         ${actions()}
-      `)+
-      section('steps', `
+      `)
+      + section('steps', `
         <h2>Сколько шагов вы проходите сейчас в день (примерно)?</h2>
         <input id="steps" type="range" min="0" max="25000" step="250" value="4000">
         <div class="hint">Сейчас: <b><span id="sv">4000</span> шагов</b></div>
         <p class="hint"><b>Подсказка:</b> найти шаги можно в приложении вашего телефона/браслета</p>
         ${actions()}
-      `)+
-      section('bmi', `
+      `)
+      + section('bmi', `
         <h2>Давайте посчитаем ваш ИМТ</h2>
         <p class="hint">Укажите ваш рост и вес — можно приблизительно.</p>
         <div class="grid cols2">
@@ -218,39 +217,39 @@
         </div>
         <div id="bmiI" class="hint"></div>
         ${actions()}
-      `)+
-      section('life', `<h2>Образ жизни</h2>${opts('lifeOpts', LIFE)}${actions()}`)+
-      section('exp',  `<h2>Опыт тренировок</h2>${opts('expOpts', EXP)}${actions()}`)+
-      section('goal', `<h2>Ваша цель</h2>${opts('goalOpts', GOAL)}${actions()}`)+
-      section('motivation', `<h2>Почему вы хотите заниматься спортом?</h2>${chips('motChips', MOT)}${actions()}`)+
-      section('perweek', `<h2>Сколько готовы тренироваться в неделю?</h2>${chips('pwChips', ['2 раза','3 раза','4–5 раз','Каждый день 20–30 мин'])}${actions()}`)+
-      section('hard', `<h2>Что сейчас даётся тяжелее всего?</h2>${opts('hardOpts', HARD)}${actions()}`)+
-      section('health', `<h2>Есть ли состояния, которые важно учитывать?</h2>${chips('healthChips', HEALTH)}<p class="hint">Если есть сомнения — проконсультируйтесь с врачом.</p>${actions()}`)+
-      section('nutrition', `<h2>Питание</h2>${opts('nutriOpts', [
-        {label:'Буду питаться по меню-конструктору в клубе',key:'menu'},
-        {label:'Хочу научиться правильно составлять тарелку',key:'plate'},
-        {label:'Нет, пока без питания',key:'no'}
-      ])}${actions()}`)+
-      section('food', `
+      `)
+      + section('life', `<h2>Образ жизни</h2>${opts('lifeOpts', LIFE)}${actions()}`)
+      + section('exp',  `<h2>Опыт тренировок</h2>${opts('expOpts', EXP)}${actions()}`)
+      + section('goal', `<h2>Ваша цель</h2>${opts('goalOpts', GOAL)}${actions()}`)
+      + section('motivation', `<h2>Почему вы хотите заниматься спортом?</h2>${chips('motChips', MOT)}${actions()}`)
+      + section('perweek', `<h2>Сколько готовы тренироваться в неделю?</h2>${chips('pwChips', ['2 раза','3 раза','4–5 раз','Каждый день 20–30 мин'])}${actions()}`)
+      + section('hard', `<h2>Что сейчас даётся тяжелее всего?</h2>${opts('hardOpts', HARD)}${actions()}`)
+      + section('health', `<h2>Есть ли состояния, которые важно учитывать?</h2>${chips('healthChips', HEALTH)}<p class="hint">Если есть сомнения — проконсультируйтесь с врачом.</p>${actions()}`)
+      + section('nutrition', `<h2>Питание</h2>${opts('nutriOpts', [
+          {label:'Буду питаться по меню-конструктору в клубе',key:'menu'},
+          {label:'Хочу научиться правильно составлять тарелку',key:'plate'},
+          {label:'Нет, пока без питания',key:'no'}
+        ])}${actions()}`)
+      + section('food', `
         <h2>Продукты и привычки</h2>
         <div class="box"><h3>Ежедневные продукты</h3>${chips('bad', BAD)}</div>
         <div class="box"><h3>Привычки, ускоряющие результат</h3>${chips('good', GOOD)}</div>
         <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="calc">Рассчитать результат →</button></div>
-      `)+
-      section('loading', `
+      `)
+      + section('loading', `
         <div class="loader2">
           <div class="ring" id="lring"><div class="pct" id="lpct">0%</div></div>
           <div class="lmsg" id="lmsg">Собираем данные…</div>
           <p class="hint" id="lsub">Возраст • ИМТ • Активность • Цель</p>
         </div>
-      `)+
-      section('result', `
+      `)
+      + section('result', `
         <h2 id="rTitle">Готово!</h2>
         <div class="counter" id="nums">0 кг за 0 недель</div>
         <p class="hint" id="rSub"></p>
         <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="toCTA">Хочу такой результат!</button></div>
-      `)+
-      section('sale', `
+      `)
+      + section('sale', `
         <h2 id="sTitle">Присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡</h2>
         <p class="hint" id="sLead"></p>
         <ul>
@@ -362,19 +361,19 @@
     }
 
     selectList($('#ageOpts'),'age',true);
-    selectList($('#bodyOpts'],'body',true);
+    selectList($('#bodyOpts'),'body',true);
     selectList($('#lifeOpts'),'life',true);
     selectList($('#expOpts'),'exp',true);
-    selectList($('#goalOpts'],'goal',true);
+    selectList($('#goalOpts'),'goal',true);
     selectList($('#motChips'),'mot',false);
     selectList($('#pwChips'),'perweek',false);
-    selectList($('#hardOpts'],'hard',true);
+    selectList($('#hardOpts'),'hard',true);
     selectList($('#healthChips'),'health',false);
     selectList($('#bad'),'bad',false);
     selectList($('#good'),'good',false);
     selectList($('#nutriOpts'),'nutri',true);
 
-       /* Экран загрузки — анимация и смена фраз */
+    /* Экран загрузки — анимация и смена фраз */
     function runLoading(done){
       const ring = $('#lring'), lpct = $('#lpct'), lmsg = $('#lmsg'), lsub = $('#lsub');
       const stepsTxt = [
@@ -398,6 +397,7 @@
     }
 
     // Калькуляция
+    const idxBy = id => $$('#screens .screen').findIndex(s=>s.dataset.id===id);
     $('#calc').onclick = ()=>{ show(idx+1); runLoading(calculate); };
 
     function goalKg(){ const g=A.goal||''; if(g.includes('3–5'))return 4; if(g.includes('5–10'))return 8; if(g.includes('10+'))return 12; return 3; }
@@ -432,7 +432,6 @@
       function frame(now){ const p=Math.min(1,(now-start)/d); cb(Math.round(a+(b-a)*ease(p))); if(p<1)requestAnimationFrame(frame); }
       requestAnimationFrame(frame);
     }
-    const idxBy = id => $$('#screens .screen').findIndex(s=>s.dataset.id===id);
     $('#toCTA').onclick = ()=>show(idxBy('sale'));
 
     // Восстановление
@@ -446,11 +445,8 @@
       $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b> <span class="bmi-tag ${cat.cls}">${cat.label}</span>` +
         `<br><span class="hint bmi-line">ИМТ помогает ориентироваться в массе тела; норма для взрослых — 18,5–24,9.</span>`;
     }
-
-    // На старте — к началу страницы
-    requestAnimationFrame(()=>{ try{ scrollTo({top:0,behavior:'instant'});}catch(e){ scrollTo(0,0);} });
-    addEventListener('keydown', e=>{ if(e.key==='ArrowRight') goNext(); if(e.key==='ArrowLeft') show(idx-1); });
+    // Старт
+    requestAnimationFrame(()=>{ try{ scrollTo({top:0,behavior:'auto'});}catch(e){ scrollTo(0,0);} });
   </script>
 </body>
 </html>
-
