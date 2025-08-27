@@ -1,30 +1,218 @@
 <!doctype html>
+
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ШАГАЙ ДОМА · Квиз-калькулятор</title>
   <meta name="description" content="Узнайте, за сколько недель шагательные тренировки помогут вам похудеть." />
-  <link rel="stylesheet" href="sd.css" />
   <meta name="color-scheme" content="light only" />
+  <style>
+    :root{ --r:#CF2C02; --y:#FFBA08; --o:#E85D04; --g:#D9D9D9; --txt:#1a1a1a; }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{ margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; color:var(--txt); background:#fff }
+    .app{ width:min(960px,100%); margin:0 auto; padding:16px }
+    .card{ background:#fff; border-radius:22px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:18px }/* Прогресс: дорожка + кроссовок (по умолчанию скрыт до 2-го экрана) */
+#progress{ position:relative; height:18px; margin:0 0 12px; visibility:hidden }
+#progress .track{ height:8px; border-radius:999px; background:#eee; overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,.06) }
+#progress .fill{ height:100%; width:0%; background:linear-gradient(135deg,var(--r),var(--o)); transition:width .35s ease }
+#progress .runner{ position:absolute; top:50%; left:0%; transform:translate(-50%,-50%); font-size:18px; line-height:1; filter:drop-shadow(0 2px 4px rgba(0,0,0,.2)); transition:left .35s ease }
+
+/* Экраны */
+.screen{ display:none; animation:.35s fs ease both }
+.screen.is{ display:block }
+@keyframes fs{ from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:translateY(0)} }
+
+.hint{ color:#6b6b6b; font-size:.9rem }
+.grid{ display:grid; gap:12px }
+.cols2{ grid-template-columns:1fr 1fr }
+@media (max-width:620px){ .cols2{ grid-template-columns:1fr } }
+
+.opt{ border:2px solid var(--g); border-radius:14px; padding:12px; display:flex; gap:10px; align-items:center; background:#fff; cursor:pointer; transition:.2s }
+.opt.is{ border-color:var(--o); box-shadow:0 6px 16px rgba(232,93,4,.12) }
+
+.chips{ display:flex; flex-wrap:wrap; gap:8px }
+.chip{ border:2px solid var(--g); border-radius:999px; padding:8px 12px; background:#fff; cursor:pointer }
+.chip.is{ border-color:var(--o); box-shadow:0 6px 16px rgba(232,93,4,.12) }
+
+.text{ width:100%; border:2px solid var(--g); border-radius:12px; padding:10px 12px; font-size:1rem }
+
+.actions{ display:flex; gap:8px; margin-top:14px }
+.btn{ border:none; border-radius:12px; padding:12px 16px; font-weight:700; cursor:pointer }
+.primary{ background:linear-gradient(135deg,var(--r),var(--o)); color:#fff; box-shadow:0 10px 18px rgba(207,44,2,.25) }
+.ghost{ background:#fff; border:2px solid var(--g) }
+
+.sticky{ position:sticky; bottom:0; background:linear-gradient(0deg,#fff 70%,rgba(255,255,255,0)); padding-top:8px; z-index:9 }
+
+/* Лоадер */
+.loader{ display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center }
+.pulse{ width:64px; height:64px; border-radius:50%; background:radial-gradient(circle at 30% 30%,#fff 0 30%, var(--y) 31%); box-shadow:0 0 0 0 rgba(255,186,8,.5); animation:pulse 1.5s infinite }
+@keyframes pulse{ to{ box-shadow:0 0 0 26px rgba(255,186,8,0) } }
+
+.counter{ font-size:clamp(26px,6vw,48px); line-height:1.15; letter-spacing:-.02em; text-wrap:balance }
+
+/* Карточки на шаге про продукты */
+.box{ border:2px solid var(--y); border-radius:14px; padding:12px; margin:8px 0 }
+.box h3{ margin:.2rem 0 .6rem 0 }
+
+/* Антиконфликт: гарантируем клики внутри наших экранов */
+#screens .screen.is, #screens .opt.is, #screens .chip.is { pointer-events:auto !important }
+
+  </style>
 </head>
 <body>
-  <!-- Полотно для конфетти -->
-  <canvas id="confetti"></canvas>
-
-  <div class="app">
+  <canvas id="confetti"></canvas>  <div class="app">
     <div class="card">
-      <!-- Прогресс-бар (появится со 2-го экрана; управляется в sd.js) -->
-      <div id="progress"></div>
-
-      <!-- Сюда sd.js сгенерирует все экраны квиза -->
+      <div id="progress"><div class="track"><div class="fill"></div></div><div class="runner" aria-hidden="true">👟</div></div>
       <div id="screens"></div>
     </div>
-  </div>
+  </div>  <script>
+    const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
+    const vibrate = n => { try{ navigator.vibrate && navigator.vibrate(n||12) }catch(e){} };
 
-  <!-- Логика квиза -->
-  <script src="sd.js" defer></script>
+    // Конфетти
+    const Confetti = (()=>{ const cnv=$('#confetti'), ctx=cnv.getContext('2d'); let W,H,parts=[],running=false; const colors=['#CF2C02','#E85D04','#FFBA08','#fff']; function resize(){ W=cnv.width=innerWidth; H=cnv.height=innerHeight } function spawn(n=180){ for(let i=0;i<n;i++){ parts.push({x:Math.random()*W,y:-10-Math.random()*H*.5,r:4+Math.random()*6,c:colors[(Math.random()*colors.length)|0],v:1+Math.random()*3,a:Math.random()*Math.PI*2,s:.02+Math.random()*.04}); } } function draw(){ if(!running) return; ctx.clearRect(0,0,W,H); for(const p of parts){ p.y+=p.v; p.x+=Math.sin(p.a+=p.s); ctx.fillStyle=p.c; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); } parts=parts.filter(p=>p.y<H+20); requestAnimationFrame(draw); } function burst(){ resize(); spawn(); if(!running){ running=true; draw(); } setTimeout(()=>running=false,1600); } addEventListener('resize',resize); resize(); return { burst }; })();
 
-  <noscript>Для работы квиза включите JavaScript.</noscript>
-</body>
-</html>
+    // Данные и справочники
+    const A = JSON.parse(localStorage.getItem('sdq')||'{}');
+    const save = () => localStorage.setItem('sdq', JSON.stringify(A));
+
+    const AGE=['18–29','30–39','40–49','50+'];
+    const BODY=[['Худощавое','slim'],['Среднее','avg'],['Крупное','large'],['Избыточный вес','obese']];
+    const LIFE=['Сидячая работа','Умеренно активная','Активная'];
+    const EXP=['Никогда не занималась','Иногда дома / по видео','Регулярно'];
+    const GOAL=['Сбросить 3–5 кг','Сбросить 5–10 кг','Сбросить 10+ кг','Поддерживать фигуру / вернуть тонус'];
+    const MOT=['Для здоровья','Для внешности','Для энергии и лёгкости','Для уверенности в себе'];
+    const HARD=['Долгая прогулка утомляет','Каждый пролёт по лестнице — испытание','Стыдно включаться в активные игры','Прыжки','Ничего из этого'];
+    const HEALTH=['Диабет','Проблемы со щитовидкой','Гипертония','Боль в суставах','Беременность','Нет'];
+    const BAD=['Сладкая газировка','Выпечка','Фастфуд','Колбаса/сосиски','Сыр 45%+','Ночные перекусы','Алкоголь чаще 2 р/нед','Сладкий чай/кофе','Очень солёная пища'];
+    const GOOD=['1.5–2 л воды','Овощи 400 г/день','Фрукты ежедневно','Белок в каждом приёме пищи','10–20 мин растяжки','8 000+ шагов уже сейчас'];
+
+    // Генерация экранов
+    const screensRoot = $('#screens');
+    const section = (id,html)=>`<section class="screen${id==='intro'?' is':''}" data-id="${id}">${html}</section>`;
+    const chips = (id,arr)=>`<div class="chips" id="${id}">`+arr.map(t=>`<button type="button" class="chip" data-v="${t}">${t}</button>`).join('')+`</div>`;
+    const opts = (id,arr)=>`<div class="grid cols2" id="${id}">`+arr.map(t=>{ const label=t.label||t[0]||t; const key=t.key||t[1]||t; return `<label class="opt" data-v="${key}"><span>${label}</span></label>`; }).join('')+`</div>`;
+    const actions = ()=>`<div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" data-next>Далее</button></div>`;
+
+    const html =
+      section('intro', `
+        <h1>Узнайте, за сколько недель шагательные тренировки помогут вам похудеть</h1>
+        <p class="hint">Ответьте на несколько вопросов — это займёт 1–2 минуты.</p>
+        <div class="grid"><div><div class="hint">Как к вам обращаться?</div><input id="name" class="text" placeholder="Например, Ирина"></div></div>
+        <div class="actions sticky"><button class="btn primary" id="start" type="button" data-next>Поехали →</button></div>
+      `)+
+      section('age', `<h2>Ваш возраст</h2>${opts('ageOpts', AGE)}${actions()}`)+
+      section('body', `<h2>Телосложение сейчас</h2>${opts('bodyOpts', BODY.map(([l,k])=>({label:l,key:k})))}${actions()}`)+
+      section('steps', `
+        <h2>Сколько шагов вы проходите сейчас в день (примерно)?</h2>
+        <input id="steps" type="range" min="0" max="25000" step="250" value="4000">
+        <div class="hint">Сейчас: <b><span id="sv">4000</span> шагов</b></div>
+        <p class="hint"><b>Подсказка:</b> найти шаги можно в приложении вашего телефона/браслета</p>
+        ${actions()}
+      `)+
+      section('bmi', `
+        <h2>Давайте посчитаем ваш ИМТ</h2>
+        <p class="hint">Укажите ваш рост и вес — можно приблизительно.</p>
+        <div class="grid cols2">
+          <div><div class="hint">Рост, см</div><input id="h" type="number" class="text" placeholder="165"></div>
+          <div><div class="hint">Вес, кг</div><input id="w" type="number" class="text" placeholder="72"></div>
+        </div>
+        <div id="bmiI" class="hint"></div>
+        ${actions()}
+      `)+
+      section('life', `<h2>Образ жизни</h2>${opts('lifeOpts', LIFE)}${actions()}`)+
+      section('exp',  `<h2>Опыт тренировок</h2>${opts('expOpts', EXP)}${actions()}`)+
+      section('goal', `<h2>Ваша цель</h2>${opts('goalOpts', GOAL)}${actions()}`)+
+      section('motivation', `<h2>Почему вы хотите заниматься спортом?</h2>${chips('motChips', MOT)}${actions()}`)+
+      section('perweek', `<h2>Сколько готовы тренироваться в неделю?</h2>${chips('pwChips', ['2 раза','3 раза','4–5 раз','Каждый день 20–30 мин'])}${actions()}`)+
+      section('hard', `<h2>Что сейчас даётся тяжелее всего?</h2>${opts('hardOpts', HARD)}${actions()}`)+
+      section('health', `<h2>Есть ли состояния, которые важно учитывать?</h2>${chips('healthChips', HEALTH)}<p class="hint">Если есть сомнения — проконсультируйтесь с врачом.</p>${actions()}`)+
+      section('nutrition', `<h2>Питание</h2>${opts('nutriOpts', [{label:'Буду питаться по меню-конструктору в клубе',key:'menu'},{label:'Хочу научиться правильно составлять тарелку',key:'plate'},{label:'Нет, пока без питания',key:'no'}])}${actions()}`)+
+      section('food', `
+        <h2>Продукты и привычки</h2>
+        <div class="box"><h3>Ежедневные продукты</h3>${chips('bad', BAD)}</div>
+        <div class="box"><h3>Привычки, ускоряющие результат</h3>${chips('good', GOOD)}</div>
+        <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="calc">Рассчитать результат →</button></div>
+      `)+
+      section('loading', `
+        <div class="loader"><div class="pulse"></div>
+          <h2>Прогноз загружается…</h2>
+          <p class="hint">Учитываем возраст, ИМТ, активность, шаги и питание.</p>
+        </div>
+      `)+
+      section('result', `
+        <h2 id="rTitle">Готово!</h2>
+        <div class="counter" id="nums">0 кг за 0 недель</div>
+        <p class="hint" id="rSub"></p>
+        <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="toCTA">Хочу такой результат!</button></div>
+      `)+
+      section('sale', `
+        <h2 id="sTitle">Присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡</h2>
+        <p class="hint" id="sLead"></p>
+        <ul>
+          <li>Домашние шагательные тренировки 20–30 минут</li>
+          <li>Готовые планы на неделю</li>
+          <li>Поддержка и мотивация в чате</li>
+          <li>Без прыжков и сложной хореографии</li>
+        </ul>
+        <div class="actions"><a class="btn primary" id="cta" href="#" target="_blank" rel="noopener">Получить абонемент со скидкой</a><button class="btn ghost" data-prev>Назад</button></div>
+        <p class="hint">Прогноз носит ознакомительный характер.</p>
+      `);
+
+    screensRoot.innerHTML = html;
+
+    // Прогресс-бар (появляется со 2-го экрана)
+    const progress = $('#progress');
+    const pgFill = () => $('#progress .fill');
+    const pgRun  = () => $('#progress .runner');
+
+    // Навигация
+    let idx=0; const S=$$('#screens .screen'); const need=k=>!A[k];
+    function setProgress(i){ progress.style.visibility = (i===0)?'hidden':'visible'; const total=S.length-1; const pct=Math.round((i/total)*100); pgFill().style.width=pct+'%'; pgRun().style.left=pct+'%'; }
+    function show(n){ S[idx].classList.remove('is'); idx=Math.max(0,Math.min(S.length-1,n)); S[idx].classList.add('is'); setProgress(idx); scrollTo({top:0,behavior:'smooth'}); }
+    setProgress(0);
+
+    addEventListener('click', e=>{ const next=e.target.closest('[data-next]'); const prev=e.target.closest('[data-prev]'); if(next){ vibrate(); goNext(); } if(prev){ vibrate(); show(idx-1); } });
+    function shake(){ S[idx].animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:260}); vibrate(25); }
+    function goNext(){ const id=S[idx].dataset.id; if(id==='age'&&need('age'))return shake(); if(id==='body'&&need('body'))return shake(); if(id==='bmi'&&(!A.h||!A.w))return shake(); if(id==='life'&&need('life'))return shake(); if(id==='exp'&&need('exp'))return shake(); if(id==='goal'&&need('goal'))return shake(); if(id==='perweek'&&need('perweek'))return shake(); show(idx+1); }
+
+    // Привязки полей
+    $('#name').oninput = e=>{ A.name=e.target.value.trim(); save(); };
+    const steps=$('#steps'), sv=$('#sv'); steps.oninput=e=>{ A.steps=+e.target.value; sv.textContent=A.steps; save(); };
+
+    ;['h','w'].forEach(id=>{ $('#'+id).oninput = updateBMI });
+    function updateBMI(){ const h=+$('#h').value, w=+$('#w').value; if(h>0&&w>0){ A.h=h; A.w=w; const m=h/100; A.bmi=+(w/(m*m)).toFixed(1); save(); $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b><br>ИМТ (индекс массы тела) помогает определить, есть ли у вас избыточный вес.`; } else { $('#bmiI').textContent=''; } }
+
+    function selectList(root,key,single){ root.addEventListener('click',e=>{ const sel=e.target.closest(single?'.opt':'.chip'); if(!sel)return; if(single){ $$('.opt',root).forEach(x=>x.classList.remove('is')); sel.classList.add('is'); A[key]=sel.dataset.v||sel.textContent; } else { sel.classList.toggle('is'); A[key]=$$('.chip.is',root).map(x=>x.dataset.v||x.textContent); } save(); vibrate(8); }); }
+
+    selectList($('#ageOpts'),'age',true); selectList($('#bodyOpts'),'body',true); selectList($('#lifeOpts'),'life',true); selectList($('#expOpts'),'exp',true); selectList($('#goalOpts'),'goal',true); selectList($('#motChips'),'mot',false); selectList($('#pwChips'),'perweek',false); selectList($('#hardOpts'),'hard',true); selectList($('#healthChips'),'health',false); selectList($('#bad'),'bad',false); selectList($('#good'),'good',false); selectList($('#nutriOpts'),'nutri',true);
+
+    // Расчёт
+    $('#calc').onclick = ()=>{ show(idx+1); setTimeout(calculate,700); };
+
+    function goalKg(){ const g=A.goal||''; if(g.includes('3–5'))return 4; if(g.includes('5–10'))return 8; if(g.includes('10+'))return 12; return 3; }
+    const fAge = ()=> /50/.test(A.age||'')?.88 : /40/.test(A.age||'')?.94 : /30/.test(A.age||'')?.98 : 1.06; // не теряем на молодых
+    const fLife= ()=> /Сидячая/.test(A.life||'')?.90 : /Умеренно/.test(A.life||'')?1.00 : 1.08;
+    const fExp = ()=> /Никогда/.test(A.exp||'')?.95 : /Регулярно/.test(A.exp||'')?1.08 : 1.00;
+    function fBody(){ switch(A.body){ case 'slim':return .92; case 'avg':return 1.00; case 'large':return .96; case 'obese':return .92; default:return 1.00; } }
+    function fSteps(){ const now=+A.steps||4000; const add=2000; const t=now+add; let boost=1+add/10000; if(now<3000)boost+=.08; if(now>9000)boost-=.06; return { f:Math.max(.95,Math.min(1.28,boost)), t }; }
+    function fNutri(){ let f=1; if(A.nutri==='menu')f+=.22; else if(A.nutri==='plate')f+=.12; else f-=.12; f-=((A.bad||[]).length)*.03; f+=Math.min(((A.good||[]).length)*.02,.10); return Math.max(.7,Math.min(1.35,f)); }
+    function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06; if(h.has('Боль в суставах'))f-=.04; return Math.max(.8,f); }
+    function rate(){ let r=.5; const bmi=A.bmi||26; if(bmi>=30)r+=.08; else if(bmi<23)r-=.08; r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth(); return Math.max(.25,Math.min(.9,+r.toFixed(2))); }
+
+    function calculate(){ const name=A.name?.trim()||'Друзья'; const kg=goalKg(); const rt=rate(); const wks=Math.max(4,Math.min(16,Math.ceil(kg/rt))); const t=fSteps().t; $('#rTitle').textContent=`${name}, ваш прогноз готов ✨`; animateNumber(12,wks,1400,v=>{ $('#nums').textContent=`−${kg} кг за ${v} недель`; }); $('#rSub').innerHTML=`С тренировками ШАГАЙ ДОМА ⚡️ вы будете проходить <b>${t.toLocaleString('ru-RU')}</b> шагов каждый день!<br><span class="hint">Рекомендуемый темп: <b>${rt} кг/нед</b>.</span>`; $('#sTitle').textContent=`${name}, присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`; $('#sLead').innerHTML=`Чтобы прийти к цели <b>−${kg} кг</b> за <b>${wks} недель</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.`; $('#cta').href='https://walk-walk.ru/?utm_source=quiz&utm_medium=cta&utm_campaign=sd_weight_calc'; Confetti.burst(); show(idxBy('result')); }
+
+    function animateNumber(a,b,d,cb){ const start=performance.now(); const ease=t=>1-Math.pow(1-t,3); function frame(now){ const p=Math.min(1,(now-start)/d); cb(Math.round(a+(b-a)*ease(p))); if(p<1)requestAnimationFrame(frame); } requestAnimationFrame(frame); }
+    const idxBy = id => $$('#screens .screen').findIndex(s=>s.dataset.id===id);
+    $('#toCTA').onclick = ()=>show(idxBy('sale'));
+
+    // Восстановление
+    if(A.name) $('#name').value=A.name;
+    if(A.steps){ $('#steps').value=A.steps; $('#sv').textContent=A.steps; }
+    if(A.h) $('#h').value=A.h; if(A.w) $('#w').value=A.w; if(A.bmi) $('#bmiI').innerHTML=`Ваш ИМТ: <b>${A.bmi}</b><br>ИМТ (индекс массы тела) помогает определить, есть ли у вас избыточный вес.`;
+
+    // Навигация с клавиатуры
+    addEventListener('keydown', e=>{ if(e.key==='ArrowRight') goNext(); if(e.key==='ArrowLeft') show(idx-1); });
+  </script></body>
+  </html>
