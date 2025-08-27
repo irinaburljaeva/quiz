@@ -14,7 +14,7 @@
     .app{ width:min(960px,100%); margin:0 auto; padding:16px }
     .card{ background:#fff; border-radius:22px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:18px }
 
-    /* Confetti overlays page (не сдвигает контент) */
+    /* Confetti overlays page */
     #confetti{ position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:50; display:block }
 
     /* HERO video/image */
@@ -34,6 +34,11 @@
 
     .opt{ border:2px solid var(--g); border-radius:14px; padding:12px; display:flex; gap:10px; align-items:center; background:#fff; cursor:pointer; transition:.2s }
     .opt.is{ border-color:var(--o); box-shadow:0 6px 16px rgba(232,93,4,.12) }
+
+    /* Карточки телосложения с картинками */
+    .opt--img{ flex-direction:column; align-items:center; text-align:center; padding:10px }
+    .opt--img img{ width:100%; height:180px; object-fit:contain; background:#fafafa; border-radius:12px }
+    .opt--img span{ margin-top:8px; font-weight:600 }
 
     .chips{ display:flex; flex-wrap:wrap; gap:8px }
     .chip{ border:2px solid var(--g); border-radius:999px; padding:8px 12px; background:#fff; cursor:pointer }
@@ -61,10 +66,10 @@
     .box{ border:2px solid var(--y); border-radius:14px; padding:12px; margin:8px 0 }
     .box h3{ margin:.2rem 0 .6rem 0 }
 
-    /* Антиконфликт: гарантируем клики внутри наших экранов */
+    /* Антиконфликт: клики внутри экранов */
     #screens .screen.is, #screens .opt.is, #screens .chip.is { pointer-events:auto !important }
 
-    /* === Circular progress === */
+    /* === Circular progress (круг + процент) === */
     #progress{ position:relative; height:auto; margin:0 0 12px; visibility:hidden }
     #progress .pcirc{
       --p:0%;
@@ -72,6 +77,7 @@
       background: conic-gradient(var(--o) var(--p), #eee 0);
       position:relative; display:inline-grid; place-items:center;
       box-shadow:0 6px 16px rgba(0,0,0,.08);
+      transition: background .15s linear; /* для мелких дрожаний */
     }
     #progress .pcirc::after{
       content:""; width:44px; height:44px; border-radius:50%; background:#fff; position:absolute;
@@ -116,7 +122,13 @@
     const save = () => localStorage.setItem('sdq', JSON.stringify(A));
 
     const AGE=['18–29','30–39','40–49','50+'];
-    const BODY=[['Худощавое','slim'],['Среднее','avg'],['Крупное','large'],['Избыточный вес','obese']];
+    // ключи для формулы оставляем как раньше, картинки подставляем вручную
+    const BODY = [
+      {label:'Худощавое', key:'slim',   img:'skinny.png', alt:'Худощавое телосложение'},
+      {label:'Среднее',   key:'avg',    img:'slim.png',   alt:'Среднее телосложение'},
+      {label:'Крупное',   key:'large',  img:'medium.png', alt:'Крупное телосложение'},
+      {label:'Избыточный вес', key:'obese', img:'xl.png', alt:'Избыточный вес'}
+    ];
     const LIFE=['Сидячая работа','Умеренно активная','Активная'];
     const EXP=['Никогда не занималась','Иногда дома / по видео','Регулярно'];
     const GOAL=['Сбросить 3–5 кг','Сбросить 5–10 кг','Сбросить 10+ кг','Поддерживать фигуру / вернуть тонус'];
@@ -150,7 +162,18 @@
         <div class="actions sticky"><button class="btn primary" id="start" type="button" data-next>Поехали →</button></div>
       `)+
       section('age', `<h2>Ваш возраст</h2>${opts('ageOpts', AGE)}${actions()}`)+
-      section('body', `<h2>Телосложение сейчас</h2>${opts('bodyOpts', BODY.map(([l,k])=>({label:l,key:k})))}${actions()}`)+
+      section('body', `
+        <h2>Телосложение сейчас</h2>
+        <div class="grid cols2" id="bodyOpts">
+          ${BODY.map(o => `
+            <label class="opt opt--img" data-v="${o.key}">
+              <img src="${o.img}" alt="${o.alt}">
+              <span>${o.label}</span>
+            </label>
+          `).join('')}
+        </div>
+        ${actions()}
+      `)+
       section('steps', `
         <h2>Сколько шагов вы проходите сейчас в день (примерно)?</h2>
         <input id="steps" type="range" min="0" max="25000" step="250" value="4000">
@@ -213,7 +236,7 @@
 
     screensRoot.innerHTML = html;
 
-    // Добавим HERO-видео/изображение в intro (с фолбэком)
+    // HERO видео/изображение в intro (с фолбэком)
     (function addHero(){
       const intro = document.querySelector('#screens [data-id="intro"]');
       if(!intro || intro.querySelector('.hero-wrap')) return;
@@ -231,12 +254,33 @@
       }); }
     })();
 
-    // Прогресс-бар (круг + процент; показывается со 2-го экрана)
+    // Прогресс-бар (круг + процент; с пружинной анимацией; показывается со 2-го экрана)
     const progress = $('#progress');
     progress.innerHTML = '<div class="pcirc"><div class="pct">0%</div></div><div class="plabel" id="plabel">Шаг 1 из 1</div>';
     const pcirc  = () => $('#progress .pcirc');
     const pcText = () => $('#progress .pct');
     const plabel = () => $('#plabel');
+
+    let pctNow = 0, rafId = 0;
+    function animateProgress(to){
+      cancelAnimationFrame(rafId);
+      const stiffness = 0.08; // жёсткость пружины
+      const damping   = 0.75; // затухание
+      let v = 0;
+      function frame(){
+        const x = pctNow - to;           // смещение
+        const a = -stiffness * x;        // сила к цели
+        v = (v + a) * damping;           // скорость с затуханием
+        pctNow += v;
+        if (Math.abs(pctNow - to) < 0.3 && Math.abs(v) < 0.3) { pctNow = to; } // снэп в конце
+
+        pcirc().style.setProperty('--p', pctNow.toFixed(1) + '%');
+        pcText().textContent = Math.round(pctNow) + '%';
+
+        if (pctNow !== to) { rafId = requestAnimationFrame(frame); }
+      }
+      rafId = requestAnimationFrame(frame);
+    }
 
     // Навигация
     let idx=0; const S=$$('#screens .screen'); const need=k=>!A[k];
@@ -246,8 +290,7 @@
       const total = S.length - 1;      // без intro
       const step  = Math.max(1, Math.min(i, total));
       const pct   = Math.round((i/total)*100);
-      pcirc().style.setProperty('--p', pct + '%');
-      pcText().textContent = pct + '%';
+      animateProgress(pct);
       plabel().textContent = `Шаг ${step} из ${total}`;
     }
     function show(n){
@@ -279,7 +322,9 @@
 
     // Привязки полей
     $('#name').oninput = e=>{ A.name=e.target.value.trim(); save(); };
-    const steps=$('#steps'), sv=$('#sv'); steps.oninput=e=>{ A.steps=+e.target.value; sv.textContent=A.steps; save(); };
+
+    const steps=$('#steps'), sv=$('#sv');
+    steps.oninput=e=>{ A.steps=+e.target.value; sv.textContent=A.steps; save(); };
 
     ;['h','w'].forEach(id=>{ $('#'+id).oninput = updateBMI });
     function updateBMI(){
@@ -322,7 +367,7 @@
     function fBody(){ switch(A.body){ case 'slim':return .92; case 'avg':return 1.00; case 'large':return .96; case 'obese':return .92; default:return 1.00; } }
     function fSteps(){ const now=+A.steps||4000; const add=2000; const t=now+add; let boost=1+add/10000; if(now<3000)boost+=.08; if(now>9000)boost-=.06; return { f:Math.max(.95,Math.min(1.28,boost)), t }; }
     function fNutri(){ let f=1; if(A.nutri==='menu')f+=.22; else if(A.nutri==='plate')f+=.12; else f-=.12; f-=((A.bad||[]).length)*.03; f+=Math.min(((A.good||[]).length)*.02,.10); return Math.max(.7,Math.min(1.35,f)); }
-    function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06; if(h.has('Боль в суставах'))f-=.04; return Math.max(.8,f); }
+    function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||х.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06; if(h.has('Боль в суставах'))f-=.04; return Math.max(.8,f); }
     function rate(){ let r=.5; const bmi=A.bmi||26; if(bmi>=30)r+=.08; else if(bmi<23)r-=.08; r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth(); return Math.max(.25,Math.min(.9,+r.toFixed(2))); }
 
     function calculate(){
@@ -360,7 +405,7 @@
     if(A.w) $('#w').value=A.w;
     if(A.bmi) $('#bmiI').innerHTML=`Ваш ИМТ: <b>${A.bmi}</b><br>ИМТ (индекс массы тела) помогает определить, есть ли у вас избыточный вес.`;
 
-    // На всякий случай — к началу страницы при загрузке (и не сносить контент)
+    // К началу страницы при загрузке
     requestAnimationFrame(()=>{ try{ scrollTo({top:0,behavior:'instant'});}catch(e){ scrollTo(0,0);} });
     // Клавиатура на ПК
     addEventListener('keydown', e=>{ if(e.key==='ArrowRight') goNext(); if(e.key==='ArrowLeft') show(idx-1); });
