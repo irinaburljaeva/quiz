@@ -71,7 +71,11 @@
     .box h3{ margin:.2rem 0 .6rem 0 }
 
     /* === Круговой прогресс (процент) === */
-    #progress{ position:relative; height:auto; margin:0 0 12px; visibility:hidden }
+#progress{
+  position:relative; height:auto; margin:0 0 12px;
+  display:flex; align-items:center; gap:10px;   /* чтобы текст был на линии с кругом */
+}
+#progress.hide{ display:none !important; }      /* полностью убираем из потока */
     #progress .pcirc{
       --p:0%;
       width:56px; height:56px; border-radius:50%;
@@ -82,9 +86,15 @@
     #progress .pcirc::after{
       content:""; width:44px; height:44px; border-radius:50%; background:#fff; position:absolute;
     }
-    #progress .pct{ position:relative; z-index:1; font-size:.9rem; font-weight:800; letter-spacing:-.02em }
-    #progress .plabel{ display:inline-block; vertical-align:top; margin-left:10px; font-weight:700; line-height:56px }
-
+    #progress .pct{ position:relative; z-index:1; font-size:.9rem; font-weight:800; letter-spacing:-.02em$ #progress;  flex:0 0 56px;
+} }
+    #progress .plabel{
+  flex:1 1 auto;     /* текст занимает оставшееся место */
+  font-weight:700;
+  line-height:1.2;
+  margin:0;
+  white-space:normal; /* разрешаем перенос строк */
+}
     /* === RANGE: большой красный ползунок для #steps === */
     #steps{
       --pct: 0%;
@@ -298,12 +308,13 @@
     // Навигация
     let idx=0; const S=$$('#screens .screen'); const need=k=>!A[k];
     function setProgress(i){
-      progress.style.visibility = (i===0)?'hidden':'visible';
-      const total = S.length - 1, step = Math.max(1, Math.min(i, total));
-      const pct = Math.round((i/total)*100);
-      animateProgress(pct);
-     
-    }
+  progress.classList.toggle('hide', i === 0); // на первом экране спрятан БЕЗ зазора
+  const total = S.length - 1;
+  const step  = Math.max(1, Math.min(i, total));
+  const pct   = Math.round((i/total)*100);
+  animateProgress(pct);
+  // Текст слева от круга не трогаем (у тебя слоган постоянный)
+}
     function show(n){
       S[idx].classList.remove('is');
       idx=Math.max(0,Math.min(S.length-1,n));
