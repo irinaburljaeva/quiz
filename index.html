@@ -71,7 +71,7 @@
 
     /* Продукты */
     .box{ border:2px solid var(--y); border-radius:14px; padding:12px; margin:8px 0 }
-    .box h3{ margin:.2rem 0 .6rem 0 }
+    .box h3{ margin:.2rem 0 .6рем 0 }
 
     /* === Круговой прогресс — в одну строку, без зазора на первом экране === */
     #progress{
@@ -89,7 +89,15 @@
     }
     #progress .pcirc::after{ content:""; width:44px; height:44px; border-radius:50%; background:#fff; position:absolute }
     #progress .pct{ position:relative; z-index:1; font-size:.9rem; font-weight:800; letter-spacing:-.02em }
-    #progress .plabel{ flex:1 1 auto; font-weight:700; line-height:1.2; margin:0; white-space:normal }
+
+    /* Логотип справа от прогресса */
+    #progress .plogo{
+      margin-left:auto; display:flex; align-items:center; flex:0 0 auto;
+    }
+    #progress .plogo img{
+      height:32px; width:auto; display:block; object-fit:contain;
+    }
+    @media (max-width:480px){ #progress .plogo img{ height:28px } }
 
     /* === RANGE: большой красный ползунок для #steps === */
     #steps{
@@ -119,7 +127,7 @@
     }
     #steps:active::-moz-range-thumb{ transform:scale(1.06) }
 
-    /* === BMI tag === */
+    /* BMI tag */
     .bmi-line{ margin-top:6px }
     .bmi-tag{ display:inline-block; padding:4px 8px; border-radius:999px; font-weight:700; font-size:.9rem; vertical-align:baseline }
     .bmi-ok{   background:#e8f7ee; color:#0f7a42 }
@@ -247,6 +255,7 @@
         <h2 id="rTitle">Готово!</h2>
         <div class="counter" id="nums">0 кг за 0 недель</div>
         <p class="hint" id="rSub"></p>
+        <p class="hint" id="rDisc">Прогноз носит ознакомительный характер и не является медицинской рекомендацией.</p>
         <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="toCTA">Хочу такой результат!</button></div>
       `)
       + section('sale', `
@@ -259,14 +268,16 @@
           <li>Без прыжков и сложной хореографии</li>
         </ul>
         <div class="actions"><a class="btn primary" id="cta" href="#" target="_blank" rel="noopener">Получить абонемент со скидкой</a><button class="btn ghost" data-prev>Назад</button></div>
-        <p class="hint">Прогноз носит ознакомительный характер.</p>
       `);
 
     screensRoot.innerHTML = html;
 
-    /* Прогресс-бар (круг + процент, пружинная анимация) */
+    /* Прогресс-бар (круг + процент) + логотип справа */
     const progress = $('#progress');
-    progress.innerHTML = '<div class="pcirc"><div class="pct">0%</div></div><div class="plabel" id="plabel">Узнай, как быстро ты похудеешь на шагах</div>';
+    progress.innerHTML = `
+      <div class="pcirc"><div class="pct">0%</div></div>
+      <div class="plogo"><img src="logo.png" alt="ШАГАЙ ДОМА"></div>
+    `;
     const pcirc  = () => $('#progress .pcirc');
     const pcText = () => $('#progress .pct');
 
@@ -364,7 +375,7 @@
     selectList($('#bodyOpts'),'body',true);
     selectList($('#lifeOpts'),'life',true);
     selectList($('#expOpts'),'exp',true);
-    selectList($('#goalOpts'),'goal',true);
+    selectList($('#goalOpts'],'goal',true);
     selectList($('#motChips'),'mot',false);
     selectList($('#pwChips'),'perweek',false);
     selectList($('#hardOpts'),'hard',true);
@@ -407,7 +418,7 @@
     function fBody(){ switch(A.body){ case 'slim':return .92; case 'avg':return 1.00; case 'large':return .96; case 'obese':return .92; default:return 1.00; } }
     function fSteps(){ const now=+A.steps||4000; const add=2000; const t=now+add; let boost=1+add/10000; if(now<3000)boost+=.08; if(now>9000)boost-=.06; return { f:Math.max(.95,Math.min(1.28,boost)), t }; }
     function fNutri(){ let f=1; if(A.nutri==='menu')f+=.22; else if(A.nutri==='plate')f+=.12; else f-=.12; f-=((A.bad||[]).length)*.03; f+=Math.min(((A.good||[]).length)*.02,.10); return Math.max(.7,Math.min(1.35,f)); }
-    function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06; if(h.has('Боль в суставах'))f-=.04; return Math.max(.8,f); }
+    function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||х.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06; if(h.has('Боль в суставах'))f-=.04; return Math.max(.8,f); }
     function rate(){ let r=.5; const bmi=A.bmi||26; if(bmi>=30)r+=.08; else if(bmi<23)r-=.08; r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth(); return Math.max(.25,Math.min(.9,+r.toFixed(2))); }
 
     function calculate(){
@@ -418,7 +429,14 @@
 
       $('#rTitle').textContent=`${name}, ваш прогноз готов ✨`;
       animateNumber(12,wks,1400,v=>{ $('#nums').textContent=`−${kg} кг за ${v} недель`; });
-      $('#rSub').innerHTML=`С тренировками ШАГАЙ ДОМА ⚡️ вы будете проходить <b>${t.toLocaleString('ru-RU')}</b> шагов каждый день!<br><span class="hint">Рекомендуемый темп: <b>${rt} кг/нед</b>.</span>`;
+
+      const rtText = rt.toLocaleString('ru-RU', {minimumFractionDigits:1, maximumFractionDigits:1});
+      $('#rSub').innerHTML = `
+        С тренировками ШАГАЙ ДОМА ⚡️ вы будете проходить
+        <b>${t.toLocaleString('ru-RU')}</b> шагов каждый день!
+        <br><span class="hint">Ориентировочный темп снижения веса:
+        <b>~${rtText} кг/неделю</b> (среднее значение при соблюдении плана).</span>
+      `;
 
       $('#sTitle').textContent=`${name}, присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`;
       $('#sLead').innerHTML=`Чтобы прийти к цели <b>−${kg} кг</b> за <b>${wks} недель</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.`;
@@ -445,7 +463,8 @@
       $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b> <span class="bmi-tag ${cat.cls}">${cat.label}</span>` +
         `<br><span class="hint bmi-line">ИМТ помогает ориентироваться в массе тела; норма для взрослых — 18,5–24,9.</span>`;
     }
-    // Старт
+
+    // На старте — к началу страницы
     requestAnimationFrame(()=>{ try{ scrollTo({top:0,behavior:'auto'});}catch(e){ scrollTo(0,0);} });
   </script>
 </body>
