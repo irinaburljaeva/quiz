@@ -2,11 +2,11 @@
 // Требуется в index.html: <canvas id="confetti"></canvas>, <div id="progress"></div>, <div id="screens"></div>
 
 (() => {
-  const $ = s => document.querySelector(s);
+  const $  = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
   const vibrate = n => { try { navigator.vibrate && navigator.vibrate(n || 12); } catch(e) {} };
 
-  // ---- Конфетти (без зависимостей)
+  // ——— Конфетти без зависимостей
   const Confetti = (() => {
     const cnv = $('#confetti');
     const ctx = cnv.getContext('2d');
@@ -14,22 +14,20 @@
     const colors = ['#CF2C02','#E85D04','#FFBA08','#fff'];
     function resize(){ W = cnv.width = innerWidth; H = cnv.height = innerHeight; }
     function spawn(n = 180){
-      for (let i=0;i<n;i++) {
-        parts.push({
-          x: Math.random()*W, y: -10 - Math.random()*H*0.5,
-          r: 4 + Math.random()*6, c: colors[(Math.random()*colors.length)|0],
-          v: 1 + Math.random()*3, a: Math.random()*6.283, s: 0.02 + Math.random()*0.04
-        });
-      }
+      for (let i=0;i<n;i++) parts.push({
+        x: Math.random()*W, y: -10 - Math.random()*H*0.5,
+        r: 4 + Math.random()*6, c: colors[(Math.random()*colors.length)|0],
+        v: 1 + Math.random()*3, a: Math.random()*Math.PI*2, s: 0.02 + Math.random()*0.04
+      });
     }
     function draw(){
       if(!running) return;
       ctx.clearRect(0,0,W,H);
-      for (const p of parts) {
+      for(const p of parts){
         p.y += p.v; p.x += Math.sin(p.a += p.s);
         ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
       }
-      parts = parts.filter(p => p.y < H + 20);
+      parts = parts.filter(p => p.y < H+20);
       requestAnimationFrame(draw);
     }
     function burst(){ resize(); spawn(); if(!running){ running = true; draw(); } setTimeout(()=>running=false, 1600); }
@@ -37,42 +35,24 @@
     return { burst };
   })();
 
-  // ---- Данные, хранилище, прогресс
+  // ——— Данные и справочники
   const A = JSON.parse(localStorage.getItem('sdq') || '{}'); // ответы
-  const progress = $('#progress');
-  function footprintSVG(){
-    const s = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    s.setAttribute('viewBox','0 0 64 64'); s.classList.add('foot');
-    s.innerHTML = `
-      <path d="M26 38c-7 1-8 8-6 13 3 6 12 7 18 3 5-4 7-12 3-16-3-3-9-1-15 0Z" fill="#E85D04"/>
-      <circle cx="19" cy="21" r="5" fill="#FFBA08"/>
-      <circle cx="28" cy="18" r="4" fill="#FFBA08"/>
-      <circle cx="36" cy="18" r="3.8" fill="#FFBA08"/>
-      <circle cx="44" cy="21" r="3.2" fill="#FFBA08"/>
-      <circle cx="49" cy="26" r="2.6" fill="#FFBA08"/>`;
-    return s;
-  }
-  for (let i=0;i<15;i++) progress.appendChild(footprintSVG());
-  function setProgress(i){ $$('.foot', progress).forEach((el,n)=>el.classList.toggle('is', n <= i)); }
-
-  // ---- Справочники
-  const AGE   = ['18–29','30–39','40–49','50+'];
-  const BODY  = [['Худощавое','slim'],['Среднее','avg'],['Крупное','large'],['Избыточный вес','obese']];
-  const LIFE  = ['Сидячая работа','Умеренно активная','Активная'];
-  const EXP   = ['Никогда не занималась','Иногда дома / по видео','Регулярно'];
-  const GOAL  = ['Сбросить 3–5 кг','Сбросить 5–10 кг','10+ кг','Поддерживать фигуру / вернуть тонус'];
-  const MOT   = ['Для здоровья','Для внешности','Для энергии и лёгкости','Для уверенности в себе'];
-  const HARD  = ['Долгая прогулка утомляет','Каждый пролёт по лестнице — испытание','Стыдно включаться в активные игры','Прыжки','Ничего из этого'];
-  const HEALTH= ['Диабет','Проблемы со щитовидкой','Гипертония','Боль в суставах','Беременность','Нет'];
-  const BAD   = ['Сладкая газировка','Выпечка','Фастфуд','Колбаса/сосиски','Сыр 45%+','Ночные перекусы','Алкоголь чаще 2 р/нед','Сладкий чай/кофе','Очень солёная пища'];
-  const GOOD  = ['1.5–2 л воды','Овощи 400 г/день','Фрукты ежедневно','Белок в каждом приёме пищи','10–20 мин растяжки','8 000+ шагов уже сейчас'];
-
   const save = () => localStorage.setItem('sdq', JSON.stringify(A));
 
-  // ---- Генерация экранов (внутрь #screens)
-  const screensRoot = $('#screens');
+  const AGE    = ['18–29','30–39','40–49','50+'];
+  const BODY   = [['Худощавое','slim'],['Среднее','avg'],['Крупное','large'],['Избыточный вес','obese']];
+  const LIFE   = ['Сидячая работа','Умеренно активная','Активная'];
+  const EXP    = ['Никогда не занималась','Иногда дома / по видео','Регулярно'];
+  const GOAL   = ['Сбросить 3–5 кг','Сбросить 5–10 кг','10+ кг','Поддерживать фигуру / вернуть тонус'];
+  const MOT    = ['Для здоровья','Для внешности','Для энергии и лёгкости','Для уверенности в себе'];
+  const HARD   = ['Долгая прогулка утомляет','Каждый пролёт по лестнице — испытание','Стыдно включаться в активные игры','Прыжки','Ничего из этого'];
+  const HEALTH = ['Диабет','Проблемы со щитовидкой','Гипертония','Боль в суставах','Беременность','Нет'];
+  const BAD    = ['Сладкая газировка','Выпечка','Фастфуд','Колбаса/сосиски','Сыр 45%+','Ночные перекусы','Алкоголь чаще 2 р/нед','Сладкий чай/кофе','Очень солёная пища'];
+  const GOOD   = ['1.5–2 л воды','Овощи 400 г/день','Фрукты ежедневно','Белок в каждом приёме пищи','10–20 мин растяжки','8 000+ шагов уже сейчас'];
 
-  const section = (id, html) => `<section class="screen${id==='intro' ? ' is' : ''}" data-id="${id}">${html}</section>`;
+  // ——— Построение экранов внутрь #screens
+  const screensRoot = $('#screens');
+  const section = (id, html) => `<section class="screen${id==='intro'?' is':''}" data-id="${id}">${html}</section>`;
   const chips   = (id, arr)   => `<div class="chips" id="${id}">` + arr.map(t => `<button type="button" class="chip" data-v="${t}">${t}</button>`).join('') + `</div>`;
   const opts    = (id, arr)   => `<div class="grid cols2" id="${id}">` + arr.map(t => {
     const label = t.label || t[0] || t;
@@ -95,14 +75,8 @@
         <button class="btn primary" id="start" type="button" data-next>Поехали →</button>
       </div>
     `) +
-    section('age', `
-      <h2>Ваш возраст</h2>
-      ${opts('ageOpts', AGE)}${actions()}
-    `) +
-    section('body', `
-      <h2>Телосложение сейчас</h2>
-      ${opts('bodyOpts', BODY.map(([l,k])=>({label:l,key:k})))}${actions()}
-    `) +
+    section('age', `<h2>Ваш возраст</h2>${opts('ageOpts', AGE)}${actions()}`) +
+    section('body', `<h2>Телосложение сейчас</h2>${opts('bodyOpts', BODY.map(([l,k])=>({label:l,key:k})))}${actions()}`) +
     section('steps', `
       <h2>Сколько шагов вы проходите сейчас в день?</h2>
       <input id="steps" type="range" min="0" max="25000" step="250" value="4000">
@@ -118,45 +92,14 @@
       <div id="bmiI" class="hint"></div>
       ${actions()}
     `) +
-    section('life', `
-      <h2>Образ жизни</h2>
-      ${opts('lifeOpts', LIFE)}${actions()}
-    `) +
-    section('exp', `
-      <h2>Опыт тренировок</h2>
-      ${opts('expOpts', EXP)}${actions()}
-    `) +
-    section('goal', `
-      <h2>Цель</h2>
-      ${opts('goalOpts', GOAL)}${actions()}
-    `) +
-    section('motivation', `
-      <h2>Что вас мотивирует больше всего?</h2>
-      ${chips('motChips', MOT)}${actions()}
-    `) +
-    section('perweek', `
-      <h2>Сколько готовы тренироваться в неделю?</h2>
-      ${chips('pwChips', ['2 раза','3 раза','4–5 раз','Каждый день 20–30 мин'])}${actions()}
-    `) +
-    section('hard', `
-      <h2>Что сейчас даётся тяжелее всего?</h2>
-      ${opts('hardOpts', HARD)}${actions()}
-    `) +
-    section('health', `
-      <h2>Есть ли состояния, которые важно учитывать?</h2>
-      ${chips('healthChips', HEALTH)}
-      <p class="hint">Если есть сомнения — проконсультируйтесь с врачом.</p>
-      ${actions()}
-    `) +
-    section('nutrition', `
-      <h2>Включим работу с питанием?</h2>
-      ${opts('nutriOpts', [
-        {label:'Буду питаться по меню-конструктору в клубе', key:'menu'},
-        {label:'Хочу научиться правильно составлять тарелку', key:'plate'},
-        {label:'Нет, пока без питания', key:'no'}
-      ])}
-      ${actions()}
-    `) +
+    section('life', `<h2>Образ жизни</h2>${opts('lifeOpts', LIFE)}${actions()}`) +
+    section('exp',  `<h2>Опыт тренировок</h2>${opts('expOpts',  EXP)}${actions()}`) +
+    section('goal', `<h2>Цель</h2>${opts('goalOpts', GOAL)}${actions()}`) +
+    section('motivation', `<h2>Что вас мотивирует больше всего?</h2>${chips('motChips', MOT)}${actions()}`) +
+    section('perweek',    `<h2>Сколько готовы тренироваться в неделю?</h2>${chips('pwChips', ['2 раза','3 раза','4–5 раз','Каждый день 20–30 мин'])}${actions()}`) +
+    section('hard',       `<h2>Что сейчас даётся тяжелее всего?</h2>${opts('hardOpts', HARD)}${actions()}`) +
+    section('health',     `<h2>Есть ли состояния, которые важно учитывать?</h2>${chips('healthChips', HEALTH)}<p class="hint">Если есть сомнения — проконсультируйтесь с врачом.</p>${actions()}`) +
+    section('nutrition',  `<h2>Включим работу с питанием?</h2>${opts('nutriOpts', [{label:'Буду питаться по меню-конструктору в клубе',key:'menu'},{label:'Хочу научиться правильно составлять тарелку',key:'plate'},{label:'Нет, пока без питания',key:'no'}])}${actions()}`) +
     section('food', `
       <h2>Калькулятор продуктов</h2>
       <p class="hint">Отметьте то, что делаете <b>каждый день</b>.</p>
@@ -169,8 +112,7 @@
       </div>
     `) +
     section('loading', `
-      <div class="loader">
-        <div class="pulse"></div>
+      <div class="loader"><div class="pulse"></div>
         <h2>Прогноз загружается…</h2>
         <p class="hint">Учитываем возраст, ИМТ, активность, шаги и питание.</p>
       </div>
@@ -202,11 +144,33 @@
 
   screensRoot.innerHTML = html;
 
-  // ---- Навигация между экранами
+  // ——— Прогресс-бар «дорожка + кроссовок»
+  const progress = $('#progress');
+  // инжектим минимальные стили (на случай, если их нет в sd.css)
+  (function injectProgressCSS(){
+    const css = `
+      #progress{position:relative;height:18px;margin:0 0 12px}
+      #progress .track{height:8px;border-radius:999px;background:#eee;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.06)}
+      #progress .fill{height:100%;width:0%;background:linear-gradient(135deg,var(--r,#CF2C02),var(--o,#E85D04));transition:width .35s ease}
+      #progress .runner{position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);font-size:18px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2));transition:left .35s ease}
+    `;
+    const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+  })();
+  progress.innerHTML = '<div class="track"><div class="fill"></div></div><div class="runner" aria-hidden="true">👟</div>';
+  const pgFill = () => $('#progress .fill');
+  const pgRun  = () => $('#progress .runner');
+
+  // ——— Навигация между экранами
   let idx = 0;
   const S = $$('#screens .screen');
   const need = k => !A[k];
 
+  function setProgress(i){
+    const total = S.length - 1;
+    const pct = Math.round((i/total)*100);
+    pgFill().style.width = pct + '%';
+    pgRun().style.left   = pct + '%';
+  }
   function show(n){
     S[idx].classList.remove('is');
     idx = Math.max(0, Math.min(S.length-1, n));
@@ -223,24 +187,27 @@
     if (prev) { vibrate(); show(idx-1); }
   });
 
-  function shake(){ S[idx].animate(
-    [{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],
-    {duration:260}
-  ); vibrate(25); }
+  function shake(){
+    S[idx].animate(
+      [{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],
+      {duration:260}
+    );
+    vibrate(25);
+  }
 
   function goNext(){
     const id = S[idx].dataset.id;
-    if (id==='age'      && need('age'))   return shake();
-    if (id==='body'     && need('body'))  return shake();
-    if (id==='bmi'      && (!A.h || !A.w))return shake();
-    if (id==='life'     && need('life'))  return shake();
-    if (id==='exp'      && need('exp'))   return shake();
-    if (id==='goal'     && need('goal'))  return shake();
-    if (id==='perweek'  && need('perweek')) return shake();
+    if (id==='age'      && need('age'))      return shake();
+    if (id==='body'     && need('body'))     return shake();
+    if (id==='bmi'      && (!A.h || !A.w))   return shake();
+    if (id==='life'     && need('life'))     return shake();
+    if (id==='exp'      && need('exp'))      return shake();
+    if (id==='goal'     && need('goal'))     return shake();
+    if (id==='perweek'  && need('perweek'))  return shake();
     show(idx+1);
   }
 
-  // ---- Привязки
+  // ——— Привязки полей
   $('#name').oninput = e => { A.name = e.target.value.trim(); save(); };
   const steps = $('#steps'), sv = $('#sv');
   steps.oninput = e => { A.steps = +e.target.value; sv.textContent = A.steps; save(); };
@@ -249,7 +216,8 @@
   function updateBMI(){
     const h = +$('#h').value, w = +$('#w').value;
     if (h>0 && w>0) {
-      A.h = h; A.w = w; const m = h/100; A.bmi = +(w/(m*m)).toFixed(1); save();
+      A.h = h; A.w = w; const m = h/100; A.bmi = +(w/(m*m)).toFixed(1);
+      save();
       $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b>`;
     }
   }
@@ -270,20 +238,20 @@
     });
   }
 
-  selectList($('#ageOpts'),   'age',    true);
-  selectList($('#bodyOpts'),  'body',   true);
-  selectList($('#lifeOpts'),  'life',   true);
-  selectList($('#expOpts'),   'exp',    true);
-  selectList($('#goalOpts'),  'goal',   true);
-  selectList($('#motChips'),  'mot',    false);
-  selectList($('#pwChips'),   'perweek',false);
-  selectList($('#hardOpts'),  'hard',   true);
-  selectList($('#healthChips'),'health',false);
-  selectList($('#bad'),       'bad',    false);
-  selectList($('#good'),      'good',   false);
-  selectList($('#nutriOpts'), 'nutri',  true);
+  selectList($('#ageOpts'),    'age',     true);
+  selectList($('#bodyOpts'),   'body',    true);
+  selectList($('#lifeOpts'),   'life',    true);
+  selectList($('#expOpts'),    'exp',     true);
+  selectList($('#goalOpts'),   'goal',    true);
+  selectList($('#motChips'),   'mot',     false);
+  selectList($('#pwChips'),    'perweek', false);
+  selectList($('#hardOpts'),   'hard',    true);
+  selectList($('#healthChips'),'health',  false);
+  selectList($('#bad'),        'bad',     false);
+  selectList($('#good'),       'good',    false);
+  selectList($('#nutriOpts'),  'nutri',   true);
 
-  // ---- Расчёт результата
+  // ——— Расчёт результата
   $('#calc').onclick = () => { show(idx+1); setTimeout(calculate, 700); };
 
   function goalKg(){
@@ -293,11 +261,18 @@
     if (g.includes('10+'))  return 12;
     return 3;
   }
-  const fAge   = () => /50/.test(A.age||'') ? .88 : /40/.test(A.age||'') ? .94 : /30/.test(A.age||'') ? .98 : 1.06;
-  const fLife  = () => /Сидячая/.test(A.life||'') ? .90 : /Умеренно/.test(A.life||'') ? 1.00 : 1.08;
-  const fExp   = () => /Никогда/.test(A.exp||'') ? .95 : /Регулярно/.test(A.exp||'') ? 1.08 : 1.00;
-  const fBody  = () => A.body==='slim'?.92 : A.body==='avg'?1.00 : A.body==='large'?.96 : A.body==='obese'?.92 : 1.00;
-
+  const fAge  = () => /50/.test(A.age||'') ? .88 : /40/.test(A.age||'') ? .94 : /30/.test(A.age||'') ? .98 : 1.06;
+  const fLife = () => /Сидячая/.test(A.life||'') ? .90 : /Умеренно/.test(A.life||'') ? 1.00 : 1.08;
+  const fExp  = () => /Никогда/.test(A.exp||'') ? .95 : /Регулярно/.test(A.exp||'') ? 1.08 : 1.00;
+  function fBody(){
+    switch (A.body) {
+      case 'slim':  return .92;
+      case 'avg':   return 1.00;
+      case 'large': return .96;
+      case 'obese': return .92;
+      default:      return 1.00;
+    }
+  }
   function fSteps(){
     const now = +A.steps || 4000;
     const add = 2000;
@@ -345,7 +320,7 @@
     $('#sTitle').textContent = `${name}, присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`;
     $('#sLead').innerHTML = `Чтобы прийти к цели ≈<b>${kg} кг</b> за <b>${wks} недель</b>, используйте готовые планы и поддержку — первые изменения уже через 1–2 недели.`;
 
-    // CTA ссылку замени на свой лендинг:
+    // замените на свой лендинг
     $('#cta').href = 'https://walk-walk.ru/?utm_source=quiz&utm_medium=cta&utm_campaign=sd_weight_calc';
 
     Confetti.burst();
@@ -362,11 +337,11 @@
     }
     requestAnimationFrame(frame);
   }
-  const idxBy = id => S.findIndex(s => s.dataset.id === id);
+  const idxBy = id => $$('#screens .screen').findIndex(s => s.dataset.id === id);
   $('#toCTA').onclick = () => show(idxBy('sale'));
 
-  // ---- Простенький техрежим (?edit=1): редактируй тексты прямо на странице
-  (() => {
+  // ——— Техрежим (?edit=1) — редактируй тексты на странице
+  (function techEdit(){
     const qs = new URLSearchParams(location.search);
     if (qs.get('edit') === '1') {
       const list = $$('#screens h1, #screens h2, #screens p, #screens .hint, .btn');
@@ -379,7 +354,6 @@
           localStorage.setItem('sd_copy', JSON.stringify(m));
         };
       });
-      // применить уже сохранённые правки
       const m = JSON.parse(localStorage.getItem('sd_copy') || '{}');
       Object.entries(m).forEach(([k,v]) => {
         const el = document.querySelector('[data-e="'+k+'"]');
@@ -388,14 +362,14 @@
     }
   })();
 
-  // ---- Восстановление полей
+  // ——— Восстановление значений
   if (A.name)  $('#name').value = A.name;
   if (A.steps) { $('#steps').value = A.steps; $('#sv').textContent = A.steps; }
   if (A.h)     $('#h').value = A.h;
   if (A.w)     $('#w').value = A.w;
   if (A.bmi)   $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b>`;
 
-  // ---- Навигация с клавиатуры (удобно на ПК)
+  // ——— Удобная клавиатура на ПК
   addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') goNext();
     if (e.key === 'ArrowLeft')  show(idx-1);
