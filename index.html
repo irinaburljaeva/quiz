@@ -7,20 +7,24 @@
   <meta name="description" content="Узнайте, за сколько недель шагательные тренировки помогут вам похудеть." />
   <meta name="color-scheme" content="light only" />
   <style>
-    :root{ --r:#CF2C02; --y:#FFBA08; --o:#E85D04; --g:#D9D9D9; --txt:#1a1a1a; }
+    :root{ --r:#CF2C02; --y:#FFBA08; --o:#E85D04; --g:#D9D9D9; --txt:#1a1a1a;
+           --hero-pos-y: 28%; --hero-pos-y-m: 22%; }
     *{box-sizing:border-box} html,body{height:100%}
     body{ margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; color:var(--txt); background:#fff; overflow-x:hidden }
 
     .app{ width:min(960px,100%); margin:0 auto; padding:16px }
     .card{ background:#fff; border-radius:22px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:18px }
 
-    /* Confetti overlays page */
+    /* Конфетти — оверлей, не сдвигает контент */
     #confetti{ position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:50; display:block }
 
-    /* HERO video/image */
+    /* HERO video/image — без обрезания головы */
     .hero-wrap{ margin:0 0 12px 0; border-radius:20px; overflow:hidden; box-shadow:0 10px 18px rgba(0,0,0,.08) }
-    .hero-media{ display:block; width:100%; height:260px; object-fit:cover }
-    @media (max-width:480px){ .hero-media{ height:200px } }
+    .hero-media{
+      display:block; width:100%; height:auto;
+      aspect-ratio:16/9; object-fit:cover; object-position:50% var(--hero-pos-y); border-radius:20px;
+    }
+    @media (max-width:480px){ .hero-media{ object-position:50% var(--hero-pos-y-m) } }
 
     /* Экраны */
     .screen{ display:none; animation:.35s fs ease both }
@@ -35,7 +39,7 @@
     .opt{ border:2px solid var(--g); border-radius:14px; padding:12px; display:flex; gap:10px; align-items:center; background:#fff; cursor:pointer; transition:.2s }
     .opt.is{ border-color:var(--o); box-shadow:0 6px 16px rgba(232,93,4,.12) }
 
-    /* Карточки телосложения с картинками */
+    /* Телосложение — карточки с картинками */
     .opt--img{ flex-direction:column; align-items:center; text-align:center; padding:10px }
     .opt--img img{ width:100%; height:180px; object-fit:contain; background:#fafafa; border-radius:12px }
     .opt--img span{ margin-top:8px; font-weight:600 }
@@ -62,40 +66,67 @@
 
     .counter{ font-size:clamp(26px,6vw,48px); line-height:1.15; letter-spacing:-.02em; text-wrap:balance }
 
-    /* Карточки на шаге про продукты */
+    /* Продукты */
     .box{ border:2px solid var(--y); border-radius:14px; padding:12px; margin:8px 0 }
     .box h3{ margin:.2rem 0 .6rem 0 }
 
-    /* Антиконфликт: клики внутри экранов */
-    #screens .screen.is, #screens .opt.is, #screens .chip.is { pointer-events:auto !important }
-
-    /* === Circular progress (круг + процент) === */
+    /* === Круговой прогресс (процент) === */
     #progress{ position:relative; height:auto; margin:0 0 12px; visibility:hidden }
     #progress .pcirc{
       --p:0%;
       width:56px; height:56px; border-radius:50%;
       background: conic-gradient(var(--o) var(--p), #eee 0);
       position:relative; display:inline-grid; place-items:center;
-      box-shadow:0 6px 16px rgba(0,0,0,.08);
-      transition: background .15s linear; /* для мелких дрожаний */
+      box-shadow:0 6px 16px rgba(0,0,0,.08); transition:background .15s linear;
     }
     #progress .pcirc::after{
       content:""; width:44px; height:44px; border-radius:50%; background:#fff; position:absolute;
     }
     #progress .pct{ position:relative; z-index:1; font-size:.9rem; font-weight:800; letter-spacing:-.02em }
     #progress .plabel{ display:inline-block; vertical-align:top; margin-left:10px; font-weight:700; line-height:56px }
+
+    /* === RANGE: большой красный ползунок для #steps === */
+    #steps{
+      --pct: 0%;
+      --track:#e9e9e9; --fill-start:var(--r); --fill-end:var(--o);
+      width:100%; height:40px; background:transparent; accent-color:var(--o);
+    }
+    #steps:focus{ outline:none }
+    /* WebKit */
+    #steps::-webkit-slider-runnable-track{
+      height:12px; border-radius:999px;
+      background:linear-gradient(90deg,var(--fill-start) 0 var(--pct), var(--track) var(--pct) 100%);
+      box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+    }
+    #steps::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:28px; height:28px; border-radius:50%; background:#fff; border:3px solid var(--o);
+      box-shadow:0 4px 10px rgba(232,93,4,.25); margin-top:-8px; transition:transform .12s ease;
+    }
+    #steps:active::-webkit-slider-thumb{ transform:scale(1.06) }
+    /* Firefox */
+    #steps::-moz-range-track{ height:12px; border-radius:999px; background:var(--track); box-shadow:inset 0 1px 2px rgba(0,0,0,.08) }
+    #steps::-moz-range-progress{ height:12px; border-radius:999px; background:linear-gradient(135deg,var(--fill-start),var(--fill-end)) }
+    #steps::-moz-range-thumb{
+      width:28px; height:28px; border-radius:50%; background:#fff; border:3px solid var(--o);
+      box-shadow:0 4px 10px rgba(232,93,4,.25); transition:transform .12s ease;
+    }
+    #steps:active::-moz-range-thumb{ transform:scale(1.06) }
+
+    /* === BMI tag === */
+    .bmi-line{ margin-top:6px }
+    .bmi-tag{ display:inline-block; padding:4px 8px; border-radius:999px; font-weight:700; font-size:.9rem; vertical-align:baseline }
+    .bmi-ok{   background:#e8f7ee; color:#0f7a42 }
+    .bmi-warn{ background:#fff4e6; color:#a04b00 }
+    .bmi-bad{  background:#ffe8e6; color:#a11000 }
   </style>
 </head>
 <body>
-  <!-- Конфетти -->
   <canvas id="confetti"></canvas>
 
   <div class="app">
     <div class="card">
-      <!-- Прогресс-бар (покажется со 2-го экрана) -->
       <div id="progress"></div>
-
-      <!-- Сюда генерируются экраны -->
       <div id="screens"></div>
     </div>
   </div>
@@ -117,13 +148,13 @@
       addEventListener('resize',resize); resize(); return { burst };
     })();
 
-    // Данные и справочники
+    // Данные
     const A = JSON.parse(localStorage.getItem('sdq')||'{}');
     const save = () => localStorage.setItem('sdq', JSON.stringify(A));
 
+    // Справочники
     const AGE=['18–29','30–39','40–49','50+'];
-    // ключи для формулы оставляем как раньше, картинки подставляем вручную
-    const BODY = [
+    const BODY=[
       {label:'Худощавое', key:'slim',   img:'skinny.png', alt:'Худощавое телосложение'},
       {label:'Среднее',   key:'avg',    img:'slim.png',   alt:'Среднее телосложение'},
       {label:'Крупное',   key:'large',  img:'medium.png', alt:'Крупное телосложение'},
@@ -156,6 +187,12 @@
 
     const html =
       section('intro', `
+        <figure class="hero-wrap">
+          <video class="hero-media" autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="intro_poster.jpg">
+            <source src="intro.mp4" type="video/mp4" />
+            <img class="hero-media" src="intro_poster.jpg" alt="ШАГАЙ ДОМА — вдохновляющий старт" />
+          </video>
+        </figure>
         <h1>Узнайте, за сколько недель шагательные тренировки помогут вам похудеть</h1>
         <p class="hint">Ответьте на несколько вопросов — это займёт 1–2 минуты.</p>
         <div class="grid"><div><div class="hint">Как к вам обращаться?</div><input id="name" class="text" placeholder="Например, Ирина"></div></div>
@@ -236,60 +273,34 @@
 
     screensRoot.innerHTML = html;
 
-    // HERO видео/изображение в intro (с фолбэком)
-    (function addHero(){
-      const intro = document.querySelector('#screens [data-id="intro"]');
-      if(!intro || intro.querySelector('.hero-wrap')) return;
-      const fig = document.createElement('figure');
-      fig.className = 'hero-wrap';
-      fig.innerHTML = `
-        <video class="hero-media" autoplay muted loop playsinline webkit-playsinline preload="metadata" poster="intro_poster.jpg">
-          <source src="intro.mp4" type="video/mp4" />
-          <img class="hero-media" src="intro_poster.jpg" alt="ШАГАЙ ДОМА — вдохновляющий старт" />
-        </video>`;
-      intro.insertBefore(fig, intro.firstChild);
-      const v = fig.querySelector('video');
-      if(v){ v.muted = true; v.play().catch(()=>{}); v.addEventListener('error', ()=>{
-        const img = document.createElement('img'); img.className='hero-media'; img.src='intro_poster.jpg'; img.alt='ШАГАЙ ДОМА — вдохновляющий старт'; v.replaceWith(img);
-      }); }
-    })();
-
-    // Прогресс-бар (круг + процент; с пружинной анимацией; показывается со 2-го экрана)
+    // Прогресс-бар (круг + процент, пружинная анимация)
     const progress = $('#progress');
     progress.innerHTML = '<div class="pcirc"><div class="pct">0%</div></div><div class="plabel" id="plabel">Шаг 1 из 1</div>';
     const pcirc  = () => $('#progress .pcirc');
     const pcText = () => $('#progress .pct');
     const plabel = () => $('#plabel');
-
     let pctNow = 0, rafId = 0;
     function animateProgress(to){
       cancelAnimationFrame(rafId);
-      const stiffness = 0.08; // жёсткость пружины
-      const damping   = 0.75; // затухание
+      const stiffness = 0.08, damping = 0.75;
       let v = 0;
       function frame(){
-        const x = pctNow - to;           // смещение
-        const a = -stiffness * x;        // сила к цели
-        v = (v + a) * damping;           // скорость с затуханием
-        pctNow += v;
-        if (Math.abs(pctNow - to) < 0.3 && Math.abs(v) < 0.3) { pctNow = to; } // снэп в конце
-
+        const x = pctNow - to, a = -stiffness * x;
+        v = (v + a) * damping; pctNow += v;
+        if (Math.abs(pctNow - to) < 0.3 && Math.abs(v) < 0.3) pctNow = to;
         pcirc().style.setProperty('--p', pctNow.toFixed(1) + '%');
         pcText().textContent = Math.round(pctNow) + '%';
-
-        if (pctNow !== to) { rafId = requestAnimationFrame(frame); }
+        if (pctNow !== to) rafId = requestAnimationFrame(frame);
       }
       rafId = requestAnimationFrame(frame);
     }
 
     // Навигация
     let idx=0; const S=$$('#screens .screen'); const need=k=>!A[k];
-
     function setProgress(i){
       progress.style.visibility = (i===0)?'hidden':'visible';
-      const total = S.length - 1;      // без intro
-      const step  = Math.max(1, Math.min(i, total));
-      const pct   = Math.round((i/total)*100);
+      const total = S.length - 1, step = Math.max(1, Math.min(i, total));
+      const pct = Math.round((i/total)*100);
       animateProgress(pct);
       plabel().textContent = `Шаг ${step} из ${total}`;
     }
@@ -324,18 +335,32 @@
     $('#name').oninput = e=>{ A.name=e.target.value.trim(); save(); };
 
     const steps=$('#steps'), sv=$('#sv');
-    steps.oninput=e=>{ A.steps=+e.target.value; sv.textContent=A.steps; save(); };
+    function updateRangeBG(){
+      const min=+steps.min||0, max=+steps.max||100, val=+steps.value||0;
+      const pct=((val-min)/(max-min))*100; steps.style.setProperty('--pct', pct+'%');
+    }
+    steps.oninput=e=>{ A.steps=+e.target.value; sv.textContent=A.steps; updateRangeBG(); save(); };
 
-    ;['h','w'].forEach(id=>{ $('#'+id).oninput = updateBMI });
+    ['h','w'].forEach(id=>{ $('#'+id).oninput = updateBMI; });
+    function bmiCategory(bmi){
+      if (bmi < 18.5) return {label:'Дефицит массы', cls:'bmi-warn', note:'ниже нормы (18,5–24,9)'};
+      if (bmi < 25)   return {label:'Норма',          cls:'bmi-ok',   note:'в пределах нормы (18,5–24,9)'};
+      if (bmi < 30)   return {label:'Избыточная масса',cls:'bmi-warn', note:'выше нормы'};
+      if (bmi < 35)   return {label:'Ожирение I ст.',  cls:'bmi-bad',  note:'значительно выше нормы'};
+      if (bmi < 40)   return {label:'Ожирение II ст.', cls:'bmi-bad',  note:'значительно выше нормы'};
+      return            {label:'Ожирение III ст.',     cls:'bmi-bad',  note:'значительно выше нормы'};
+    }
     function updateBMI(){
       const h=+$('#h').value, w=+$('#w').value;
-      if(h>0&&w>0){
+      if (h>0 && w>0){
         A.h=h; A.w=w; const m=h/100; A.bmi=+(w/(m*m)).toFixed(1); save();
-        $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b><br>ИМТ (индекс массы тела) помогает определить, есть ли у вас избыточный вес.`;
+        const cat=bmiCategory(A.bmi);
+        $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b> <span class="bmi-tag ${cat.cls}">${cat.label}</span>` +
+          `<br><span class="hint bmi-line">ИМТ помогает ориентироваться в массе тела; норма для взрослых — 18,5–24,9. Помните, что на результат влияют особенности телосложения, беременность и выраженная мышечная масса.</span>`;
       } else { $('#bmiI').textContent=''; }
     }
 
-    function selectList(root,key,single){
+       function selectList(root,key,single){
       root.addEventListener('click',e=>{
         const sel=e.target.closest(single?'.opt':'.chip'); if(!sel) return;
         if(single){ $$('.opt',root).forEach(x=>x.classList.remove('is')); sel.classList.add('is'); A[key]=sel.dataset.v||sel.textContent; }
@@ -367,7 +392,7 @@
     function fBody(){ switch(A.body){ case 'slim':return .92; case 'avg':return 1.00; case 'large':return .96; case 'obese':return .92; default:return 1.00; } }
     function fSteps(){ const now=+A.steps||4000; const add=2000; const t=now+add; let boost=1+add/10000; if(now<3000)boost+=.08; if(now>9000)boost-=.06; return { f:Math.max(.95,Math.min(1.28,boost)), t }; }
     function fNutri(){ let f=1; if(A.nutri==='menu')f+=.22; else if(A.nutri==='plate')f+=.12; else f-=.12; f-=((A.bad||[]).length)*.03; f+=Math.min(((A.good||[]).length)*.02,.10); return Math.max(.7,Math.min(1.35,f)); }
-    function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||х.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06; if(h.has('Боль в суставах'))f-=.04; return Math.max(.8,f); }
+    function fHealth(){ const h=new Set(A.health||[]); let f=1; if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06; if(h.has('Боль в суставах'))f-=.04; return Math.max(.8,f); }
     function rate(){ let r=.5; const bmi=A.bmi||26; if(bmi>=30)r+=.08; else if(bmi<23)r-=.08; r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth(); return Math.max(.25,Math.min(.9,+r.toFixed(2))); }
 
     function calculate(){
@@ -383,7 +408,6 @@
       $('#sTitle').textContent=`${name}, присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`;
       $('#sLead').innerHTML=`Чтобы прийти к цели <b>−${kg} кг</b> за <b>${wks} недель</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.`;
 
-      // замените на свой лендинг
       $('#cta').href='https://walk-walk.ru/?utm_source=quiz&utm_medium=cta&utm_campaign=sd_weight_calc';
 
       Confetti.burst();
@@ -401,13 +425,17 @@
     // Восстановление
     if(A.name) $('#name').value=A.name;
     if(A.steps){ $('#steps').value=A.steps; $('#sv').textContent=A.steps; }
+    updateRangeBG();
     if(A.h) $('#h').value=A.h;
     if(A.w) $('#w').value=A.w;
-    if(A.bmi) $('#bmiI').innerHTML=`Ваш ИМТ: <b>${A.bmi}</b><br>ИМТ (индекс массы тела) помогает определить, есть ли у вас избыточный вес.`;
+    if(A.bmi){
+      const cat=bmiCategory(A.bmi);
+      $('#bmiI').innerHTML = `Ваш ИМТ: <b>${A.bmi}</b> <span class="bmi-tag ${cat.cls}">${cat.label}</span>` +
+        `<br><span class="hint bmi-line">ИМТ помогает ориентироваться в массе тела; норма для взрослых — 18,5–24,9.</span>`;
+    }
 
-    // К началу страницы при загрузке
+    // На старте — к началу страницы
     requestAnimationFrame(()=>{ try{ scrollTo({top:0,behavior:'instant'});}catch(e){ scrollTo(0,0);} });
-    // Клавиатура на ПК
     addEventListener('keydown', e=>{ if(e.key==='ArrowRight') goNext(); if(e.key==='ArrowLeft') show(idx-1); });
   </script>
 </body>
