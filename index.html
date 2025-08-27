@@ -7,7 +7,7 @@
   <meta name="description" content="Узнайте, за сколько недель шагательные тренировки помогут вам похудеть." />
   <meta name="color-scheme" content="light only" />
 
-  <!-- Предзагрузка видео для мгновенного старта -->
+  <!-- Предзагрузка видео для ускоренного старта -->
   <link rel="preload" as="video" href="intro.mp4" type="video/mp4" fetchpriority="high">
 
   <style>
@@ -82,7 +82,7 @@
     /* Экран результата — крупные цифры */
     .counter{ font-size:clamp(26px,6vw,48px); line-height:1.15; letter-spacing:-.02em; text-wrap:balance }
 
-    /* Продукты */
+    /* Продукты (старые боксы — оставлены на всякий) */
     .box{ border:2px solid var(--y); border-radius:14px; padding:12px; margin:8px 0 }
     .box h3{ margin:.2rem 0 .6rem 0 }
 
@@ -140,6 +140,64 @@
     .bmi-ok{   background:#e8f7ee; color:#0f7a42 }
     .bmi-warn{ background:#fff4e6; color:#a04b00 }
     .bmi-bad{  background:#ffe8e6; color:#a11000 }
+
+    /* ===== Экран «Привычки и продукты» — вау-версия ===== */
+    .habit{ display:grid; gap:14px }
+    .habit-grid{ display:grid; gap:12px; grid-template-columns:1fr 1fr }
+    @media (max-width:720px){ .habit-grid{ grid-template-columns:1fr } }
+
+    .habit h3{ margin:.2rem 0 .6rem 0; font-size:1.02rem }
+    .habit .col{ border:2px solid var(--g); border-radius:14px; padding:12px; background:#fff }
+
+    .chips--pills{ gap:10px }
+    .chips--pills .chip{
+      border-radius:999px; padding:10px 14px; font-weight:600;
+      border:2px solid var(--g); background:#fff; position:relative;
+      transition:transform .08s ease, border-color .15s ease, box-shadow .15s ease, background .2s ease, color .2s ease;
+    }
+    .chips--pills .chip[data-kind="bad"]{ border-color:#ffd7cf }
+    .chips--pills .chip[data-kind="good"]{ border-color:#cfeede }
+
+    .chips--pills .chip.is{ transform:translateY(-1px) scale(1.02); color:#111 }
+    .chips--pills .chip[data-kind="bad"].is{
+      background:linear-gradient(135deg,#ffe9e3,#ffd3c9);
+      border-color:#ffb5a5; box-shadow:0 6px 16px rgba(255,115,97,.18);
+    }
+    .chips--pills .chip[data-kind="good"].is{
+      background:linear-gradient(135deg,#e9f9f0,#d5f1e6);
+      border-color:#bfe7d6; box-shadow:0 6px 16px rgba(21,178,116,.16);
+    }
+    .chips--pills .chip.is::after{
+      content:"✓"; position:absolute; top:-8px; right:-8px;
+      width:22px; height:22px; border-radius:50%;
+      display:grid; place-items:center; font-weight:800; font-size:.85rem;
+      background:#fff; border:2px solid #ddd; box-shadow:0 2px 8px rgba(0,0,0,.1);
+    }
+
+    .habit-meter{ border:2px solid var(--g); border-radius:14px; padding:12px; background:#fff }
+    .hm-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px }
+    #hmLabel{ font-weight:700 }
+    #hmScore{ font-weight:800 }
+    .hm-track{
+      --p:50%;
+      position:relative; height:14px; border-radius:999px; overflow:hidden;
+      background:linear-gradient(90deg,#ffe1db 0%,#fff7e8 50%,#e7f7ef 100%);
+      box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+    }
+    .hm-pointer{
+      position:absolute; top:50%; left:var(--p); transform:translate(-50%,-50%);
+      width:18px; height:18px; border-radius:50%; background:#fff; border:3px solid var(--o);
+      box-shadow:0 4px 12px rgba(0,0,0,.12); transition:left .25s ease, border-color .2s ease;
+    }
+    .hm-scale{ display:flex; justify-content:space-between; font-size:.82rem; color:#666; margin-top:6px }
+    .hm-badge{ display:inline-block; padding:4px 8px; border-radius:999px; font-weight:700; font-size:.85rem; margin-left:8px }
+    .hm-bad{ background:#ffe9e6; color:#a11000 }
+    .hm-ok{  background:#fff3cc; color:#9a6b00 }
+    .hm-good{background:#e7f7ef; color:#0f7a42 }
+
+    /* Изображение на продающем экране */
+    .sale-hero{ margin:0 0 12px 0; border-radius:16px; overflow:hidden }
+    .sale-hero img{ width:100%; display:block; border-radius:16px; object-fit:cover }
   </style>
 </head>
 <body>
@@ -151,7 +209,8 @@
   </div>
 
   <script>
-    const $ = s => document.querySelector(s), $$ = s => Array.from(document.querySelectorAll(s));
+    const $  = s => document.querySelector(s);
+    const $$ = (s, root=document) => Array.from((root||document).querySelectorAll(s)); // поддержка root
     const vibrate = n => { try{ navigator.vibrate && navigator.vibrate(n||12) }catch(e){} };
 
     // Данные
@@ -196,7 +255,6 @@
           <div class="hero-skel" id="heroSkel"></div>
           <video class="hero-media" autoplay muted loop playsinline preload="auto">
             <source src="intro.mp4#t=0.1" type="video/mp4" />
-            <!-- Фолбэк на случай отсутствия поддержки видео -->
             <img src="logo.png" alt="ШАГАЙ ДОМА" />
           </video>
         </figure>
@@ -248,10 +306,44 @@
           {label:'Нет, пока без питания',key:'no'}
         ])}${actions()}`)
       + section('food', `
-        <h2>Продукты и привычки</h2>
-        <div class="box"><h3>Ежедневные продукты</h3>${chips('bad', BAD)}</div>
-        <div class="box"><h3>Привычки, ускоряющие результат</h3>${chips('good', GOOD)}</div>
-        <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="calc">Рассчитать результат →</button></div>
+        <h2>Привычки и продукты</h2>
+        <div class="habit">
+          <div class="habit-grid">
+            <div class="col">
+              <h3>Тормозит прогресс</h3>
+              <div class="chips chips--pills" id="bad">
+                ${BAD.map(x=>`<button type="button" class="chip" data-kind="bad" data-v="${x}">${x}</button>`).join('')}
+              </div>
+            </div>
+            <div class="col">
+              <h3>Ускоряет результат</h3>
+              <div class="chips chips--pills" id="good">
+                ${GOOD.map(x=>`<button type="button" class="chip" data-kind="good" data-v="${x}">${x}</button>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="habit-meter">
+            <div class="hm-top">
+              <div>
+                <span id="hmLabel">Индекс прогресса</span>
+                <span class="hm-badge hm-ok" id="hmBadge">нейтрально</span>
+              </div>
+              <span id="hmScore">0%</span>
+            </div>
+            <div class="hm-track" id="hmTrack">
+              <div class="hm-pointer" id="hmPtr"></div>
+            </div>
+            <div class="hm-scale"><span>тормозит</span><span>нейтрально</span><span>ускоряет</span></div>
+          </div>
+
+          <p class="hint">Отмечайте то, что про вас — индикатор обновляется в реальном времени ✨</p>
+
+          <div class="actions sticky">
+            <button class="btn ghost" data-prev>Назад</button>
+            <button class="btn primary" id="calc">Рассчитать результат →</button>
+          </div>
+        </div>
       `)
       + section('loading', `
         <div class="loader2">
@@ -268,6 +360,9 @@
         <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="toCTA">Хочу такой результат!</button></div>
       `)
       + section('sale', `
+        <figure class="sale-hero">
+          <img src="final.PNG" alt="Результаты участниц и атмосфера клуба «ШАГАЙ ДОМА»">
+        </figure>
         <h2 id="sTitle">Присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡</h2>
         <p class="hint" id="sLead"></p>
         <ul>
@@ -281,7 +376,7 @@
 
     screensRoot.innerHTML = html;
 
-    /* Прогресс-бар (круг + процент) + логотип справа */
+  /* Прогресс-бар (круг + процент) + логотип справа */
     const progress = $('#progress');
     progress.innerHTML = `
       <div class="pcirc"><div class="pct">0%</div></div>
@@ -374,8 +469,13 @@
     function selectList(root,key,single){
       root.addEventListener('click',e=>{
         const sel=e.target.closest(single?'.opt':'.chip'); if(!sel) return;
-        if(single){ $$('.opt',root).forEach(x=>x.classList.remove('is')); sel.classList.add('is'); A[key]=sel.dataset.v||sel.textContent; }
-        else { sel.classList.toggle('is'); A[key]=$$('.chip.is',root).map(x=>x.dataset.v||x.textContent); }
+        if(single){
+          $$('.opt',root).forEach(x=>x.classList.remove('is'));
+          sel.classList.add('is'); A[key]=sel.dataset.v||sel.textContent;
+        } else {
+          sel.classList.toggle('is');
+          A[key]=$$('.chip.is',root).map(x=>x.dataset.v||x.textContent);
+        }
         save(); vibrate(8);
       });
     }
@@ -392,6 +492,55 @@
     selectList($('#bad'),'bad',false);
     selectList($('#good'),'good',false);
     selectList($('#nutriOpts'),'nutri',true);
+
+    /* ===== Индикатор привычек (вау-экран) ===== */
+    function nutritionFactorPreview(){
+      const b = (A.bad||[]).length;
+      const g = (A.good||[]).length;
+      let f = 1;
+      f += g * 0.02;  // хорошие +2% за штуку
+      f -= b * 0.03;  // вредные -3% за штуку
+      f = Math.max(.7, Math.min(1.35, f));
+      return f;
+    }
+    function updateHabitMeter(){
+      const f = nutritionFactorPreview();
+      const accel = Math.round((f - 1) * 100);
+      const ptr = $('#hmPtr'), track = $('#hmTrack'), score = $('#hmScore'), badge = $('#hmBadge');
+      const min=-30, max=35;
+      const clamp = Math.max(min, Math.min(max, accel));
+      const p = ((clamp - min) / (max - min)) * 100;
+      track.style.setProperty('--p', p + '%');
+      ptr.style.left = p + '%';
+      score.textContent = (accel>0?'+':'') + accel + '%';
+      let cls='hm-ok', txt='нейтрально', border='#FFBA08';
+      if(accel <= -15){ cls='hm-bad'; txt='сильно тормозит'; border='#E85D04'; }
+      else if(accel < -5){ cls='hm-bad'; txt='тормозит'; border='#E85D04'; }
+      else if(accel > 15){ cls='hm-good'; txt='суперускорение'; border='#12A06A'; }
+      else if(accel > 5){ cls='hm-good'; txt='ускоряет'; border='#12A06A'; }
+      else { cls='hm-ok'; txt='нейтрально'; border='#FFBA08'; }
+      badge.className = 'hm-badge ' + cls;
+      badge.textContent = txt;
+      ptr.style.borderColor = border;
+    }
+    function setupHabitMeter(){
+      ['bad','good'].forEach(id=>{
+        const el = $('#'+id);
+        if(!el) return;
+        el.addEventListener('click', ()=> setTimeout(updateHabitMeter, 0), true);
+      });
+      function restoreChips(id, key){
+        const sel = new Set(A[key]||[]);
+        $$('#'+id+' .chip').forEach(ch=>{
+          const v = ch.dataset.v || ch.textContent;
+          if(sel.has(v)) ch.classList.add('is');
+        });
+      }
+      restoreChips('bad','bad');
+      restoreChips('good','good');
+      updateHabitMeter();
+    }
+    setupHabitMeter();
 
     /* Экран загрузки — анимация и смена фраз */
     function runLoading(done){
