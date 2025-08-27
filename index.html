@@ -1,394 +1,464 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!DOCTYPE html><html lang="ru">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Подбор программы — ШАГАЙ ДОМА</title>
-<style>
-:root{
-  --bg:#ffffff; --paper:#ffffff; --ink:#1f2328; --muted:#6b7280;
-  --line:#ececec; --accent:#b22222; --grad1:#ff6d6d; --grad2:#ffb86b;
-  --rad:18px; --navH:96px;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ШАГАЙ ДОМА · Квиз‑калькулятор похудения</title>
+  <meta name="description" content="Квиз с расчётом: за сколько недель шагательные тренировки помогут вам похудеть. 20–30 минут дома + +2000 шагов в день." />
+  <style>
+    :root{
+      --brand-red:#CF2C02;/* кораллово‑красный */
+      --brand-yellow:#FFBA08;/* ярко‑жёлтый */
+      --brand-orange:#E85D04;/* оранжевый */
+      --brand-gray:#D9D9D9;
+      --bg:#fff;
+      --text:#1a1a1a;
+      --muted:#6b6b6b;
+      --card:#ffffff;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+      --radius:18px;
+      --radius-lg:26px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, "Noto Sans", "Segoe UI Emoji";
+      color:var(--text); background:linear-gradient(135deg,#fff 0%, #fff 40%, #fff6e0 100%);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .app{ width:min(960px, 100%); padding:clamp(12px,2vw,28px); }.card{ background:var(--card); border-radius:var(--radius-lg); box-shadow:var(--shadow);
+       padding:clamp(16px,3vw,28px); position:relative; overflow:hidden }
+.card h1, .card h2{ margin:0 0 .6rem 0; line-height:1.15 }
+.lead{ color:var(--muted); font-size:1.05rem }
+
+/* Top progress — tiny footprints */
+.progress{ display:flex; gap:8px; align-items:center; margin:0 0 18px 0; padding:8px 4px }
+.foot{ width:22px; height:22px; opacity:.25; transform:rotate(-18deg); transition:opacity .35s ease, transform .35s ease }
+.foot.active{ opacity:1; transform:rotate(0deg) scale(1.08) }
+
+/* Screen switch */
+.screen{ display:none; animation:.45s fadeSlide ease both }
+.screen.active{ display:block }
+@keyframes fadeSlide{ from{ opacity:0; transform:translateY(16px) } to{ opacity:1; transform:translateY(0) } }
+
+/* Inputs */
+.grid{ display:grid; gap:14px }
+.grid.cols-2{ grid-template-columns: 1fr 1fr }
+.opt{ border:2px solid var(--brand-gray); border-radius:16px; padding:14px; cursor:pointer; background:#fff; transition:.2s; display:flex; align-items:center; gap:12px }
+.opt input{ display:none }
+.opt:hover{ transform:translateY(-2px) }
+.opt.active{ border-color:var(--brand-orange); box-shadow:0 6px 16px rgba(232,93,4,.12) }
+.opt .badge{ margin-left:auto; font-size:.85rem; color:#fff; background:var(--brand-orange); padding:.2rem .5rem; border-radius:999px; display:none }
+.opt.active .badge{ display:inline-flex }
+
+.slider-wrap{ padding:12px 6px 4px }
+input[type="range"]{ width:100% }
+.hint{ color:var(--muted); font-size:.9rem }
+
+.row{ display:flex; gap:12px; flex-wrap:wrap }
+.row .field{ flex:1 1 160px }
+.label{ font-size:.9rem; color:var(--muted); margin-bottom:6px }
+.text{ width:100%; border:2px solid var(--brand-gray); border-radius:12px; padding:12px 14px; font-size:1rem }
+
+/* Buttons */
+.actions{ display:flex; gap:10px; margin-top:18px }
+.btn{ border:none; cursor:pointer; border-radius:14px; padding:12px 18px; font-weight:700; font-size:1rem; transition:.2s; display:inline-flex; align-items:center; gap:10px }
+.btn-primary{ background:linear-gradient(135deg,var(--brand-red), var(--brand-orange)); color:#fff; box-shadow:0 10px 18px rgba(207,44,2,.25) }
+.btn-primary:hover{ transform:translateY(-1px) }
+.btn-ghost{ background:#fff; color:var(--text); border:2px solid var(--brand-gray) }
+
+.divider{ height:1px; background:#eee; margin:14px 0 }
+
+/* Loader / result */
+.loader{ display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px; text-align:center }
+.loader .pulse{ width:68px; height:68px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #fff 0 30%, var(--brand-yellow) 31%);
+                 box-shadow:0 0 0 0 rgba(255,186,8,.5); animation:pulse 1.6s infinite }
+@keyframes pulse{ to{ box-shadow:0 0 0 26px rgba(255,186,8,0) } }
+
+.counter{ font-size: clamp(30px, 7vw, 64px); font-weight:900; letter-spacing:-.02em }
+.sub{ color:var(--muted) }
+
+/* Silhouette */
+.silhouette{ display:flex; align-items:center; justify-content:center; padding:12px 0 }
+.silhouette svg{ width:min(320px, 80%); height:auto }
+
+/* CTA card */
+.cta{ background:linear-gradient(135deg, #fff 0%, #fff7e6 70%); border:2px dashed var(--brand-yellow); border-radius:20px; padding:18px }
+.cta h3{ margin:.2rem 0 .6rem 0 }
+
+/* Badges / chips */
+.chips{ display:flex; flex-wrap:wrap; gap:8px }
+.chip{ border:2px solid var(--brand-gray); border-radius:999px; padding:8px 12px; cursor:pointer; user-select:none; transition:.2s; background:#fff }
+.chip.active{ border-color:var(--brand-orange); box-shadow:0 6px 16px rgba(232,93,4,.12) }
+
+/* Sticky footer for mobile */
+.sticky{ position:sticky; bottom:0; background:linear-gradient(0deg, #ffffff 70%, rgba(255,255,255,0) 100%); padding-top:10px }
+
+/* Canvas for confetti */
+#confetti{ position:fixed; inset:0; pointer-events:none }
+
+/* Small */
+@media (max-width:620px){
+  .grid.cols-2{ grid-template-columns: 1fr }
 }
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; color:var(--ink);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",Arial,sans-serif;
-  background:#fff;
-}
-.wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:18px}
-.card{
-  width:min(980px,100%);
-  background:var(--paper);
-  border:1px solid var(--line);
-  border-radius:var(--rad);
-  box-shadow:0 30px 80px rgba(0,0,0,.06);
-  overflow:hidden;
-}
 
-/* ---------- Шапка: логотип слева, заголовок справа на одном уровне ---------- */
-.header{
-  padding:18px;
-  display:grid;
-  grid-template-columns:auto 1fr;
-  align-items:center;
-  column-gap:22px;
-}
-.brand-img{height:44px;width:auto;display:block}
-h1{
-  margin:0;
-  font-size:26px;
-  line-height:1.15;
-  max-width:20ch;     /* ~3 строки */
-  text-wrap:balance;
-}
-
-/* ---------- Прогресс ---------- */
-.progress{padding:0 18px 14px}
-.bar{height:10px;border-radius:999px;background:#f2f4f7;position:relative;overflow:hidden;border:1px solid #eef0f3}
-.fill{position:absolute;inset:0 100% 0 0;border-radius:999px;
-  background:linear-gradient(90deg,var(--grad1),var(--grad2));transition:inset .35s ease}
-.pct{margin-top:6px;font-size:12px;color:var(--muted)}
-
-/* ---------- Сцена/шаг ---------- */
-.stage{position:relative;padding:16px 18px calc(var(--navH) + 16px);min-height:56vh}
-.step{
-  position:absolute;inset:0;opacity:0;transform:translateY(8px);transition:.28s;
-  display:flex;flex-direction:column;min-height:0;
-}
-.step.active{opacity:1;transform:none}
-.step.out{opacity:0;transform:translateY(-8px)}
-.scroll{flex:1;min-height:0;overflow:auto;padding-right:6px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-gutter:stable both-edges}
-
-/* ---------- Контент шага ---------- */
-.q{font-size:26px;line-height:1.2;margin:6px 0 12px}
-.sub{color:var(--muted);font-size:14px;margin:0 0 14px}
-.illustration{display:block;width:100%;max-height:240px;object-fit:contain;margin:0 0 12px;border-radius:14px;background:#fff;border:1px solid #e9ecf1}
-.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
-.opt{display:flex;gap:10px;align-items:center;padding:14px;border:2px dashed #1f4a7f55;border-radius:14px;background:#fffdf8;cursor:pointer;transition:.18s}
-.opt:hover{border-color:#1f4a7f88;background:#fff8ef}
-.opt.sel{border:2px solid var(--accent);background:#fff1f1}
-.opt .ico{font-size:20px;width:26px;text-align:center}
-.opt .t{font-size:16px}
-
-/* инпуты */
-.inputs{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-.input{background:#fff;border:1px solid #e9ecf1;border-radius:12px;padding:12px;display:flex;flex-direction:column}
-.input label{font-size:12px;color:var(--muted);margin-bottom:6px}
-.input input{background:transparent;border:0;color:var(--ink);font-size:18px;outline:none}
-
-/* ---------- Навигация ---------- */
-.nav{
-  position:sticky;bottom:0;display:flex;gap:12px;justify-content:space-between;align-items:center;
-  padding:12px 18px;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 35%,#fff 60%);border-top:1px solid #eef0f3
-}
-.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;cursor:pointer}
-.btn.secondary{background:#f3f4f6;color:#111827;border:1px solid #e5e7eb}
-.btn.primary{background:linear-gradient(90deg,var(--grad1),var(--grad2));color:#1a0b0b}
-.btn:disabled{opacity:.55;cursor:not-allowed}
-
-/* info/итог */
-.center{display:grid;place-content:center;text-align:center;height:100%}
-.spinner{width:46px;height:46px;border:4px solid #e9ecf1;border-top-color:#ff8a6b;border-radius:50%;margin:8px auto 12px;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.infoText{font-size:24px;text-align:center;margin:6px 0 16px}
-.infoText .hl{color:var(--accent);font-weight:900}
-
-.result{padding:22px 18px 26px;text-align:center}
-.badge{width:170px;height:170px;margin:8px auto 10px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#ffe6ea,#ff98ac 60%,#ff617d);box-shadow:0 18px 40px rgba(255,77,94,.25);color:#fff;display:grid;place-content:center;font-size:64px}
-.plan{font-size:24px;margin:6px 0 8px;color:var(--accent)}
-.desc{max-width:720px;margin:0 auto 12px;line-height:1.55}
-.buy{display:inline-block;margin-top:10px;padding:14px 24px;border-radius:999px;background:linear-gradient(90deg,var(--grad1),var(--grad2));color:#1a0b0b;text-decoration:none;font-weight:900}
-.tools{margin-top:12px;display:flex;gap:10px;justify-content:center}
-.tools .btn{font-weight:700}
-.note{font-size:12px;color:#6b7280;margin-top:8px}
-
-@media (max-width:520px){
-  h1{font-size:22px;max-width:18ch}
-}
-</style>
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card" id="app">
-    <div class="header">
-      <img src="logo.png" alt="Логотип" class="brand-img"/>
-      <h1>Найдём ваш идеальный формат тренировок</h1>
-    </div>
+  <canvas id="confetti"></canvas>
+  <div class="app">
+    <div class="card">
+      <!-- Progress footprints -->
+      <div id="progress" class="progress" aria-label="Прогресс по вопросам"></div><!-- Screens -->
+  <div id="screens">
 
-    <div class="progress">
-      <div class="bar"><div class="fill" id="fill"></div></div>
-      <div class="pct" id="pct">0%</div>
-    </div>
+    <!-- 0. Intro / Name -->
+    <section class="screen active" data-id="intro">
+      <h1>Узнайте, за сколько недель шагательные тренировки помогут вам похудеть</h1>
+      <p class="lead">Ответьте на несколько вопросов — и получите персональный расчёт + план. <strong>Это займёт 1–2 минуты.</strong></p>
+      <div class="row" style="margin-top:8px">
+        <div class="field">
+          <div class="label">Как к вам обращаться?</div>
+          <input id="name" class="text" placeholder="Например, Ирина" />
+        </div>
+      </div>
+      <div class="actions sticky">
+        <button class="btn btn-primary" data-next>Поехали →</button>
+      </div>
+    </section>
 
-    <div class="stage" id="stage"></div>
+    <!-- 1. Age -->
+    <section class="screen" data-id="age">
+      <h2>Ваш возраст</h2>
+      <div class="grid cols-2" id="ageOptions"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
 
-    <div class="nav" id="nav">
-      <button class="btn secondary" id="back">Назад</button>
-      <button class="btn primary" id="next" disabled>Далее</button>
-    </div>
+    <!-- 2. Body type -->
+    <section class="screen" data-id="body">
+      <h2>Телосложение сейчас</h2>
+      <p class="hint">Для наглядности добавили иллюстрации.</p>
+      <div class="grid cols-2" id="bodyOptions"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 2.5 Steps today -->
+    <section class="screen" data-id="steps">
+      <h2>Сколько шагов вы проходите сейчас в день?</h2>
+      <div class="slider-wrap">
+        <input id="stepsRange" type="range" min="0" max="25000" step="250" value="4000" />
+        <div class="row" style="align-items:center; gap:14px; margin-top:6px">
+          <div>Сейчас: <strong><span id="stepsVal">4000</span> шагов</strong></div>
+          <div class="hint">Подсказка: посмотрите в приложении телефона/браслета</div>
+        </div>
+        <div class="hint" style="margin-top:6px">Мы добавим к вашему текущему уровню <strong>+2000 шагов/день</strong> — мягко и безопасно.</div>
+      </div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 3. BMI calc -->
+    <section class="screen" data-id="bmi">
+      <h2>Давайте посчитаем ИМТ</h2>
+      <p class="hint">Можно приблизительно — нам важен порядок величин.</p>
+      <div class="row">
+        <div class="field">
+          <div class="label">Рост, см</div>
+          <input id="height" type="number" inputmode="numeric" class="text" placeholder="Например, 165" />
+        </div>
+        <div class="field">
+          <div class="label">Вес, кг</div>
+          <input id="weight" type="number" inputmode="decimal" class="text" placeholder="Например, 72" />
+        </div>
+      </div>
+      <div id="bmiInfo" class="hint" style="margin-top:10px"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 4. Lifestyle -->
+    <section class="screen" data-id="life">
+      <h2>Образ жизни</h2>
+      <div class="grid cols-2" id="lifeOptions"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 5. Experience -->
+    <section class="screen" data-id="exp">
+      <h2>Опыт тренировок</h2>
+      <div class="grid cols-2" id="expOptions"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 6. Goal -->
+    <section class="screen" data-id="goal">
+      <h2>Цель</h2>
+      <div class="grid cols-2" id="goalOptions"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 7. Motivation -->
+    <section class="screen" data-id="motivation">
+      <h2>Что вас мотивирует больше всего?</h2>
+      <div class="chips" id="motivationChips"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 8. Per week -->
+    <section class="screen" data-id="perweek">
+      <h2>Сколько готовы тренироваться в неделю?</h2>
+      <div class="chips" id="perweekChips"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 9. Hardest -->
+    <section class="screen" data-id="hard">
+      <h2>Что сейчас даётся тяжелее всего?</h2>
+      <div class="grid cols-2" id="hardOptions"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 10. Health -->
+    <section class="screen" data-id="health">
+      <h2>Есть ли состояния, которые важно учитывать?</h2>
+      <div class="chips" id="healthChips"></div>
+      <p class="hint" style="margin-top:8px">Если есть сомнения — перед началом тренировок проконсультируйтесь с врачом.</p>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 11. Nutrition plan -->
+    <section class="screen" data-id="nutrition">
+      <h2>Включим работу с питанием?</h2>
+      <div class="grid cols-2" id="nutriOptions"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next>Далее</button>
+      </div>
+    </section>
+
+    <!-- 12. Product calculator -->
+    <section class="screen" data-id="foodcalc">
+      <h2>Калькулятор продуктов</h2>
+      <p class="hint">Выберите, что вы употребляете <strong>каждый день</strong> — это повлияет на прогноз.</p>
+      <div class="chips" id="foodBad"></div>
+      <div class="divider"></div>
+      <div class="hint">А это — привычки, которые ускоряют результат. Отметьте, если они уже есть:</div>
+      <div class="chips" id="foodGood" style="margin-top:8px"></div>
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" data-next id="calcBtn">Рассчитать результат →</button>
+      </div>
+    </section>
+
+    <!-- 13. Loading/result -->
+    <section class="screen" data-id="loading">
+      <div class="loader">
+        <div class="pulse"></div>
+        <h2 style="margin-top:16px">Прогноз загружается…</h2>
+        <p class="hint">Мы учитываем ваш возраст, ИМТ, активность, шаги и питание.</p>
+      </div>
+    </section>
+
+    <section class="screen" data-id="result">
+      <h2 id="resultTitle">Готово!</h2>
+      <div class="counter" id="resultNumbers">0 кг · 0 недель</div>
+      <p class="sub" id="resultSub"></p>
+      <div class="silhouette" id="silhouette"></div>
+
+      <div class="cta" id="caseBlock" style="display:none"></div>
+
+      <p class="hint" style="margin-top:10px">Средняя продолжительность тренировки — 20–30 минут дома. Ежедневная цель по шагам для вас: <strong id="stepsTarget">+2000 шагов к текущему уровню</strong>.</p>
+
+      <div class="actions sticky">
+        <button class="btn btn-ghost" data-prev>Назад</button>
+        <button class="btn btn-primary" id="toCTA">Перейти к абонементу →</button>
+      </div>
+    </section>
+
+    <!-- 14. Sales screen -->
+    <section class="screen" data-id="sale">
+      <h2 id="saleTitle">Присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡</h2>
+      <p class="lead" id="saleLead"></p>
+      <ul>
+        <li>Домашние шагательные тренировки 20–30 минут</li>
+        <li>Готовые планы на неделю + <em>меню‑конструктор</em></li>
+        <li>Поддержка и мотивация в чате</li>
+        <li>Без прыжков и сложной хореографии</li>
+      </ul>
+      <div class="actions">
+        <a class="btn btn-primary" id="ctaLink" href="#" target="_blank" rel="noopener">Получить абонемент со скидкой</a>
+        <button class="btn btn-ghost" data-prev>Назад</button>
+      </div>
+      <p class="hint" style="margin-top:10px">Важно: прогноз носит ознакомительный характер и не заменяет медицинские рекомендации.</p>
+    </section>
+
   </div>
 </div>
 
-<script>
-const ANALYTICS_ENDPOINT = ""; // при необходимости вставьте свой backend
+  </div>  <script>
+    /* ————— Utilities ————— */
+    const $ = (s, el=document) => el.querySelector(s);
+    const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+    const vibrate = (ms=12)=> { try{ if(navigator.vibrate) navigator.vibrate(ms) }catch(e){} };
 
-const PLANS = {
-  start45:{title:"Комфортный старт 45+",icon:"🫶",
-    desc:"Щадящие тренировки без прыжков, мягкое жиросжигание, забота о суставах.",
-    buy:"https://walk-walk.ru/checkout?plan=start45"},
-  fatburn:{title:"Жиросжигание Light",icon:"🔥",
-    desc:"Шагательные и танцевальные кардио-связки для снижения веса в комфортном темпе.",
-    buy:"https://walk-walk.ru/checkout?plan=fatburn"},
-  tone:{title:"Тонус и осанка",icon:"🎯",
-    desc:"Функциональные комплексы на спину и корпус: подтянутая осанка и крепкий центр.",
-    buy:"https://walk-walk.ru/checkout?plan=tone"},
-  party:{title:"Шагательные дискотеки",icon:"🎵",
-    desc:"Музыка, простые ритмы, много шагов — худеем «на радостях».",
-    buy:"https://walk-walk.ru/checkout?plan=party"},
-  mobility:{title:"Подвижность и растяжка",icon:"🧘‍♀️",
-    desc:"Гибкость, суставная мобилизация и расслабление — отличное дополнение к любому плану.",
-    buy:"https://walk-walk.ru/checkout?plan=mobility"},
-  fast20:{title:"Быстрый старт 20–25 минут",icon:"⏱️",
-    desc:"Короткие, но эффективные занятия, когда нет времени на длинные тренировки.",
-    buy:"https://walk-walk.ru/checkout?plan=fast20"}
-};
-
-/* ---------- Шаги ---------- */
-const STEPS = [
-  {type:"choice", q:"Ваш возраст", image:"age.png",
-    options:[
-      {t:"18–29 лет", ico:"✨"},
-      {t:"30–39 лет", ico:"🌿"},
-      {t:"40–49 лет", ico:"🌸"},
-      {t:"50+ лет",   ico:"💫", plan:"start45"}
-    ]
-  },
-  {type:"info", image:"2.jpg",
-    text:'Больше <span class="hl">8000+</span> женщин уже занимаются с ШАГАЙ ДОМА⚡'
-  },
-  {type:"choice", q:"Какая твоя главная цель?", image:"3.png", options:[
-    {t:"Похудеть комфортно", plan:"fatburn", ico:"🔥"},
-    {t:"Начать мягко", plan:"start45", ico:"🫶"},
-    {t:"Подтянуть тело", plan:"tone", ico:"🎯"},
-    {t:"Движение под музыку", plan:"party", ico:"🎵"},
-    {t:"Гибкость и лёгкость", plan:"mobility", ico:"🧘‍♀️"},
-    {t:"Короткие занятия 20–25 мин", plan:"fast20", ico:"⏱️"}
-  ]},
-  /* новый 4-й вопрос — телосложение */
-  {type:"choice", q:"Какой из вариантов лучше описывает ваше телосложение?", image:"weight.png", options:[
-    {t:"Худенькое",        plan:"tone",    ico:"🪶"},
-    {t:"Среднее",          plan:"fatburn", ico:"🙂"},
-    {t:"Крупное",          plan:"fatburn", ico:"🔥"},
-    {t:"Избыточный вес",   plan:"fatburn", ico:"🔥🔥"}
-  ]},
-  {type:"choice", q:"Текущий уровень активности:", options:[
-    {t:"Новичок / перерыв", plan:"start45", ico:"🌱"},
-    {t:"Редко двигаюсь",    plan:"fast20",  ico:"⌛"},
-    {t:"Средний",           plan:"fatburn", ico:"🙂"},
-    {t:"Энергичный, но без прыжков", plan:"party", ico:"🎶"},
-    {t:"Нужен акцент на спину/корпус", plan:"tone", ico:"🎯"}
-  ]},
-  {type:"inputs", q:"Параметры для индивидуального подбора",
-    sub:"Рост и вес помогут корректнее подобрать темп. (Можно приблизительно)",
-    fields:[
-      {id:"height",label:"Рост (см)",min:130,max:220,placeholder:"165"},
-      {id:"weight",label:"Вес (кг)",min:35,max:180,placeholder:"70"}
-    ]
-  },
-  {type:"choice", q:"Есть ли ограничения?", options:[
-    {t:"Колени/суставы — щадящая нагрузка", plan:"start45", ico:"🦵"},
-    {t:"Чувствительная спина/шея",          plan:"tone",   ico:"🧍‍♀️"},
-    {t:"Нет серьёзных ограничений",         plan:"fatburn",ico:"💪"},
-    {t:"Предпочитаю низкую ударную нагрузку", plan:"mobility", ico:"🧘‍♀️"}
-  ]},
-  {type:"choice", q:"Какие форматы нравятся больше?", options:[
-    {t:"Шагательные/танцевальные", plan:"party",   ico:"🎵"},
-    {t:"Функциональные на корпус", plan:"tone",    ico:"🎯"},
-    {t:"Кардио + немного силовых", plan:"fatburn", ico:"🔥"},
-    {t:"Растяжка и дыхание",       plan:"mobility",ico:"🧘‍♀️"},
-    {t:"Короткие экспресс-занятия",plan:"fast20",  ico:"⏱️"},
-    {t:"Мягко 45+",                plan:"start45", ico:"🫶"}
-  ]},
-  {type:"choice", q:"Инвентарь:", options:[
-    {t:"Без инвентаря",        plan:"party",    ico:"🚫"},
-    {t:"Только коврик",        plan:"mobility", ico:"🧘"},
-    {t:"Резинки/гантели light",plan:"fatburn",  ico:"🏋️"},
-    {t:"Мяч/ролл/лента",       plan:"tone",     ico:"🧶"}
-  ]},
-  {type:"choice", q:"Темп занятий:", options:[
-    {t:"Спокойный",              plan:"mobility", ico:"🫧"},
-    {t:"Мягкий, без прыжков",    plan:"start45",  ico:"🫶"},
-    {t:"Средний, комфортный",    plan:"fatburn",  ico:"🙂"},
-    {t:"Энергичный, но не сложный", plan:"party", ico:"🎶"},
-    {t:"С акцентом на технику",  plan:"tone",     ico:"🎯"}
-  ]},
-  {type:"loading"}
-];
-
-let step=0;
-const scores={};
-const data={answers:[]};
-const sessionId=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-
-const stage=document.getElementById('stage');
-const fill=document.getElementById('fill');
-const pct=document.getElementById('pct');
-const nextBt=document.getElementById('next');
-const backBt=document.getElementById('back');
-const navEl=document.getElementById('nav');
-
-function updateNavH(){ const h=(navEl?.offsetHeight||84)+'px'; document.documentElement.style.setProperty('--navH',h);}
-window.addEventListener('resize',updateNavH); setTimeout(updateNavH,0);
-
-function setProgress(){
-  const total=STEPS.length;
-  const p=Math.round((Math.min(step,total-1))/(total-1)*100);
-  fill.style.insetInlineEnd=(100-p)+'%';
-  pct.textContent=p+'%';
-}
-function bump(plan,n=1){ if(!plan) return; scores[plan]=(scores[plan]||0)+n; }
-function bmiScore(h,w){ if(!h||!w) return; const m=w/Math.pow(h/100,2); if(m>=27)bump('fatburn',2); else if(m>=24)bump('fatburn',1); if(m<22)bump('tone',1);}
-function logAnswer(stepIdx,qText,answerText,planKey){
-  const rec={step:stepIdx,q:qText,answer:answerText,plan:(planKey||null),ts:new Date().toISOString()};
-  const i=data.answers.findIndex(x=>x.step===stepIdx);
-  if(i>=0) data.answers[i]=rec; else data.answers.push(rec);
-}
-
-function render(){
-  setProgress(); updateNavH();
-  const prev=stage.querySelector('.step.active');
-  if(prev){ prev.classList.remove('active'); prev.classList.add('out'); setTimeout(()=>prev.remove(),260); }
-  const cfg=STEPS[step];
-  const el=document.createElement('div'); el.className='step'; stage.appendChild(el);
-  nextBt.disabled=true; backBt.disabled=(step===0);
-
-  if(cfg.type==='choice'){
-    el.innerHTML=`
-      ${cfg.image?`<img class="illustration" src="${cfg.image}" alt="">`:''}
-      <div class="q">${cfg.q}</div>
-      ${cfg.sub?`<div class="sub">${cfg.sub}</div>`:''}
-      <div class="scroll"><div class="grid">
-        ${cfg.options.map(o=>`
-          <button class="opt" data-plan="${o.plan||''}">
-            <div class="ico">${o.ico||'•'}</div><div class="t">${o.t}</div>
-          </button>`).join('')}
-      </div></div>`;
-    el.addEventListener('click',(e)=>{
-      const btn=e.target.closest('.opt'); if(!btn) return;
-      el.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));
-      btn.classList.add('sel'); nextBt.disabled=false;
-      const text=btn.querySelector('.t').textContent.trim(); const p=btn.dataset.plan||null;
-      if(p) bump(p,1); logAnswer(step,cfg.q,text,p);
-      btn.scrollIntoView({block:'nearest',behavior:'smooth'});
-    });
-  }
-
-  if(cfg.type==='info'){
-    nextBt.disabled=false;
-    el.innerHTML=`
-      ${cfg.image?`<img class="illustration" src="${cfg.image}" alt="">`:''}
-      <div class="infoText">${cfg.text}</div>`;
-    logAnswer(step,'Инфо-слайд','seen',null);
-  }
-
-  if(cfg.type==='inputs'){
-    el.innerHTML=`
-      <div class="q">${cfg.q}</div>
-      ${cfg.sub?`<div class="sub">${cfg.sub}</div>`:''}
-      <div class="scroll"><div class="inputs">
-        ${cfg.fields.map(f=>`
-          <div class="input">
-            <label for="${f.id}">${f.label}</label>
-            <input id="${f.id}" type="number" inputmode="decimal"
-              placeholder="${f.placeholder||''}" min="${f.min||''}" max="${f.max||''}"/>
-          </div>`).join('')}
-      </div></div>`;
-    const h=el.querySelector('#height'), w=el.querySelector('#weight');
-    const validate=()=>{
-      const hv=Number(h?.value||h?.placeholder||0);
-      const wv=Number(w?.value||w?.placeholder||0);
-      nextBt.disabled=!(hv>=130&&hv<=220&&wv>=35&&wv<=180);
-      if(!nextBt.disabled){ data.height=hv; data.weight=wv; }
+    // Build tiny footprint SVG
+    const footprintSVG = () => {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('viewBox','0 0 64 64'); svg.classList.add('foot');
+      svg.innerHTML = `<path d="M26 38c-7 1-8 8-6 13 3 6 12 7 18 3 5-4 7-12 3-16-3-3-9-1-15 0Z" fill="var(--brand-orange)"/>
+        <circle cx="19" cy="21" r="5" fill="var(--brand-yellow)"/>
+        <circle cx="28" cy="18" r="4" fill="var(--brand-yellow)"/>
+        <circle cx="36" cy="18" r="3.8" fill="var(--brand-yellow)"/>
+        <circle cx="44" cy="21" r="3.2" fill="var(--brand-yellow)"/>
+        <circle cx="49" cy="26" r="2.6" fill="var(--brand-yellow)"/>`;
+      return svg;
     };
-    el.addEventListener('input',validate); validate();
-  }
 
-  if(cfg.type==='loading'){
-    el.innerHTML=`<div class="center"><div class="spinner"></div><div class="sub">Анализируем ответы…</div></div>`;
-    nextBt.disabled=true; backBt.disabled=true;
-    if(data.height&&data.weight) bmiScore(data.height,data.weight);
-    setTimeout(showResult,1100);
-  }
+    // Confetti (simple, no deps)
+    const Confetti = (function(){
+      const cnv = document.getElementById('confetti');
+      const ctx = cnv.getContext('2d');
+      let W, H, parts = [], running=false;
+      const colors = ['#CF2C02','#E85D04','#FFBA08','#ffffff'];
+      function resize(){ W = cnv.width = innerWidth; H = cnv.height = innerHeight; }
+      function spawn(n=120){
+        for(let i=0;i<n;i++){
+          parts.push({
+            x: Math.random()*W,
+            y: -10 - Math.random()*H*0.5,
+            r: 4+Math.random()*6,
+            c: colors[(Math.random()*colors.length)|0],
+            v: 1+Math.random()*3,
+            a: Math.random()*Math.PI*2,
+            s: 0.02 + Math.random()*0.04
+          });
+        }
+      }
+      function draw(){
+        if(!running) return;
+        ctx.clearRect(0,0,W,H);
+        for(const p of parts){
+          p.y += p.v; p.x += Math.sin(p.a+=p.s);
+          ctx.fillStyle=p.c; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+        }
+        parts = parts.filter(p=>p.y < H+20);
+        requestAnimationFrame(draw);
+      }
+      function burst(){ resize(); spawn(180); if(!running){ running=true; draw(); } setTimeout(()=>running=false, 1800); }
+      addEventListener('resize', resize); resize();
+      return { burst };
+    })();
 
-  requestAnimationFrame(()=>el.classList.add('active'));
-}
+    /* ————— Quiz screens ————— */
+    const screens = $$('#screens .screen');
+    let idx = 0; // current screen index
+    const progress = document.getElementById('progress');
+    const TOTAL_STEPS = 15; // number of footprints
+    const answers = JSON.parse(localStorage.getItem('sd_quiz')||'{}');
 
-document.getElementById('next').addEventListener('click',()=>{ step=Math.min(step+1,STEPS.length-1); render(); });
-document.getElementById('back').addEventListener('click',()=>{ if(step===0) return; step--; render(); });
+    // Build progress footprints
+    for(let i=0;i<TOTAL_STEPS;i++){ progress.appendChild(footprintSVG()); }
+    function renderProgress(){
+      $$('.foot', progress).forEach((el,i)=>{
+        el.classList.toggle('active', i <= idx);
+      });
+    }
 
-/* -------- сохранение и итог -------- */
-function toCSVRows(items){
-  const rows=[], head=['sessionId','createdAt','bestPlan','height','weight','answersJSON','scoresJSON','userAgent','screenW','screenH'];
-  rows.push(head);
-  for(const it of items){
-    rows.push([
-      it.sessionId,it.createdAt,it.derived.bestPlan,it.user.height||'',it.user.weight||'',
-      JSON.stringify(it.answers),JSON.stringify(it.derived.scores),
-      it.meta.ua,it.meta.w,it.meta.h
-    ]);
-  }
-  return rows.map(r=>r.map(v=>{const s=String(v??'');return /[",\n;]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;}).join(';')).join('\n');
-}
-function downloadCSV(all){
-  const csv=toCSVRows(all);
-  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`quiz_export_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); a.remove();
-}
-function sendToEndpoint(payload){
-  if(!ANALYTICS_ENDPOINT) return;
-  try{ fetch(ANALYTICS_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{}); }catch(_){}
-}
-function showResult(){
-  let bestKey=Object.keys(PLANS)[0], bestVal=-1;
-  for(const k of Object.keys(PLANS)){ const v=scores[k]||0; if(v>bestVal){bestVal=v; bestKey=k;} }
-  const plan=PLANS[bestKey];
+    function show(i){
+      screens[idx].classList.remove('active');
+      idx = Math.max(0, Math.min(screens.length-1, i));
+      screens[idx].classList.add('active');
+      renderProgress();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
 
-  const payload={
-    sessionId,
-    createdAt:new Date().toISOString(),
-    answers:data.answers,
-    user:{height:data.height||null,weight:data.weight||null},
-    derived:{bestPlan:bestKey,scores:{...scores}},
-    meta:{ua:navigator.userAgent,w:innerWidth,h:innerHeight}
-  };
-  const key='quizLogs'; const existing=JSON.parse(localStorage.getItem(key)||'[]'); existing.push(payload); localStorage.setItem(key,JSON.stringify(existing));
-  sendToEndpoint(payload);
+    // Global nav buttons
+    document.addEventListener('click', e=>{
+      const next = e.target.closest('[data-next]');
+      const prev = e.target.closest('[data-prev]');
+      if(next){ vibrate(); goNext(); }
+      if(prev){ vibrate(); show(idx-1); }
+    });
 
-  const app=document.getElementById('app');
-  app.innerHTML=`
-    <div class="header">
-      <img src="logo.png" alt="Логотип" class="brand-img"/>
-      <h1>Ваш результат готов!</h1>
-    </div>
-    <div class="result">
-      <div class="badge">${plan.icon||'⭐'}</div>
-      <div class="plan">Вам подходит: <b>${plan.title}</b></div>
-      <p class="desc">${plan.desc}</p>
-      <a class="buy" href="${plan.buy}" target="_blank" rel="noopener">Купить программу</a>
-      <div class="tools">
-        <button class="btn secondary" id="again">Пройти ещё раз</button>
-        <button class="btn secondary" id="export">Скачать ответы (CSV)</button>
-      </div>
-      <div class="note">Данные сохраняются локально — выгрузите CSV кнопкой выше.</div>
-    </div>`;
-  document.getElementById('again').addEventListener('click',()=>location.reload());
-  document.getElementById('export').addEventListener('click',()=>downloadCSV(JSON.parse(localStorage.getItem('quizLogs')||'[]')));
-}
+    function goNext(){
+      // simple required checks per screen
+      const s = screens[idx].dataset.id;
+      if(s==='age' && !answers.age) return shake(screens[idx]);
+      if(s==='body' && !answers.body) return shake(screens[idx]);
+      if(s==='bmi' && (!answers.height || !answers.weight)) return shake(screens[idx]);
+      if(s==='life' && !answers.life) return shake(screens[idx]);
+      if(s==='exp' && !answers.exp) return shake(screens[idx]);
+      if(s==='goal' && !answers.goal) return shake(screens[idx]);
+      if(s==='perweek' && !answers.perweek) return shake(screens[idx]);
+      if(s==='health' && !answers.health) answers.health=[];
+      if(s==='nutrition' && !answers.nutri) answers.nutri='no';
+      show(idx+1);
+    }
 
-render();
-</script>
-</body>
-</html>
+    function shake(el){ el.style.transform='translateX(0)'; el.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:280}); vibrate(25) }
+
+    // Build options
+    const ageOpts = ['18–29','30–39','40–49','50+'];
+    buildOptions($('#ageOptions'), ageOpts, 'age');
+
+    const bodyOpts = [
+      {label:'Худощавое', key:'slim', svg: bodySVG(0.80)},
+      {label:'Среднее', key:'avg', svg: bodySVG(1.00)},
+      {label:'Крупное', key:'large', svg: bodySVG(1.12)},
+      {label:'Избыточный вес', key:'obese', svg: bodySVG(1.26)},
+    ];
+    buildOptionCards($('#bodyOptions'), bodyOpts, 'body');
+
+    const lifeOpts = ['Сидячая работа','Умеренно активная','Активная'];
+    buildOptions($('#lifeOptions'), lifeOpts, 'life');
+
+    const expOpts = ['Никогда не занималась','Иногда дома / по видео','Регулярно'];
+    buildOptions($('#expOptions'), expOpts, 'exp');
+
+    const goalOpts = ['Сбросить 3–5 кг','Сбросить 5–10 кг','10+ кг','Поддерживать фигуру / вернуть тонус'];
+    buildOptions($('#goalOptions'), goalOpts, 'goal');
+
+    const motiv = ['Для здоровья','Для внешности','Для энергии и лёгкости','Для уверенности в себе'];
+    buildChips($('#motivationChips'), motiv, 'motivation', true);
+
+    buildChips($('#perweekChips'), ['2 раза','3 раза','4–5 раз','Каждый день 20–30 мин'], 'perweek');
+
+    const hardOpts = ['Долгая прогулка утомляет','Каждый пролёт по лестнице — испытание','Стыдно включаться в активные игры','Прыжки','Ничего из этого'];
+    buildOptions($('#hardOptions'), hardOpts, 'hard');
+
+    const health = ['Диабет','Проблемы со щитовидкой','Гипертония','Боль в суставах','Беременность','Нет'];
+    buildChips($('#healthChips'), health, 'health', true);
+
+    const nutri = [
+      {label:'Буду питаться по меню‑конст
