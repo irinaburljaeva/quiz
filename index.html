@@ -449,4 +449,419 @@ body.edit-mode .editable:hover{ background:rgba(255,186,8,.12) }
       show(idx+1);
     }
 
-    function shake(el){ el.style.transform='translateX(0)'; el.animate([{tra
+    function shake(el){ el.style.transform='translateX(0)'; el.animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:280}); vibrate(25) }
+
+    // Build options
+    const ageOpts = ['18–29','30–39','40–49','50+'];
+    buildOptions($('#ageOptions'), ageOpts, 'age');
+
+    const bodyOpts = [
+      {label:'Худощавое', key:'slim', svg: bodySVG(0.80)},
+      {label:'Среднее', key:'avg', svg: bodySVG(1.00)},
+      {label:'Крупное', key:'large', svg: bodySVG(1.12)},
+      {label:'Избыточный вес', key:'obese', svg: bodySVG(1.26)},
+    ];
+    buildOptionCards($('#bodyOptions'), bodyOpts, 'body');
+
+    const lifeOpts = ['Сидячая работа','Умеренно активная','Активная'];
+    buildOptions($('#lifeOptions'), lifeOpts, 'life');
+
+    const expOpts = ['Никогда не занималась','Иногда дома / по видео','Регулярно'];
+    buildOptions($('#expOptions'), expOpts, 'exp');
+
+    const goalOpts = ['Сбросить 3–5 кг','Сбросить 5–10 кг','10+ кг','Поддерживать фигуру / вернуть тонус'];
+    buildOptions($('#goalOptions'), goalOpts, 'goal');
+
+    const motiv = ['Для здоровья','Для внешности','Для энергии и лёгкости','Для уверенности в себе'];
+    buildChips($('#motivationChips'), motiv, 'motivation', true);
+
+    buildChips($('#perweekChips'), ['2 раза','3 раза','4–5 раз','Каждый день 20–30 мин'], 'perweek');
+
+    const hardOpts = ['Долгая прогулка утомляет','Каждый пролёт по лестнице — испытание','Стыдно включаться в активные игры','Прыжки','Ничего из этого'];
+    buildOptions($('#hardOptions'), hardOpts, 'hard');
+
+    const health = ['Диабет','Проблемы со щитовидкой','Гипертония','Боль в суставах','Беременность','Нет'];
+    buildChips($('#healthChips'), health, 'health', true);
+
+    const nutri = [
+      {label:'Буду питаться по меню‑конструктору в клубе', key:'menu'},
+      {label:'Хочу научиться правильно составлять тарелку', key:'plate'},
+      {label:'Нет, пока без питания', key:'no'}
+    ];
+    buildOptionCards($('#nutriOptions'), nutri.map(n=>({label:n.label, key:n.key})), 'nutri');
+
+    const foodBad = ['Сладкая газировка','Выпечка','Фастфуд','Колбаса/сосиски','Сыр 45%+','Ночные перекусы','Алкоголь чаще 2 р/нед','Сладкий чай/кофе','Очень солёная пища'];
+    const foodGood = ['1.5–2 л воды','Овощи 400 г/день','Фрукты ежедневно','Белок в каждом приёме пищи','10–20 мин растяжки','8 000+ шагов уже сейчас'];
+    buildChips($('#foodBad'), foodBad, 'foodBad', true);
+    buildChips($('#foodGood'), foodGood, 'foodGood', true);
+
+    // Steps slider
+    const stepsRange = document.getElementById('stepsRange');
+    const stepsVal = document.getElementById('stepsVal');
+    stepsRange.addEventListener('input', e=>{ stepsVal.textContent = e.target.value; answers.stepsNow = +e.target.value; persist(); });
+    if(answers.stepsNow){ stepsRange.value = answers.stepsNow; stepsVal.textContent = answers.stepsNow; }
+
+    // Name field
+    const nameInput = document.getElementById('name');
+    nameInput.addEventListener('input', e=>{ answers.name = e.target.value.trim(); persist(); });
+    if(answers.name) nameInput.value = answers.name;
+
+    // BMI live helper
+    const h = document.getElementById('height');
+    const w = document.getElementById('weight');
+    const bmiInfo = document.getElementById('bmiInfo');
+    function updateBMI(){
+      const height = parseFloat(h.value); const weight = parseFloat(w.value);
+      if(height>0 && weight>0){
+        answers.height = height; answers.weight = weight; persist();
+        const m = height/100; const bmi = +(weight/(m*m)).toFixed(1);
+        answers.bmi = bmi; persist();
+        bmiInfo.innerHTML = `Ваш ИМТ: <strong>${bmi}</strong> — ${bmiBand(bmi)}. <br/><span class="hint">ИМТ помогает приблизительно оценить, с какой скорости начинать. Это не диагноз.</span>`;
+      }
+    }
+    h.addEventListener('input', updateBMI); w.addEventListener('input', updateBMI);
+    if(answers.height){ h.value = answers.height; } if(answers.weight){ w.value = answers.weight; updateBMI(); }
+
+    // Persist
+    function persist(){ localStorage.setItem('sd_quiz', JSON.stringify(answers)); }
+
+    // Build helpers
+    function buildOptions(root, arr, key){
+      root.innerHTML = '';
+      arr.forEach(label=>{
+        const div = document.createElement('label'); div.className='opt';
+        div.innerHTML = `<input type="radio" name="${key}"><span>${label}</span><span class="badge">выбрано</span>`;
+        root.appendChild(div);
+        div.addEventListener('click',()=>{
+          $$('.opt', root).forEach(o=>o.classList.remove('active'));
+          div.classList.add('active'); answers[key]=label; vibrate(); persist();
+        });
+        if(answers[key]===label) div.classList.add('active');
+      });
+    }
+
+    function buildOptionCards(root, arr, key){
+      root.innerHTML='';
+      arr.forEach(obj=>{
+        const div = document.createElement('label'); div.className='opt';
+        div.innerHTML = `${obj.svg||''}<span>${obj.label}</span><span class="badge">выбрано</span>`;
+        root.appendChild(div);
+        div.addEventListener('click',()=>{
+          $$('.opt', root).forEach(o=>o.classList.remove('active'));
+          div.classList.add('active'); answers[key]=obj.key||obj.label; vibrate(); persist();
+        });
+        if(answers[key]===(obj.key||obj.label)) div.classList.add('active');
+      });
+    }
+
+    function buildChips(root, arr, key, multi=false){
+      root.innerHTML='';
+      const current = new Set(Array.isArray(answers[key])?answers[key]: (answers[key]?[answers[key]]:[]) );
+      arr.forEach(label=>{
+        const chip = document.createElement('button'); chip.type='button'; chip.className='chip'; chip.textContent=label;
+        if(current.has(label)) chip.classList.add('active');
+        chip.addEventListener('click',()=>{
+          chip.classList.toggle('active'); vibrate(8);
+          if(multi){
+            const sel = chipsSelection(root);
+            answers[key] = sel; persist();
+          }else{
+            // single
+            $$('.chip', root).forEach(c=>c.classList.remove('active'));
+            chip.classList.add('active'); answers[key]=label; persist();
+          }
+        });
+        root.appendChild(chip);
+      });
+      function chipsSelection(container){ return $$('.chip.active', container).map(c=>c.textContent); }
+    }
+
+    // Simple body silhouette SVG (waist width controlled by factor)
+    function bodySVG(factor=1){
+      const width = 54*factor; // waist area width
+      return `<svg width="42" height="56" viewBox="0 0 84 112" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="42" cy="16" rx="12" ry="12" fill="#FFD9A6"/>
+        <path d="M14 104c6-18 4-30 16-42-12-14-8-30 4-38h16c12 8 16 24 4 38 12 12 10 24 16 42H14Z" fill="#FFE9C7" stroke="#F1C48B" stroke-width="2"/>
+        <rect x="${42-width/2}" y="52" width="${width}" height="18" rx="9" fill="#FFC89D" opacity=".6"/>
+      </svg>`
+    }
+
+    // Calculate button
+    $('#calcBtn').addEventListener('click', ()=>{
+      show(idx+1); // to loading
+      setTimeout(() => { calculateResult(); }, 900);
+    });
+
+    function bmiBand(b){
+      if(b<18.5) return 'ниже нормы';
+      if(b<25) return 'норма';
+      if(b<30) return 'избыточная масса';
+      return 'ожирение';
+    }
+
+    function goalKg(){
+      const g = answers.goal || '';
+      if(g.includes('3–5')) return 4;
+      if(g.includes('5–10')) return 8;
+      if(g.includes('10+')) return 12;
+      return 3; // поддержание => мягкая цель
+    }
+
+    function perWeekFactor(){
+      const p = answers.perweek||'';
+      if(p.includes('Каждый день')) return 1.2;
+      if(p.includes('4–5')) return 1.15;
+      if(p.includes('3')) return 1.05;
+      return 0.95; // 2 раза
+    }
+
+    function lifeFactor(){
+      const l = answers.life||'';
+      if(l.includes('Сидячая')) return 0.9;
+      if(l.includes('Умеренно')) return 1.0;
+      return 1.08; // Активная
+    }
+
+    function ageFactor(){
+      const a = answers.age||'';
+      if(a.includes('50')) return 0.88;
+      if(a.includes('40')) return 0.94;
+      if(a.includes('30')) return 0.98;
+      return 1.06; // 18–29
+    }
+
+    function expFactor(){
+      const e = answers.exp||'';
+      if(e.includes('Никогда')) return 0.95;
+      if(e.includes('Регулярно')) return 1.08;
+      return 1.0;
+    }
+
+    function bodyAdj(){
+      const b = answers.body||'';
+      if(b==='slim') return 0.92;
+      if(b==='avg') return 1.0;
+      if(b==='large') return 0.96;
+      if(b==='obese') return 0.92; // начнём мягче, но темп устойчивый
+      return 1.0;
+    }
+
+    function stepsFactor(){
+      const now = +answers.stepsNow||4000;
+      const added = 2000; // модель из проектного ТЗ
+      const target = now + added;
+      // Чем меньше база, тем сильнее прирост к расходу, но в разумных пределах
+      let boost = 1.0 + (added/10000); // +0.2 при +2000
+      if(now<3000) boost += 0.08;
+      if(now>9000) boost -= 0.06;
+      return {factor: Math.max(0.95, Math.min(1.28, boost)), target};
+    }
+
+    function nutritionFactor(){
+      let f = 1.0;
+      if(answers.nutri==='menu') f += 0.22;
+      else if(answers.nutri==='plate') f += 0.12;
+      else f -= 0.12;
+      const bad = new Set(answers.foodBad||[]);
+      const good = new Set(answers.foodGood||[]);
+      f -= bad.size * 0.03;
+      f += Math.min(good.size*0.02, 0.10);
+      return Math.max(0.7, Math.min(1.35, f));
+    }
+
+    function healthFactor(){
+      const h = new Set(answers.health||[]);
+      let f = 1.0;
+      if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония')) f -= 0.06; // осторожнее темп
+      if(h.has('Боль в суставах')) f -= 0.04;
+      return Math.max(0.8, f);
+    }
+
+    function calcRateKgPerWeek(){
+      // Базовая безопасная скорость: 0.5 кг/нед
+      let rate = 0.5;
+      // BMI adjust
+      const bmi = answers.bmi || 26;
+      if(bmi>=30) rate += 0.08; else if(bmi<23) rate -= 0.08;
+      rate *= ageFactor();
+      rate *= lifeFactor();
+      rate *= expFactor();
+      rate *= bodyAdj();
+      const sF = stepsFactor().factor; rate *= sF;
+      rate *= nutritionFactor();
+      rate *= healthFactor();
+      // Clamp
+      rate = Math.max(0.25, Math.min(0.9, rate));
+      return +rate.toFixed(2);
+    }
+
+    function calculateResult(){
+      const name = answers.name?.trim() || 'Друзья';
+      const kgGoal = goalKg();
+      const rate = calcRateKgPerWeek();
+      const weeks = Math.max(4, Math.min(16, Math.ceil(kgGoal / rate)));
+      const kg = kgGoal; // показываем цель как достижимую при этом сроке
+      const {target} = stepsFactor();
+
+      // Animate numbers
+      $('#resultTitle').textContent = `${name}, ваш прогноз готов ✨`;
+      showScreenResult(kg, weeks);
+      $('#resultSub').innerHTML = `При темпе <strong>${rate} кг/нед</strong> и ежедневных шагах <strong>${target.toLocaleString('ru-RU')}</strong>.`;
+      $('#stepsTarget').textContent = `${target.toLocaleString('ru-RU')} шагов/день`;
+
+      // Silhouette morph (приблизительно)
+      const height = answers.height || 165; const weight = answers.weight || 72;
+      const afterWeight = Math.max(40, weight - kg);
+      const m = height/100;
+      const bmiAfter = afterWeight/(m*m);
+      // map BMI 19..32 -> factor 0.78..1.22
+      const factor = mapClamp(bmiAfter, 19, 32, 0.78, 1.22);
+      $('#silhouette').innerHTML = bodySVG(factor);
+
+      // Case block
+      const caseBlock = $('#caseBlock');
+      const cases = [
+        {cond: kg>=10, html:`<h3>Как у Анны: −12 кг за 10 недель</h3><p>Старт с 4000 шагов → довели до 9000 и добавили 20‑минутные тренировки. Главное — мягко и регулярно. У вас очень похожий профиль.</p>`},
+        {cond: kg>=6 && kg<10, html:`<h3>Как у Марины: −7 кг за 8 недель</h3><p>Комбинация шагательных + меню‑конструктор. 25 минут в день и +2000 шагов к базе.</p>`},
+        {cond: kg<6, html:`<h3>Как у Светланы: −4.5 кг за 6 недель</h3><p>Без голодовок и прыжков. Мягко увеличили шаги и подключили лёгкие силовые блоки.</p>`},
+      ];
+      const picked = cases.find(c=>c.cond);
+      caseBlock.style.display = 'block';
+      caseBlock.innerHTML = picked.html + `<p class="hint" style="margin-top:6px">* Кейсы основаны на реальном опыте участниц клуба. Результаты индивидуальны.</p>`;
+
+      // Fire confetti
+      Confetti.burst();
+
+      // Prepare sale text
+      const saleName = answers.name?.trim() ? `${answers.name}, ` : '';
+      $('#saleTitle').textContent = `${saleName}присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`;
+      $('#saleLead').innerHTML = `Чтобы прийти к цели <strong>≈${kg} кг</strong> за <strong>${weeks} недель</strong>, подключите готовые планы и поддержку — первые изменения заметны уже через 1–2 недели.`;
+      const utm = `?utm_source=quiz&utm_medium=cta&utm_campaign=sd_weight_calc`;
+      $('#ctaLink').href = 'https://walk-walk.ru/' + utm; // ← замените на лендинг/офер
+
+      // Move to result screen
+      show(getIndexById('result'));
+    }
+
+    function showScreenResult(kg, weeks){
+      const el = $('#resultNumbers');
+      // Start count from visually engaging numbers
+      animateNumber(12, weeks, 1500, v=>{
+        el.textContent = `${kg} кг · ${v} недель`;
+      }, true);
+    }
+
+    function animateNumber(from, to, dur, cb, integer=true){
+      const start = performance.now();
+      function frame(now){
+        const p = Math.min(1, (now-start)/dur);
+        const val = from + (to-from)*easeOutCubic(p);
+        const out = integer ? Math.round(val) : +val.toFixed(1);
+        cb(out);
+        if(p<1) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+    const easeOutCubic = t=>1-Math.pow(1-t,3);
+
+    function getIndexById(id){ return screens.findIndex(s=>s.dataset.id===id); }
+
+    // Change screens with preload of loading effect on calc
+    function mapClamp(v, inMin, inMax, outMin, outMax){
+      const cl = Math.max(inMin, Math.min(inMax, v));
+      const r = (cl-inMin)/(inMax-inMin); return outMin + r*(outMax-outMin);
+    }
+
+    // Hook result → sale
+    $('#toCTA').addEventListener('click', ()=>{
+      show(getIndexById('sale'));
+    });
+
+    // Initialize
+    renderProgress();
+
+    /* ————— Accessibility helpers ————— */
+    document.addEventListener('keydown', (e)=>{
+      if(e.key==='ArrowRight') { goNext(); }
+      if(e.key==='ArrowLeft') { show(idx-1); }
+    });
+      // Дополнительная подстраховка для стартовой кнопки
+    const startBtn = document.getElementById('startBtn');
+    if(startBtn){ startBtn.addEventListener('click', ()=>{ /* если глобальный делегат кликов не сработал */ try{ if(typeof goNext==='function'){ goNext(); } }catch(e){} }); }
+  });
+</script>
+  
+  <!-- Optional embedded copy; paste your JSON here when публикуете -->
+  <script id="sd-copy" type="application/json">{}</script>
+
+  <script>
+    // ——— Technical edit mode for texts ———
+    (function(){
+      const qs = new URLSearchParams(location.search);
+      const EDIT = qs.get('edit')==='1' || localStorage.getItem('sd_edit')==='1';
+      if(qs.get('reset_copy')==='1'){ localStorage.removeItem('sd_copy'); }
+
+      // 1) Assign stable data-edit-id to text elements
+      const WL = '#screens h1, #screens h2, #screens p, #screens .lead, #screens .hint, #screens button, #saleTitle, #saleLead, #resultTitle, #toCTA';
+      const nodes = Array.from(document.querySelectorAll(WL)).filter(n=> n && n.textContent.trim().length && !n.classList.contains('counter'));
+      nodes.forEach((el, i)=>{ if(!el.dataset.editId){ el.dataset.editId = 't'+i; } });
+
+      // 2) Load copy from embedded <script id="sd-copy"> and localStorage
+      function loadEmbedded(){
+        try{ const el = document.getElementById('sd-copy'); if(!el) return {}; return JSON.parse(el.textContent || '{}'); }catch(e){ return {}; }
+      }
+      function loadStored(){ try{ return JSON.parse(localStorage.getItem('sd_copy')||'{}'); }catch(e){ return {}; } }
+      const COPY = Object.assign({}, loadEmbedded(), loadStored());
+
+      // 3) Apply copy
+      function applyCopy(){
+        Object.entries(COPY).forEach(([id,txt])=>{
+          const el = document.querySelector('[data-edit-id="'+id+'"]');
+          if(el && typeof txt==='string'){ el.textContent = txt; }
+        });
+      }
+      applyCopy();
+
+      // 4) If EDIT, enable contenteditable UI
+      if(EDIT){
+        document.body.classList.add('edit-mode');
+        nodes.forEach(el=>{
+          el.contentEditable = 'true';
+          el.classList.add('editable');
+          el.addEventListener('input', ()=>{ COPY[el.dataset.editId] = el.textContent; });
+          el.addEventListener('blur',  ()=>{ localStorage.setItem('sd_copy', JSON.stringify(COPY)); });
+        });
+        // Toolbar
+        const bar = document.createElement('div');
+        bar.className = 'edit-toolbar';
+        bar.innerHTML = `
+          <button class="btn btn-ghost" id="edSave" type="button">Сохранить</button>
+          <button class="btn btn-primary" id="edCopy" type="button">Скопировать JSON</button>
+          <button class="btn btn-ghost" id="edEmbed" type="button">Сформировать &lt;script id=\"sd-copy\"&gt;</button>
+          <button class="btn btn-ghost" id="edExit" type="button">Выйти</button>
+        `;
+        document.body.appendChild(bar);
+        const save = ()=> localStorage.setItem('sd_copy', JSON.stringify(COPY));
+        bar.querySelector('#edSave').onclick = save;
+        bar.querySelector('#edCopy').onclick = ()=>{
+          const txt = JSON.stringify(COPY, null, 2);
+          navigator.clipboard?.writeText(txt).catch(()=>{});
+          alert('JSON скопирован в буфер обмена');
+        };
+        bar.querySelector('#edEmbed').onclick = ()=>{
+          const scriptTag = `<script id=\"sd-copy\" type=\"application/json\">
+${JSON.stringify(COPY, null, 2)}
+<\/script>`;
+          navigator.clipboard?.writeText(scriptTag).catch(()=>{});
+          alert('Вставьте содержимое скрипта в HTML вместо пустого { }');
+        };
+        bar.querySelector('#edExit').onclick = ()=>{
+          localStorage.setItem('sd_edit','');
+          const u = new URL(location.href); u.searchParams.delete('edit'); location.href = u.toString();
+        };
+        // Persist flag
+        localStorage.setItem('sd_edit','1');
+      }
+    })();
+  </script>
+</body>
