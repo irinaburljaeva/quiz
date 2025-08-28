@@ -453,8 +453,18 @@ function fSteps(){const now=+A.steps||4000,add=2000,t=now+add;let boost=1+add/10
 function fNutri(){let f=1;if(A.nutri==='menu')f+=.22;else if(A.nutri==='plate')f+=.12;else f-=.12;f-=((A.bad||[]).length)*.03;f+=Math.min(((A.good||[]).length)*.02,.10);return Math.max(.7,Math.min(1.35,f))}
 function fHealth(){const h=new Set(A.health||[]);let f=1;if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06;if(h.has('Боль в суставах'))f-=.04;return Math.max(.8,f)}
 function fPain(){switch(A.hardKey){case 'walk':return .94;case 'stairs':return .93;case 'games':return .96;case 'jumps':return .95;case 'none':return 1.02;default:return 1.00}}
-function rate(){let r=.5;const bmi=A.bmi||26;if(bmi>=30)r+=.08;else if(bmi<23)r-=.08;r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth()*fPain();return Math.max(.25,Math.min(.9,+r.toFixed(2)))}
+// Скорость снижения веса (кг/нед)
+function rate(){
+  const w = +A.w || 0;            // текущий вес из шага ИМТ
+  if (w >= 100) return 1.0;       // фикс 1 кг/нед для 100+ кг
 
+  // прежняя логика для всех остальных
+  let r = .5;
+  const bmi = A.bmi || 26;
+  if (bmi >= 30) r += .08; else if (bmi < 23) r -= .08;
+  r *= fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth()*fPain();
+  return Math.max(.25, Math.min(.9, +r.toFixed(2)));
+}
 function calculate(){
   const name=A.name?.trim()||'Друзья',kg=goalKg(),rt=rate(),wks=Math.max(4,Math.min(16,Math.ceil(kg/rt))),t=fSteps().t;
   $('#rTitle').textContent=`${name}, ваш прогноз готов ✨`;
