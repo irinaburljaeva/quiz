@@ -168,6 +168,13 @@ h2{font-size:clamp(20px,5vw,30px);line-height:1.18;margin:6px 0 12px}
 
 /* Убираем жирный у заголовков карточек "тяжелее всего" */
 .hhead,.hhead *{font-weight:500 !important}
+
+/* Program slide */
+.prog-hero{margin:0 0 12px;border-radius:16px;overflow:hidden}
+.prog-hero img{width:100%;display:block;border-radius:16px;object-fit:cover}
+.prog-card{border:2px solid var(--g);border-radius:16px;padding:12px;background:#fff}
+.prog-card h3{margin:.2rem 0 .6rem}
+.prog-list{padding-left:18px;margin:.2rem 0}
 </style>
 </head>
 <body>
@@ -284,7 +291,8 @@ section('intro',`
 `)
 +section('steps',`
   <h2>Сколько шагов вы проходите сейчас в день (примерно)?</h2>
-  <input id="steps" type="range" min="0" max="25000" step="250" value="4000">
+  <input id="steps" t
+    <input id="steps" type="range" min="0" max="25000" step="250" value="4000">
   <div class="hint">Сейчас: <b><span id="sv">4000</span> шагов</b></div>
   <p class="hint"><b>Подсказка:</b> найти шаги можно в приложении вашего телефона/браслета</p>
   ${actions()}
@@ -379,6 +387,18 @@ section('intro',`
   <p class="hint" id="rDisc">Прогноз носит ознакомительный характер и не является медицинской рекомендацией.</p>
   <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="toCTA">Хочу такой результат!</button></div>
 `)
++section('program',`
+  <figure class="prog-hero"><img src="program.png" alt="Рекомендуемая программа"></figure>
+  <div class="prog-card">
+    <h3 id="progTitle">Мы рекомендуем вам…</h3>
+    <p class="hint" id="progLead"></p>
+    <ul class="prog-list" id="progList"></ul>
+  </div>
+  <div class="actions sticky">
+    <button class="btn ghost" data-prev>Назад</button>
+    <button class="btn primary" id="toSale">Далее →</button>
+  </div>
+`)
 +section('sale',`
   <figure class="sale-hero"><img src="final.PNG" alt="Результаты участниц и атмосфера клуба «ШАГАЙ ДОМА»"></figure>
   <h2 id="sTitle">Присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡</h2>
@@ -411,7 +431,7 @@ function shake(){S[idx].animate([{transform:'translateX(0)'},{transform:'transla
 const need=k=>!A[k];
 function goNext(){const id=S[idx].dataset.id;
   if(id==='age'&&need('age'))return shake();
-  if(id==='body'&&need('body'))return shake();
+ if(id==='body'&&need('body'))return shake();
   if(id==='bmi'&&(!A.h||!A.w))return shake();
   if(id==='life'&&need('life'))return shake();
   if(id==='exp'&&need('exp'))return shake();
@@ -554,7 +574,7 @@ function rate(){
   let r=.5;
   const bmi=A.bmi||26;
   if(bmi>=30) r+=.08; else if(bmi<23) r-=.08;
-  r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth()*fPain();
+ r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth()*fPain();
   return Math.max(.25,Math.min(.9,+r.toFixed(2)));
 }
 
@@ -568,6 +588,44 @@ function goalKg(){
   const g=A.goal||''; if(g.includes('3–5'))return 4; if(g.includes('5–10'))return 8; if(g.includes('10+'))return 12; return 3;
 }
 
+/* ==== Program selection ==== */
+function chooseProgram(){
+  const w=+A.w||0, age=A.age||'', life=A.life||'', exp=A.exp||'', steps=+A.steps||0, bmi=+A.bmi||0;
+  if (w>=100) return {key:'p100', title:'Тренировки для 100+', lead:'Если сейчас трёхзначное число на весах — начните с бережных шагательных тренировок.', bullets:[
+    'Щадящая физическая нагрузка без перегрузки суставов',
+    'Постепенное снижение веса в комфортном темпе',
+    'Улучшение общего самочувствия и выносливости',
+    'Развитие привычки к движению без стресса'
+  ]};
+  if (/50\+/.test(age)) return {key:'p50', title:'Тренировки для 50+', lead:'Мягкие и безопасные тренировки для серебряного возраста и тех, кому противопоказана высокая интенсивность.', bullets:[
+    'Бережная проработка всех групп мышц без перегрузки',
+    'Улучшение подвижности суставов и гибкости',
+    'Поднятие уровня энергии и лёгкости в движениях',
+    'Щадящий темп для комфортных и эффективных тренировок'
+  ]};
+  const isActive = /Активная/.test(life) || steps>=8000 || /Регулярно/.test(exp);
+  if (isActive || (bmi && bmi<25)) return {key:'active', title:'Шагай дома. Активно', lead:'Для тех, кто любит двигаться дольше и активнее, без сложных танцевальных связок.', bullets:[
+    'Максимум шагов без сложных элементов',
+    'Укрепление мышц и повышение выносливости',
+    'Кардио-нагрузка для поддержки сердца и лёгких',
+    'Отличное настроение после каждой тренировки'
+  ]};
+  return {key:'base', title:'Шагай дома. База', lead:'Лучший старт, если давно не занимались: простые тренировки, чтобы спокойно втянуться.', bullets:[
+    'Отличный старт для новичков в шагательных тренировках',
+    'Минимальная нагрузка и комфортное освоение движений',
+    'Постепенное привыкание к регулярной активности',
+    'Улучшение общего тонуса и подвижности'
+  ]};
+}
+function renderProgram(){
+  const p=chooseProgram();
+  $('#progTitle').textContent=`У нас 28 программ, но вам лучше начать с «${p.title}»`;
+  $('#progLead').textContent=p.lead;
+  const ul=$('#progList'); ul.innerHTML='';
+  p.bullets.forEach(b=>{const li=document.createElement('li');li.textContent=b;ul.appendChild(li)});
+}
+
+/* ==== Calculate & screens ==== */
 function calculate(){
   const name=A.name?.trim()||'Друзья',kg=goalKg(),rt=rate();
   const wks=Math.max(4,Math.min(16,Math.ceil(kg/rt))),t=fSteps().t;
@@ -584,11 +642,11 @@ function calculate(){
     `С тренировками ШАГАЙ ДОМА ⚡️ вы будете проходить <b>${t.toLocaleString('ru-RU')}</b> шагов каждый день!<br>
      <span class="hint">Ориентировочный темп снижения веса: <b>~${rtText} кг/неделю</b>.</span>`;
 
-  // кейс: подбираем и выводим + подключаем лайтбокс
+  // кейс
   const caseObj = pickCase(Math.round(kg));
   renderCaseBox(caseObj);
 
-  // sale
+  // sale текст
   document.getElementById('sTitle').textContent=`${name}, присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`;
   document.getElementById('sLead').innerHTML=
     `Чтобы прийти к цели <b>−${kg} кг</b> за <b>${dur.label}</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.`;
@@ -596,7 +654,8 @@ function calculate(){
   show(idxBy('result'))
 }
 function animNum(a,b,d,cb){const s=performance.now(),ease=t=>1-Math.pow(1-t,3);function fr(n){const p=Math.min(1,(n-s)/d);cb(Math.round(a+(b-a)*ease(p)));if(p<1)requestAnimationFrame(fr)}requestAnimationFrame(fr)}
-document.getElementById('toCTA').onclick=()=>show(idxBy('sale'));
+document.getElementById('toCTA').onclick=()=>{ renderProgram(); show(idxBy('program')); };
+document.getElementById('toSale').onclick=()=>show(idxBy('sale'));
 
 /* hero skeleton hide */
 const hv=document.querySelector('video.hero-media'),hs=document.getElementById('heroSkel');
@@ -610,3 +669,4 @@ const pcInit=()=>{try{scrollTo({top:0,behavior:'auto'})}catch(e){scrollTo(0,0)}}
 </script>
 </body>
 </html>
+
