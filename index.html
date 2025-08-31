@@ -6,7 +6,7 @@
 <title>Калькулятор от ШАГАЙ ДОМА⚡</title>
 <meta name="description" content="Узнайте, за сколько недель шагательные тренировки помогут вам похудеть."/>
 <meta name="color-scheme" content="light only"/>
-<link rel="preload" as="video" href="intro.mp4" type="video/mp4" fetchpriority="high">
+<!-- Убрали preload видео, чтобы не забивать канал -->
 <link rel="preload" as="image" href="superfit.png">
 <link rel="preload" as="image" href="m.png">
 <link rel="preload" as="image" href="xxl.png">
@@ -21,7 +21,7 @@ body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,R
 .hero-wrap{position:relative;margin:0 0 12px;border-radius:20px;overflow:hidden;box-shadow:0 10px 18px rgba(0,0,0,.08)}
 .hero-media{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;object-position:50% var(--hero-pos-y);border-radius:20px}
 @media (max-width:480px){.hero-media{object-position:50% var(--hero-pos-y-m)}}
-.hero-skel{position:absolute;inset:0;border-radius:20px;background:linear-gradient(110deg,#f4f4f4 8%,#eaeaea 18%,#f4f4f4 33%);background-size:200% 100%;animation:heroShimmer 1.2s linear infinite}
+.hero-skel{position:absolute;inset:0;border-radius:20px;background:linear-gradient(110deg,#f4f4f4 8%,#eaeaea 18%,#f4f4f4 33%);background-size:200% 100%;animation:heroShimmer 1.2s linear infinite;pointer-events:none}
 @keyframes heroShimmer{to{background-position-x:-200%}}
 .hero-skel.hide{opacity:0;pointer-events:none;transition:opacity .25s ease}
 
@@ -109,7 +109,7 @@ h2{font-size:clamp(20px,5vw,30px);line-height:1.18;margin:6px 0 12px}
 .hcard.is{border-color:var(--o);background:linear-gradient(180deg,#fff 0,#fff9f3 100%);box-shadow:0 12px 26px rgba(232,93,4,.18)}
 .hhead{display:flex;gap:10px;align-items:center;letter-spacing:-.02em}
 .hicon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:#fff6f1;border:2px solid #ffd5c2}
-/* убрать bold из заголовков карточек */
+/* убрать bold у заголовков карточек */
 .hhead,.hhead *{font-weight:500 !important}
 
 /* Goal UI */
@@ -247,38 +247,6 @@ function pickCase(targetKg){
   }
   return best;
 }
-/* лайтбокс */
-const lightbox = $('#lightbox'), lbImg=$('#lbImg'), lbCap=$('#lbCap'), lbClose=$('#lbClose');
-function openLightbox(src, caption){
-  if(!src) return;
-  lbImg.src = src; lbCap.textContent = caption || '';
-  lightbox.classList.add('show'); lightbox.setAttribute('aria-hidden','false');
-  document.body.style.overflow='hidden';
-}
-function closeLightbox(){
-  lightbox.classList.remove('show'); lightbox.setAttribute('aria-hidden','true');
-  lbImg.src=''; lbCap.textContent='';
-  document.body.style.overflow='';
-}
-lightbox.addEventListener('click', e => { if(e.target===lightbox) closeLightbox(); });
-lbClose.addEventListener('click', closeLightbox);
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLightbox(); });
-
-/* отрисовка кейса — картинка кликабельная (лайтбокс) */
-function renderCaseBox(c){
-  const box=document.getElementById('caseBox'); if(!box) return;
-  if(!c){ box.classList.add('hide'); return; }
-  const caption=`Как у нашей шагательницы ${c.name}! Она уже сбросила ${c.kg} кг за ${c.months} мес. в клубе.`;
-  const img = c.img ? `<img src="${c.img}" alt="${c.name}" id="caseImg">` : `<img src="logo.png" alt="ШАГАЙ ДОМА" id="caseImg">`;
-  box.innerHTML = `${img}
-    <div>
-      <h3>Как у нашей шагательницы ${c.name}!</h3>
-      <p>Она уже сбросила <b>${c.kg}</b> кг за <b>${c.months}</b> мес. в клубе.</p>
-    </div>`;
-  box.classList.remove('hide');
-  const preview=box.querySelector('#caseImg');
-  preview?.addEventListener('click', ()=> openLightbox(preview.src, caption));
-}
 
 /* scaffolding */
 const screensRoot=$('#screens');
@@ -292,9 +260,8 @@ const html=
 section('intro',`
   <figure class="hero-wrap">
     <div class="hero-skel" id="heroSkel"></div>
-    <video 
-   <video class="hero-media" autoplay muted loop playsinline preload="auto">
-      <source src="intro.mp4#t=0.1" type="video/mp4"/>
+    <video class="hero-media" autoplay muted playsinline loop preload="metadata" poster="logo.png">
+      <source src="intro.mp4" type="video/mp4"/>
       <img src="logo.png" alt="ШАГАЙ ДОМА"/>
     </video>
   </figure>
@@ -321,7 +288,7 @@ section('intro',`
   <h2>Давайте посчитаем ваш ИМТ</h2>
   <p class="hint">Укажите ваш рост и вес — можно приблизительно.</p>
   <div class="grid cols2">
-    <div><div class="hint">Рост, см</div><input id="h" type="number" class="text" placeholder="Например: 165"></div>
+      <div><div class="hint">Рост, см</div><input id="h" type="number" class="text" placeholder="Например: 165"></div>
     <div><div class="hint">Вес, кг</div><input id="w" type="number" class="text" placeholder="Например: 72"></div>
   </div>
   <div id="bmiI" class="hint"></div>
@@ -447,7 +414,7 @@ section('intro',`
 `);
 screensRoot.innerHTML=html;
 
-/* progress header */
+/* progress header (единая версия) */
 const progress=$('#progress');
 progress.innerHTML=`<div class="pcirc"><div class="pct">0%</div></div><div class="plogo"><img src="logo.png" alt="ШАГАЙ ДОМА"></div>`;
 const pcirc=()=>$('#progress .pcirc'),pcText=()=>$('#progress .pct');let pctNow=0,rafId=0;
@@ -456,10 +423,18 @@ let idx=0;const S=$$('#screens .screen');
 function setP(i){progress.classList.toggle('hide',i===0);const p=Math.round(i/(S.length-1)*100);animProg(p)}
 function show(n){S[idx].classList.remove('is');idx=Math.max(0,Math.min(S.length-1,n));S[idx].classList.add('is');setP(idx);scrollTo({top:0,behavior:'smooth'})}
 setP(0);
-addEventListener('click',e=>{const next=e.target.closest('[data-next]'),prev=e.target.closest('[data-prev]');if(next){vibrate();goNext()}if(prev){vibrate();show(idx-1)}});
-      function shake(){S[idx].animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:260});vibrate(25)}
+
+/* делегирование кнопок дальше/назад */
+addEventListener('click',e=>{
+  const next=e.target.closest('[data-next]'),
+        prev=e.target.closest('[data-prev]');
+  if(next){vibrate();goNext()}
+  if(prev){vibrate();show(idx-1)}
+});
+function shake(){S[idx].animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:260});vibrate(25)}
 const need=k=>!A[k];
-function goNext(){const id=S[idx].dataset.id;
+function goNext(){
+  const id=S[idx].dataset.id;
   if(id==='age'&&need('age'))return shake();
   if(id==='body'&&need('body'))return shake();
   if(id==='bmi'&&(!A.h||!A.w))return shake();
@@ -470,6 +445,12 @@ function goNext(){const id=S[idx].dataset.id;
   show(idx+1)
 }
 
+/* Явная привязка именно к кнопке "Поехали" */
+document.querySelector('section[data-id="intro"] [data-next]')?.addEventListener('click',(e)=>{
+  e.preventDefault();
+  vibrate();
+  show(1); // перейти к возрасту
+});
 /* inputs */
 $('#name').oninput=e=>{A.name=e.target.value.trim();save()};
 const steps=$('#steps'),sv=$('#sv');function updRange(){const min=+steps.min||0,max=+steps.max||100,val=+steps.value||0,p=((val-min)/(max-min))*100;steps.style.setProperty('--pct',p+'%')}
@@ -480,7 +461,7 @@ if(steps){updRange();steps.oninput=e=>{A.steps=+e.target.value;sv.textContent=A.
 function bmiCat(b){if(b<18.5)return{label:'Дефицит массы',cls:'bmi-warn',note:'ниже нормы (18,5–24,9)'};if(b<25)return{label:'Норма',cls:'bmi-ok',note:'в пределах нормы'};if(b<30)return{label:'Избыточная масса',cls:'bmi-warn',note:'выше нормы'};if(b<35)return{label:'Ожирение I ст.',cls:'bmi-bad',note:'выше нормы'};if(b<40)return{label:'Ожирение II ст.',cls:'bmi-bad',note:'значительно выше нормы'};return{label:'Ожирение III ст.',cls:'bmi-bad',note:'значительно выше нормы'}}
 function updBMI(){const h=+$('#h').value,w=+$('#w').value;if(h>0&&w>0){A.h=h;A.w=w;const m=h/100;A.bmi=+(w/(m*m)).toFixed(1);save();const c=bmiCat(A.bmi);$('#bmiI').innerHTML=`Ваш ИМТ: <b>${A.bmi}</b> <span class="bmi-tag ${c.cls}">${c.label}</span><br><span class="hint bmi-line">ИМТ помогает ориентироваться в массе тела; норма — 18,5–24,9. Учитывайте особенности телосложения, беременность и мышечную массу.</span>`}else{$('#bmiI').textContent=''}}
 
-/* selectors */
+/* селекторы */
 function selectList(root,key,single){if(!root)return;root.addEventListener('click',e=>{const sel=e.target.closest(single?'.opt':'.chip');if(!sel)return;if(single){$$('.opt',root).forEach(x=>x.classList.remove('is'));sel.classList.add('is');A[key]=sel.dataset.v||sel.textContent}else{sel.classList.toggle('is');A[key]=$$('.chip.is',root).map(x=>x.dataset.v||x.textContent)}save();vibrate(8)})}
 selectList($('#ageOpts'),'age',true);
 selectList($('#bodyOpts'),'body',true);
@@ -493,7 +474,7 @@ selectList($('#bad'),'bad',false);
 selectList($('#good'),'good',false);
 selectList($('#nutriOpts'),'nutri',true);
 
-/* habit meter */
+/* индикатор привычек */
 function nutrPreview(){const b=(A.bad||[]).length,g=(A.good||[]).length;let f=1;f+=g*.02;f-=b*.03;return Math.max(.7,Math.min(1.35,f))}
 function updMeter(){
   const f=nutrPreview(),acc=Math.round((f-1)*100);
@@ -510,10 +491,10 @@ function updMeter(){
 }
 (()=>{['bad','good'].forEach(id=>{$('#'+id)?.addEventListener('click',()=>setTimeout(updMeter,0),true)});updMeter()})();
 
-/* hard cards tilt */
+/* hard cards */
 (function setupHard(){const w=$('#hardCards');if(!w)return;const cs=$$('.hcard',w);if(A.hardKey){cs.find(c=>c.dataset.k===A.hardKey)?.classList.add('is')}w.addEventListener('click',e=>{const c=e.target.closest('.hcard');if(!c)return;cs.forEach(x=>x.classList.toggle('is',x===c));A.hardKey=c.dataset.k;A.hard={'walk':'Долгая прогулка утомляет','stairs':'Каждый пролёт по лестнице — испытание','games':'Стыдно включаться в активные игры','jumps':'Прыжки','none':'Ничего из этого'}[A.hardKey];save();vibrate(8)});cs.forEach(c=>{c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height,rx=(.5-y)*8,ry=(x-.5)*10;c.style.transform=`rotateX(${rx}deg) rotateY(${ry}deg)`});['pointerleave','pointercancel','blur'].forEach(ev=>c.addEventListener(ev,()=>{c.style.transform=''}))})})();
 
-/* ===== Goal logic: 9 PNG + BMI anchors ===== */
+/* ===== Goal logic: PNG crossfade по ИМТ ===== */
 const BMI_ANCHORS=[18.8,20.0,21.8,23.5,26.0,29.0,32.0,35.0,38.0];
 function indexFromBMI(bmi){
   const B=BMI_ANCHORS, N=B.length-1;
@@ -568,7 +549,8 @@ function toggleKeep(ch){const rng=$('#goalRange');A.keep=!!ch;save();if(ch){rng.
 const goalR=$('#goalRange'),goalK=$('#goalKeep');
 goalR.oninput=e=>setGoal(e.target.value);goalK.onchange=e=>toggleKeep(e.target.checked);
 (()=>{const kg=(A.goalKg!=null)?+A.goalKg:5;goalR.value=kg;const keep=(A.keep===true)||kg===0;goalK.checked=keep;toggleKeep(keep);if(!keep)setGoal(kg);updateGoalPreview()})();
-      /* Loading + result */
+
+/* Загрузка + результат */
 function runLoading(done){
   const ring=$('#lring'),lpct=$('#lpct'),lmsg=$('#lmsg'),lsub=$('#lsub');
   const stepsTxt=['Учитываем ваш возраст','Смотрим телосложение и ИМТ','Проверяем активность и опыт','Добавляем шаги и питание','Готовим персональный прогноз…'];
@@ -585,8 +567,7 @@ function runLoading(done){
 }
 const idxBy=id=>$$('#screens .screen').findIndex(s=>s.dataset.id===id);
 $('#calc').onclick=()=>{show(idx+1);runLoading(calculate)};
-
-/* Tempo factors */
+      /* Факторы темпа */
 function fAge(){const a=A.age||'';if(/50/.test(a))return 0.88;if(/40/.test(a))return 0.94;if(/30/.test(a))return 0.98;return 1.06}
 function fLife(){const l=A.life||'';if(/Сидячая/.test(l))return 0.90;if(/Умеренно/.test(l))return 1.00;return 1.08}
 function fExp(){const e=A.exp||'';if(/Никогда/.test(e))return 0.95;if(/Регулярно/.test(e))return 1.08;return 1.00}
@@ -596,7 +577,7 @@ function fNutri(){let f=1;if(A.nutri==='menu')f+=.22;else if(A.nutri==='plate')f
 function fHealth(){const h=new Set(A.health||[]);let f=1;if(h.has('Диабет')||h.has('Проблемы со щитовидкой')||h.has('Гипертония'))f-=.06;if(h.has('Боль в суставах'))f-=.04;return Math.max(.8,f)}
 function fPain(){switch(A.hardKey){case 'walk':return .94;case 'stairs':return .93;case 'games':return .96;case 'jumps':return .95;case 'none':return 1.02;default:return 1.00}}
 
-/* Скорость снижения веса (кг/нед): 100+ кг → фикс 1.0 */
+/* Скорость (кг/нед): 100+ кг → 1.0 */
 function rate(){
   const w=+A.w||0;
   if(w>=100) return 1.0;
@@ -607,7 +588,7 @@ function rate(){
   return Math.max(.25,Math.min(.9,+r.toFixed(2)));
 }
 
-/* Форматируем срок: ≤10 недель — недели, >10 — месяцы */
+/* Формат срока: ≤10 недель — недели, >10 — месяцы */
 function fmtDuration(wks){
   if (wks <= 10) { return { start: 12, value: wks, unitText: 'недель', label: `${wks} недель` }; }
   const months = Math.ceil(wks / 4); return { start: 6, value: months, unitText: 'мес.', label: `${months} мес.` };
@@ -617,56 +598,33 @@ function goalKg(){
   const g=A.goal||''; if(g.includes('3–5'))return 4; if(g.includes('5–10'))return 8; if(g.includes('10+'))return 12; return 3;
 }
 
-/* ==== Program selection (улучшено) ==== */
+/* Выбор программы + рендер */
 function chooseProgram(){
   const w=+A.w||0, age=A.age||'', life=A.life||'', exp=A.exp||'', steps=+A.steps||0, bmi=+A.bmi||0;
 
   if (w>=100) return {
     key:'p100', title:'Тренировки для 100+',
     lead:'Если сейчас трёхзначное число на весах — начните с бережных шагательных тренировок.',
-    bullets:[
-      'Щадящая физическая нагрузка без перегрузки суставов',
-      'Постепенное снижение веса в комфортном темпе',
-      'Улучшение общего самочувствия и выносливости',
-      'Развитие привычки к движению без стресса'
-    ],
+    bullets:['Щадящая физическая нагрузка без перегрузки суставов','Постепенное снижение веса в комфортном темпе','Улучшение общего самочувствия и выносливости','Развитие привычки к движению без стресса'],
     meta:{workouts:'7 тренировок', duration:'15–20 минут', tempo:'Темп низкий', steps:'2–2,5 тыс шагов'}
   };
-
   if (/50\+/.test(age)) return {
     key:'p50', title:'Тренировки для 50+',
     lead:'Мягкие и безопасные тренировки для серебряного возраста и темпа без перегрузки.',
-    bullets:[
-      'Бережная проработка всех групп мышц без перегрузки',
-      'Улучшение подвижности суставов и гибкости',
-      'Поднятие уровня энергии и лёгкости в движениях',
-      'Щадящий темп для комфортных и эффективных тренировок'
-    ],
+    bullets:['Бережная проработка всех групп мышц без перегрузки','Улучшение подвижности суставов и гибкости','Поднятие уровня энергии и лёгкости в движениях','Щадящий темп для комфортных и эффективных тренировок'],
     meta:{workouts:'7 тренировок', duration:'15–20 минут', tempo:'Темп средний'}
   };
-
   const isActive = /Активная/.test(life) || steps>=8000 || /Регулярно/.test(exp) || (bmi && bmi<25);
   if (isActive) return {
     key:'active', title:'Шагай дома. Активно',
     lead:'Для тех, кто любит двигаться дольше и активнее — максимум шагов без сложных связок.',
-    bullets:[
-      'Максимум шагов без сложных элементов',
-      'Укрепление мышц и повышение выносливости',
-      'Кардио-нагрузка для поддержки сердца и лёгких',
-      'Отличное настроение после каждой тренировки'
-    ],
+    bullets:['Максимум шагов без сложных элементов','Укрепление мышц и повышение выносливости','Кардио-нагрузка для поддержки сердца и лёгких','Отличное настроение после каждой тренировки'],
     meta:{workouts:'7 тренировок', duration:'15–40 минут', tempo:'Темп высокий', steps:'2–6 тыс шагов'}
   };
-
   return {
     key:'base', title:'Шагай дома. База',
     lead:'Лучший старт, если давно не занимались: простые тренировки, чтобы спокойно втянуться.',
-    bullets:[
-      'Отличный старт для новичков в шагательных тренировках',
-      'Минимальная нагрузка и комфортное освоение движений',
-      'Постепенное привыкание к регулярной активности',
-      'Улучшение общего тонуса и подвижности'
-    ],
+    bullets:['Отличный старт для новичков в шагательных тренировках','Минимальная нагрузка и комфортное освоение движений','Постепенное привыкание к регулярной активности','Улучшение общего тонуса и подвижности'],
     meta:{workouts:'8 тренировок', duration:'15–20 минут', tempo:'Темп низкий'}
   };
 }
@@ -675,46 +633,37 @@ function renderProgram(){
   $('#progTitle').textContent = `У нас 28 программ, но вам лучше начать с «${p.title}»`;
   $('#progLead').textContent  = p.lead;
 
-  // чипсы со статами
   const chips = [];
   if (p.meta?.workouts) chips.push(p.meta.workouts);
   if (p.meta?.duration) chips.push(p.meta.duration);
   if (p.meta?.steps)    chips.push(p.meta.steps);
   if (p.meta?.tempo)    chips.push(p.meta.tempo);
+  $('#progChips').innerHTML = chips.map(t=>`<span class="p-chip${/высокий/i.test(t)?' emph':''}">${t}</span>`).join('');
 
-  const chipsRoot = $('#progChips');
-  chipsRoot.innerHTML = chips.map((t,i)=>`<span class="p-chip${/высокий/i.test(t)?' emph':''}">${t}</span>`).join('');
-
-  // буллеты
   const ul=$('#progList'); ul.innerHTML='';
   (p.bullets||[]).forEach(b=>{const li=document.createElement('li');li.textContent=b;ul.appendChild(li)});
 }
 
-/* ==== Calculate & screens ==== */
+/* Расчёт + вывод результата */
 function calculate(){
   const name=A.name?.trim()||'Друзья',kg=goalKg(),rt=rate();
   const wks=Math.max(4,Math.min(16,Math.ceil(kg/rt))),t=fSteps().t;
-
-  // формат срока (нед/мес)
   const dur=fmtDuration(wks);
 
-  document.getElementById('rTitle').textContent=`${name}, ваш прогноз готов ✨`;
+  $('#rTitle').textContent=`${name}, ваш прогноз готов ✨`;
   animNum(dur.start,dur.value,1400,v=>{
-    document.getElementById('nums').textContent=`−${kg} кг за ${v} ${dur.unitText}`;
+    $('#nums').textContent=`−${kg} кг за ${v} ${dur.unitText}`;
   });
   const rtText=rt.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1});
-  document.getElementById('rSub').innerHTML=
+  $('#rSub').innerHTML=
     `С тренировками ШАГАЙ ДОМА ⚡️ вы будете проходить <b>${t.toLocaleString('ru-RU')}</b> шагов каждый день!<br>
      <span class="hint">Ориентировочный темп снижения веса: <b>~${rtText} кг/неделю</b>.</span>`;
 
-  // кейс
   const caseObj = pickCase(Math.round(kg));
   renderCaseBox(caseObj);
 
-  // sale текст
-  document.getElementById('sTitle').textContent=`${name}, присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`;
-  document.getElementById('sLead').innerHTML=
-    `Чтобы прийти к цели <b>−${kg} кг</b> за <b>${dur.label}</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.`;
+  $('#sTitle').textContent=`${name}, присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`;
+  $('#sLead').innerHTML=`Чтобы прийти к цели <b>−${kg} кг</b> за <b>${dur.label}</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.`;
 
   show(idxBy('result'))
 }
@@ -722,20 +671,16 @@ function animNum(a,b,d,cb){const s=performance.now(),ease=t=>1-Math.pow(1-t,3);f
 document.getElementById('toCTA').onclick=()=>{ renderProgram(); show(idxBy('program')); };
 document.getElementById('toSale').onclick=()=>show(idxBy('sale'));
 
-/* hero skeleton hide */
+/* hero skeleton hide + ошибка */
 const hv=document.querySelector('video.hero-media'),hs=document.getElementById('heroSkel');
 function hideS(){hs&&hs.classList.add('hide')}
 hv?.addEventListener('loadeddata',hideS,{once:true});
 hv?.addEventListener('canplay',hideS,{once:true});
-setTimeout(hideS,2000);
+hv?.addEventListener('error',()=>setTimeout(hideS,1000),{once:true});
+setTimeout(hideS,2000); // страховка
 
-/* progress header show/hide */
-const progressEl=$('#progress');
-progressEl.innerHTML=`<div class="pcirc"><div class="pct">0%</div></div><div class="plogo"><img src="logo.png" alt="ШАГАЙ ДОМА"></div>`;
-const pc=()=>$('#progress .pcirc'),pctEl=()=>$('#progress .pct');let pct=0,rid=0;
-function animP(to){cancelAnimationFrame(rid);const k=.08,d=.75;let v=0;function f(){const x=pct-to,a=-k*x;v=(v+a)*d;pct+=v;if(Math.abs(pct-to)<.3&&Math.abs(v)<.3)pct=to;pc().style.setProperty('--p',pct.toFixed(1)+'%');pctEl().textContent=Math.round(pct)+'%';if(pct!==to)rid=requestAnimationFrame(f)}rid=requestAnimationFrame(f)}
-function setP(i){progressEl.classList.toggle('hide',i===0);const p=Math.round(i/(S.length-1)*100);animP(p)}
-setP(0);
+/* progress init */
+const pcInit=()=>{try{scrollTo({top:0,behavior:'auto'})}catch(e){scrollTo(0,0)}};pcInit();setP(0);
 </script>
 </body>
 </html>
