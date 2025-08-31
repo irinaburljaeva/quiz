@@ -305,7 +305,7 @@ section('intro',`
           <img src="xl.png"       data-i="7" alt="xl"       loading="lazy" decoding="async">
           <img src="xxl.png"      data-i="8" alt="xxl"      loading="lazy" decoding="async">
           <div class="tape" id="goalTape"></div>
-        </div>
+                </div>
       </div>
     </div>
     <p class="goal-note">Цель можно уточнить позже — расчёт адаптируется под ваш темп и самочувствие.</p>
@@ -316,20 +316,18 @@ section('intro',`
 +section('perweek',`
   <h2>Сколько готовы тренироваться в неделю?</h2>
   ${chips('pwChips',['2 раза','3 раза','4–5 раз','Каждый день 20–30 мин'])}
-  <div id="aha" class="aha hidden">
-    <!-- сюда динамически подставляется текст + график -->
-  </div>
+  <div id="aha" class="aha hidden"></div>
   ${actions()}
 `)
 +section('hard',`
   <h2>Что сейчас даётся тяжелее всего?</h2>
   <div class="hardw">
     <div class="hard-cards" id="hardCards">
-      <div class="hcard" data-k="walk"><div class="hicon">🚶‍♀️</div><div>Долгая прогулка утомляет</div></div></div>
-      <div class="hcard" data-k="stairs"><div class="hicon">🪜</div><div>Каждый пролёт по лестнице — испытание</div></div></div>
-      <div class="hcard" data-k="games"><div class="hicon">🎯</div><div>Стыдно включаться в активные игры</div></div></div>
-      <div class="hcard" data-k="jumps"><div class="hicon">🦘</div><div>Прыжки</div></div></div>
-      <div class="hcard" data-k="none"><div class="hicon">✅</div><div>Ничего из этого</div></div></div>
+      <div class="hcard" data-k="walk"><div class="hhead"><div class="hicon">🚶‍♀️</div><div>Долгая прогулка утомляет</div></div></div>
+      <div class="hcard" data-k="stairs"><div class="hhead"><div class="hicon">🪜</div><div>Каждый пролёт по лестнице — испытание</div></div></div>
+      <div class="hcard" data-k="games"><div class="hhead"><div class="hicon">🎯</div><div>Стыдно включаться в активные игры</div></div></div>
+      <div class="hcard" data-k="jumps"><div class="hhead"><div class="hicon">🦘</div><div>Прыжки</div></div></div>
+      <div class="hcard" data-k="none"><div class="hhead"><div class="hicon">✅</div><div>Ничего из этого</div></div></div>
     </div>
     ${actions()}
   </div>
@@ -454,14 +452,13 @@ document.querySelector('section[data-id="intro"] [data-next]')?.addEventListener
   e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
   vibrate(); show(1);
 });
-
-/* inputs */
+      /* inputs */
 $('#name').oninput=e=>{A.name=e.target.value.trim();save()};
 const steps=$('#steps'),sv=$('#sv');function updRange(){const min=+steps.min||0,max=+steps.max||100,val=+steps.value||0,p=((val-min)/(max-min))*100;steps.style.setProperty('--pct',p+'%')}
 if(steps){updRange();steps.oninput=e=>{A.steps=+e.target.value;sv.textContent=A.steps;updRange();save();updateAha()}}
 
 /* BMI calc + label */
-['h','w'].forEach(id=>{$('#'+id)?.addEventListener('input',()=>{updBMI();updateGoalPreview()})});
+['h','w'].forEach(id=>{$('#'+id)?.addEventListener('input',()=>{updBMI();updateGoalPreview();updateGoalMax()})});
 function bmiCat(b){if(b<18.5)return{label:'Дефицит массы',cls:'bmi-warn',note:'ниже нормы (18,5–24,9)'};if(b<25)return{label:'Норма',cls:'bmi-ok',note:'в пределах нормы'};if(b<30)return{label:'Избыточная масса',cls:'bmi-warn',note:'выше нормы'};if(b<35)return{label:'Ожирение I ст.',cls:'bmi-bad',note:'выше нормы'};if(b<40)return{label:'Ожирение II ст.',cls:'bmi-bad',note:'значительно выше нормы'};return{label:'Ожирение III ст.',cls:'bmi-bad',note:'значительно выше нормы'}}
 function updBMI(){const h=+$('#h').value,w=+$('#w').value;if(h>0&&w>0){A.h=h;A.w=w;const m=h/100;A.bmi=+(w/(m*m)).toFixed(1);save();const c=bmiCat(A.bmi);$('#bmiI').innerHTML=`Ваш ИМТ: <b>${A.bmi}</b> <span class="bmi-tag ${c.cls}">${c.label}</span><br><span class="hint bmi-line">ИМТ помогает ориентироваться в массе тела; норма — 18,5–24,9. Учитывайте особенности телосложения, беременность и мышечную массу.</span>`}else{$('#bmiI').textContent=''}}
 
@@ -485,7 +482,7 @@ function updMeter(){
   $('#hmWrap').classList.toggle('hidden',!any);
   if(!any) return;
   const f=nutrPreview(),acc=Math.round((f-1)*100);
-  const ptr=$('#hmPtr'),track=$('#hmTrack'),score=$('#hmScore'),badge=$('#hmBadge');
+  const ptr=$('#hmPtr'),track=$('#hmTrack'),score=$('#hmScore'),badge=$('#hmBadge']);
   const min=-30,max=35,clamp=Math.max(min,Math.min(max,acc)),p=((clamp-min)/(max-min))*100;
   track.style.setProperty('--p',p+'%');ptr.style.left=p+'%';
   score.textContent=(acc>0?'+':'')+acc+'%';
@@ -501,7 +498,7 @@ updMeter();
 /* hard cards */
 (function setupHard(){const w=$('#hardCards');if(!w)return;const cs=$$('.hcard',w);if(A.hardKey){cs.find(c=>c.dataset.k===A.hardKey)?.classList.add('is')}w.addEventListener('click',e=>{const c=e.target.closest('.hcard');if(!c)return;cs.forEach(x=>x.classList.toggle('is',x===c));A.hardKey=c.dataset.k;A.hard={'walk':'Долгая прогулка утомляет','stairs':'Каждый пролёт по лестнице — испытание','games':'Стыдно включаться в активные игры','jumps':'Прыжки','none':'Ничего из этого'}[A.hardKey];save();vibrate(8)})})();
 
-/* ===== Goal logic: PNG crossfade ===== */
+/* ===== Goal logic: PNG crossfade + SAFE LIMIT ===== */
 const BMI_ANCHORS=[18.8,20.0,21.8,23.5,26.0,29.0,32.0,35.0,38.0];
 function indexFromBMI(bmi){
   const B=BMI_ANCHORS, N=B.length-1;
@@ -550,11 +547,31 @@ function updateGoalPreview(){
 }
 function gBucket(kg){const v=+kg;if(v<=0)return'Накачать мышцы';if(v<=5)return'Сбросить 3–5 кг';if(v<=10)return'Сбросить 5–10 кг';return'Сбросить 10+ кг'}
 function updGoal(){const kg=+A.goalKg||0;$('#goalVal').textContent=kg.toFixed(1);const b=$('#goalBadge');let cls='goal-mid',txt='умеренно';if(kg===0){cls='goal-soft';txt='поддержание'}else if(kg<=5){cls='goal-soft';txt='мягко'}else if(kg<=10){cls='goal-mid';txt='умеренно'}else{cls='goal-hard';txt='интенсивно'}b.className='goal-badge '+cls;b.textContent=txt;const rng=$('#goalRange'),pct=kg/(+rng.max)*100;rng.style.setProperty('--pct',pct+'%');updateGoalPreview()}
-function setGoal(val){const kg=Math.max(0,Math.min(20,+val||0));A.goalKg=kg;A.goal=gBucket(kg);save();updGoal()}
-function toggleKeep(ch){const rng=$('#goalRange');A.keep=!!ch;save();if(ch){rng.disabled=true;setGoal(0)}else{rng.disabled=false;if((+A.goalKg||0)===0)setGoal(5)}updateGoalPreview()}
+function setGoal(val){const rng=$('#goalRange');const max=+rng.max||20;const kg=Math.max(0,Math.min(max,+val||0));A.goalKg=kg;A.goal=gBucket(kg);save();updGoal()}
+function toggleKeep(ch){const rng=$('#goalRange');A.keep=!!ch;save();if(ch){rng.disabled=true;setGoal(0)}else{rng.disabled=false;if((+A.goalKg||0)===0)setGoal(Math.min(+rng.max,5))}updateGoalPreview()}
 const goalR=$('#goalRange'),goalK=$('#goalKeep');
 goalR.oninput=e=>setGoal(e.target.value);goalK.onchange=e=>toggleKeep(e.target.checked);
-(()=>{const kg=(A.goalKg!=null)?+A.goalKg:5;goalR.value=kg;const keep=(A.keep===true)||kg===0;goalK.checked=keep;toggleKeep(keep);if(!keep)setGoal(kg);updateGoalPreview()})();
+
+/* NEW: безопасный максимум цели (не ниже BMI≈19) */
+function updateGoalMax(){
+  const rng=$('#goalRange');
+  const h=+A.h, w=+A.w;
+  let max=20;
+  if(h>0 && w>0){
+    const m=h/100;
+    const minW=19*m*m;               // минимальный безопасный вес ~ BMI 19
+    const safe=Math.max(0, w - minW);
+    max = Math.min(20, Math.round(safe*2)/2); // шаг 0.5, потолок 20
+  }
+  rng.max = max;
+  if((+A.goalKg||0) > max) setGoal(max);
+  // обновим визуализацию заполнения трека
+  const pct=(+A.goalKg||0)/(+rng.max||20)*100;
+  rng.style.setProperty('--pct', pct+'%');
+}
+
+/* инициализация goal-слайдера */
+(()=>{const kg=(A.goalKg!=null)?+A.goalKg:5;goalR.value=kg;const keep=(A.keep===true)||kg===0;goalK.checked=keep;updateGoalMax();toggleKeep(keep);if(!keep)setGoal(Math.min(kg,+goalR.max));updateGoalPreview()})();
 
 /* Aha moment (пересчёт по выбору частоты) */
 function freqFromPerweek(){
@@ -570,9 +587,7 @@ function updateAha(){
   const box=$('#aha'); if(!box) return;
   const s=freqFromPerweek();
   if(!s){ box.classList.add('hidden'); return; }
-  const minPerSess=25;                      // средняя длительность занятия, мин
-  const eqSteps=3000;                       // эквивалент в шагах за 1 тренировку
-  const totalMin=s*minPerSess;
+  const minPerSess=25; const eqSteps=3000;
   const base=(+A.steps||4000)*7;
   const addSteps=s*eqSteps;
   let factor=base>0 ? (base+addSteps)/base : 0;
@@ -589,8 +604,7 @@ function updateAha(){
   box.classList.remove('hidden');
 }
 updateAha();
-
-/* Загрузка + результат */
+      /* Загрузка + результат */
 function runLoading(done){
   const ring=$('#lring'),lpct=$('#lpct'),lmsg=$('#lmsg'),lsub=$('#lsub');
   const stepsTxt=['Учитываем ваш возраст','Смотрим телосложение и ИМТ','Проверяем активность и опыт','Добавляем шаги и питание','Готовим персональный прогноз…'];
@@ -636,7 +650,7 @@ function fmtDuration(wks){
   const months = Math.ceil(wks / 4); return { start: 6, value: months, unitText: 'мес.', label: `${months} мес.` };
 }
 function goalKg(){
-  if(A.goalKg!=null) return Math.max(0,Math.min(20,+A.goalKg));
+  if(A.goalKg!=null) return Math.max(0,Math.min(+$('#goalRange').max||20,+A.goalKg));
   const g=A.goal||''; if(g.includes('3–5'))return 4; if(g.includes('5–10'))return 8; if(g.includes('10+'))return 12; return 3;
 }
 
@@ -737,7 +751,7 @@ function buildProgramBullets(p){
   const mot=(A.mot||[]); if(mot.includes('Для внешности')) B.push('Работаем с объёмами талии и бёдер — заметные изменения к 4–6 неделе.');
   if(mot.includes('Для энергии и лёгкости')) B.push('Больше энергии и лёгкости уже через 1–2 недели.');
   if(mot.includes('Для здоровья')) B.push('Бережная аэробная нагрузка — поддержка сердца, сосудов и дыхания.');
-  if(mot.includes('Для уверенности в себе')) B.push('Понятный план и поддержка сообщества — мотивация не пропадёт, а от вас будет нельзя отвести взгляд.');
+  if(mot.includes('Для уверенности в себе')) B.push('Понятный план и поддержка сообщества — мотивация не пропадёт.');
   const kg=(A.goalKg!=null)?+A.goalKg:0;
   if(kg>0) B.push(`Двигаемся к вашей цели −${kg} кг безопасным и эффективным темпом, без рывков.`);
   else B.push('Поддержим форму, усилим тонус и выносливость — без изнурения.');
