@@ -746,7 +746,7 @@ function buildProgramBullets(p){
 
 function renderProgram(){
   const p=chooseProgram();
-  $('#progTitle').textContent = `У нас 28 программ, но вам лучше начать с «${p.title}»`;
+  $('#progTitle').textContent = `У нас 28 программ, но вам лучше начать с «${p.title}». Входит в любой абонемент!`;
   const leadParts=[p.lead];
   if(/Активная/.test(A.life||'')||/Регулярно/.test(A.exp||'')) leadParts.push('Подойдёт, если вы любите более высокий темп.');
   if(/Сидячая/.test(A.life||'')) leadParts.push('Подойдёт, если вы много сидите и хотите мягко вернуться к активности.');
