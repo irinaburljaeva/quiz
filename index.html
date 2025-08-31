@@ -109,6 +109,8 @@ h2{font-size:clamp(20px,5vw,30px);line-height:1.18;margin:6px 0 12px}
 .hcard.is{border-color:var(--o);background:linear-gradient(180deg,#fff 0,#fff9f3 100%);box-shadow:0 12px 26px rgba(232,93,4,.18)}
 .hhead{display:flex;gap:10px;align-items:center;letter-spacing:-.02em}
 .hicon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:#fff6f1;border:2px solid #ffd5c2}
+/* убрать bold из заголовков карточек */
+.hhead,.hhead *{font-weight:500 !important}
 
 /* Goal UI */
 .goalw{display:grid;gap:12px}
@@ -166,15 +168,33 @@ h2{font-size:clamp(20px,5vw,30px);line-height:1.18;margin:6px 0 12px}
 #lightbox .x{position:absolute;top:10px;right:14px;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.12);color:#fff;font-size:26px;cursor:pointer}
 #lightbox .x:active{transform:scale(.96)}
 
-/* Убираем жирный у заголовков карточек "тяжелее всего" */
-.hhead,.hhead *{font-weight:500 !important}
+/* Program slide — новая обложка + чипсы со статами */
+.prog-wrap{display:grid;gap:12px}
+.prog-head{
+  position:relative;border:2px solid var(--g);border-radius:16px;padding:14px 12px;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(255,240,230,.9), transparent 50%),
+    radial-gradient(120% 80% at 100% 100%, rgba(255,247,236,.9), transparent 55%),
+    linear-gradient(180deg,#fff,#fff);
+  overflow:hidden;
+}
+.prog-head::after{
+  content:""; position:absolute; right:-40px; top:-40px; width:160px; height:160px;
+  background:conic-gradient(from 0deg, #FFBA08, #E85D04); opacity:.15; border-radius:50%;
+  filter:blur(6px);
+}
+.p-title{margin:.2rem 0 6px; font-size:clamp(20px,5vw,28px); font-weight:800; letter-spacing:-.02em}
+.p-sub{margin:0; color:#555}
+.p-chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+.p-chip{border:2px solid #ffd5c2; background:#fff7ef; border-radius:999px; padding:6px 10px; font-weight:700; font-size:.88rem}
+.p-chip.emph{border-color:#cfeede; background:#e9f9f0}
 
-/* Program slide */
-.prog-hero{margin:0 0 12px;border-radius:16px;overflow:hidden}
-.prog-hero img{width:100%;display:block;border-radius:16px;object-fit:cover}
-.prog-card{border:2px solid var(--g);border-radius:16px;padding:12px;background:#fff}
+.prog-hero{margin:0 0 6px; border-radius:16px; overflow:hidden}
+.prog-hero img{width:100%; display:block; border-radius:16px; object-fit:cover; box-shadow:0 12px 28px rgba(0,0,0,.08)}
+
+.prog-card{border:2px solid var(--g); border-radius:16px; padding:12px; background:#fff}
 .prog-card h3{margin:.2rem 0 .6rem}
-.prog-list{padding-left:18px;margin:.2rem 0}
+.prog-list{padding-left:18px; margin:.2rem 0}
 </style>
 </head>
 <body>
@@ -204,7 +224,7 @@ const LIFE=['Сидячая работа','Умеренно активная','�
 const EXP=['Никогда не занималась','Иногда дома / по видео','Регулярно'];
 const MOT=['Для здоровья','Для внешности','Для энергии и лёгкости','Для уверенности в себе'];
 const HEALTH=['Диабет','Проблемы со щитовидкой','Гипертония','Боль в суставах','Беременность','Нет'];
-const BAD=['Сладкая газировка','Выпечка','Фастфуд','Колбаса/сосиски','Сыр 45%+','Ночные перекусы','Алкоголь чаще 2 р/нед','Сладкий чай/кофе','Очень солёная пища'];
+const BAD=['Сладкая газировка','Выпечка','Фастфуд','Колбаса/сосиски','Сыры 45%+','Ночные перекусы','Алкоголь чаще 2 р/нед','Сладкий чай/кофе','Очень солёная пища'];
 const GOOD=['1.5–2 л воды','Овощи 400 г/день','Фрукты ежедневно','Белок в каждом приёме пищи','10–20 мин растяжки','8 000+ шагов уже сейчас'];
 
 /* кейсы (имена в родительном падеже) */
@@ -272,7 +292,8 @@ const html=
 section('intro',`
   <figure class="hero-wrap">
     <div class="hero-skel" id="heroSkel"></div>
-    <video class="hero-media" autoplay muted loop playsinline preload="auto">
+    <video 
+   <video class="hero-media" autoplay muted loop playsinline preload="auto">
       <source src="intro.mp4#t=0.1" type="video/mp4"/>
       <img src="logo.png" alt="ШАГАЙ ДОМА"/>
     </video>
@@ -291,8 +312,7 @@ section('intro',`
 `)
 +section('steps',`
   <h2>Сколько шагов вы проходите сейчас в день (примерно)?</h2>
-  <input id="steps" t
-    <input id="steps" type="range" min="0" max="25000" step="250" value="4000">
+  <input id="steps" type="range" min="0" max="25000" step="250" value="4000">
   <div class="hint">Сейчас: <b><span id="sv">4000</span> шагов</b></div>
   <p class="hint"><b>Подсказка:</b> найти шаги можно в приложении вашего телефона/браслета</p>
   ${actions()}
@@ -388,15 +408,26 @@ section('intro',`
   <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="toCTA">Хочу такой результат!</button></div>
 `)
 +section('program',`
-  <figure class="prog-hero"><img src="program.png" alt="Рекомендуемая программа"></figure>
-  <div class="prog-card">
-    <h3 id="progTitle">Мы рекомендуем вам…</h3>
-    <p class="hint" id="progLead"></p>
-    <ul class="prog-list" id="progList"></ul>
-  </div>
-  <div class="actions sticky">
-    <button class="btn ghost" data-prev>Назад</button>
-    <button class="btn primary" id="toSale">Далее →</button>
+  <div class="prog-wrap">
+    <div class="prog-head">
+      <div class="p-title" id="progTitle">Мы рекомендуем вам…</div>
+      <p class="p-sub" id="progLead"></p>
+      <div class="p-chips" id="progChips"></div>
+    </div>
+
+    <figure class="prog-hero">
+      <img src="program.png" alt="Рекомендуемая программа">
+    </figure>
+
+    <div class="prog-card">
+      <h3>Почему это подойдёт именно вам</h3>
+      <ul class="prog-list" id="progList"></ul>
+    </div>
+
+    <div class="actions sticky">
+      <button class="btn ghost" data-prev>Назад</button>
+      <button class="btn primary" id="toSale">К программе →</button>
+    </div>
   </div>
 `)
 +section('sale',`
@@ -426,12 +457,11 @@ function setP(i){progress.classList.toggle('hide',i===0);const p=Math.round(i/(S
 function show(n){S[idx].classList.remove('is');idx=Math.max(0,Math.min(S.length-1,n));S[idx].classList.add('is');setP(idx);scrollTo({top:0,behavior:'smooth'})}
 setP(0);
 addEventListener('click',e=>{const next=e.target.closest('[data-next]'),prev=e.target.closest('[data-prev]');if(next){vibrate();goNext()}if(prev){vibrate();show(idx-1)}});
-
-function shake(){S[idx].animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:260});vibrate(25)}
+      function shake(){S[idx].animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:260});vibrate(25)}
 const need=k=>!A[k];
 function goNext(){const id=S[idx].dataset.id;
   if(id==='age'&&need('age'))return shake();
- if(id==='body'&&need('body'))return shake();
+  if(id==='body'&&need('body'))return shake();
   if(id==='bmi'&&(!A.h||!A.w))return shake();
   if(id==='life'&&need('life'))return shake();
   if(id==='exp'&&need('exp'))return shake();
@@ -475,7 +505,7 @@ function updMeter(){
   if(acc<=-15){cls='hm-bad';txt='сильно тормозит';border='#E85D04'}
   else if(acc<-5){cls='hm-bad';txt='тормозит';border='#E85D04'}
   else if(acc>15){cls='hm-good';txt='суперускорение';border='#12A06A'}
-  else if(acc>5){cls='hm-good';txt='ускоряет';border='#12A06A'}
+  else if(acc>5){cls='hm-good';txt='ускоряет';border:'#12A06A'}
   badge.className='hm-badge '+cls;badge.textContent=txt;ptr.style.borderColor=border;
 }
 (()=>{['bad','good'].forEach(id=>{$('#'+id)?.addEventListener('click',()=>setTimeout(updMeter,0),true)});updMeter()})();
@@ -538,8 +568,7 @@ function toggleKeep(ch){const rng=$('#goalRange');A.keep=!!ch;save();if(ch){rng.
 const goalR=$('#goalRange'),goalK=$('#goalKeep');
 goalR.oninput=e=>setGoal(e.target.value);goalK.onchange=e=>toggleKeep(e.target.checked);
 (()=>{const kg=(A.goalKg!=null)?+A.goalKg:5;goalR.value=kg;const keep=(A.keep===true)||kg===0;goalK.checked=keep;toggleKeep(keep);if(!keep)setGoal(kg);updateGoalPreview()})();
-
-/* Loading + result */
+      /* Loading + result */
 function runLoading(done){
   const ring=$('#lring'),lpct=$('#lpct'),lmsg=$('#lmsg'),lsub=$('#lsub');
   const stepsTxt=['Учитываем ваш возраст','Смотрим телосложение и ИМТ','Проверяем активность и опыт','Добавляем шаги и питание','Готовим персональный прогноз…'];
@@ -574,7 +603,7 @@ function rate(){
   let r=.5;
   const bmi=A.bmi||26;
   if(bmi>=30) r+=.08; else if(bmi<23) r-=.08;
- r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth()*fPain();
+  r*=fAge()*fLife()*fExp()*fBody()*fSteps().f*fNutri()*fHealth()*fPain();
   return Math.max(.25,Math.min(.9,+r.toFixed(2)));
 }
 
@@ -588,41 +617,77 @@ function goalKg(){
   const g=A.goal||''; if(g.includes('3–5'))return 4; if(g.includes('5–10'))return 8; if(g.includes('10+'))return 12; return 3;
 }
 
-/* ==== Program selection ==== */
+/* ==== Program selection (улучшено) ==== */
 function chooseProgram(){
   const w=+A.w||0, age=A.age||'', life=A.life||'', exp=A.exp||'', steps=+A.steps||0, bmi=+A.bmi||0;
-  if (w>=100) return {key:'p100', title:'Тренировки для 100+', lead:'Если сейчас трёхзначное число на весах — начните с бережных шагательных тренировок.', bullets:[
-    'Щадящая физическая нагрузка без перегрузки суставов',
-    'Постепенное снижение веса в комфортном темпе',
-    'Улучшение общего самочувствия и выносливости',
-    'Развитие привычки к движению без стресса'
-  ]};
-  if (/50\+/.test(age)) return {key:'p50', title:'Тренировки для 50+', lead:'Мягкие и безопасные тренировки для серебряного возраста и тех, кому противопоказана высокая интенсивность.', bullets:[
-    'Бережная проработка всех групп мышц без перегрузки',
-    'Улучшение подвижности суставов и гибкости',
-    'Поднятие уровня энергии и лёгкости в движениях',
-    'Щадящий темп для комфортных и эффективных тренировок'
-  ]};
-  const isActive = /Активная/.test(life) || steps>=8000 || /Регулярно/.test(exp);
-  if (isActive || (bmi && bmi<25)) return {key:'active', title:'Шагай дома. Активно', lead:'Для тех, кто любит двигаться дольше и активнее, без сложных танцевальных связок.', bullets:[
-    'Максимум шагов без сложных элементов',
-    'Укрепление мышц и повышение выносливости',
-    'Кардио-нагрузка для поддержки сердца и лёгких',
-    'Отличное настроение после каждой тренировки'
-  ]};
-  return {key:'base', title:'Шагай дома. База', lead:'Лучший старт, если давно не занимались: простые тренировки, чтобы спокойно втянуться.', bullets:[
-    'Отличный старт для новичков в шагательных тренировках',
-    'Минимальная нагрузка и комфортное освоение движений',
-    'Постепенное привыкание к регулярной активности',
-    'Улучшение общего тонуса и подвижности'
-  ]};
+
+  if (w>=100) return {
+    key:'p100', title:'Тренировки для 100+',
+    lead:'Если сейчас трёхзначное число на весах — начните с бережных шагательных тренировок.',
+    bullets:[
+      'Щадящая физическая нагрузка без перегрузки суставов',
+      'Постепенное снижение веса в комфортном темпе',
+      'Улучшение общего самочувствия и выносливости',
+      'Развитие привычки к движению без стресса'
+    ],
+    meta:{workouts:'7 тренировок', duration:'15–20 минут', tempo:'Темп низкий', steps:'2–2,5 тыс шагов'}
+  };
+
+  if (/50\+/.test(age)) return {
+    key:'p50', title:'Тренировки для 50+',
+    lead:'Мягкие и безопасные тренировки для серебряного возраста и темпа без перегрузки.',
+    bullets:[
+      'Бережная проработка всех групп мышц без перегрузки',
+      'Улучшение подвижности суставов и гибкости',
+      'Поднятие уровня энергии и лёгкости в движениях',
+      'Щадящий темп для комфортных и эффективных тренировок'
+    ],
+    meta:{workouts:'7 тренировок', duration:'15–20 минут', tempo:'Темп средний'}
+  };
+
+  const isActive = /Активная/.test(life) || steps>=8000 || /Регулярно/.test(exp) || (bmi && bmi<25);
+  if (isActive) return {
+    key:'active', title:'Шагай дома. Активно',
+    lead:'Для тех, кто любит двигаться дольше и активнее — максимум шагов без сложных связок.',
+    bullets:[
+      'Максимум шагов без сложных элементов',
+      'Укрепление мышц и повышение выносливости',
+      'Кардио-нагрузка для поддержки сердца и лёгких',
+      'Отличное настроение после каждой тренировки'
+    ],
+    meta:{workouts:'7 тренировок', duration:'15–40 минут', tempo:'Темп высокий', steps:'2–6 тыс шагов'}
+  };
+
+  return {
+    key:'base', title:'Шагай дома. База',
+    lead:'Лучший старт, если давно не занимались: простые тренировки, чтобы спокойно втянуться.',
+    bullets:[
+      'Отличный старт для новичков в шагательных тренировках',
+      'Минимальная нагрузка и комфортное освоение движений',
+      'Постепенное привыкание к регулярной активности',
+      'Улучшение общего тонуса и подвижности'
+    ],
+    meta:{workouts:'8 тренировок', duration:'15–20 минут', tempo:'Темп низкий'}
+  };
 }
 function renderProgram(){
   const p=chooseProgram();
-  $('#progTitle').textContent=`У нас 28 программ, но вам лучше начать с «${p.title}»`;
-  $('#progLead').textContent=p.lead;
+  $('#progTitle').textContent = `У нас 28 программ, но вам лучше начать с «${p.title}»`;
+  $('#progLead').textContent  = p.lead;
+
+  // чипсы со статами
+  const chips = [];
+  if (p.meta?.workouts) chips.push(p.meta.workouts);
+  if (p.meta?.duration) chips.push(p.meta.duration);
+  if (p.meta?.steps)    chips.push(p.meta.steps);
+  if (p.meta?.tempo)    chips.push(p.meta.tempo);
+
+  const chipsRoot = $('#progChips');
+  chipsRoot.innerHTML = chips.map((t,i)=>`<span class="p-chip${/высокий/i.test(t)?' emph':''}">${t}</span>`).join('');
+
+  // буллеты
   const ul=$('#progList'); ul.innerHTML='';
-  p.bullets.forEach(b=>{const li=document.createElement('li');li.textContent=b;ul.appendChild(li)});
+  (p.bullets||[]).forEach(b=>{const li=document.createElement('li');li.textContent=b;ul.appendChild(li)});
 }
 
 /* ==== Calculate & screens ==== */
@@ -665,7 +730,12 @@ hv?.addEventListener('canplay',hideS,{once:true});
 setTimeout(hideS,2000);
 
 /* progress header show/hide */
-const pcInit=()=>{try{scrollTo({top:0,behavior:'auto'})}catch(e){scrollTo(0,0)}};pcInit();setP(0);
+const progressEl=$('#progress');
+progressEl.innerHTML=`<div class="pcirc"><div class="pct">0%</div></div><div class="plogo"><img src="logo.png" alt="ШАГАЙ ДОМА"></div>`;
+const pc=()=>$('#progress .pcirc'),pctEl=()=>$('#progress .pct');let pct=0,rid=0;
+function animP(to){cancelAnimationFrame(rid);const k=.08,d=.75;let v=0;function f(){const x=pct-to,a=-k*x;v=(v+a)*d;pct+=v;if(Math.abs(pct-to)<.3&&Math.abs(v)<.3)pct=to;pc().style.setProperty('--p',pct.toFixed(1)+'%');pctEl().textContent=Math.round(pct)+'%';if(pct!==to)rid=requestAnimationFrame(f)}rid=requestAnimationFrame(f)}
+function setP(i){progressEl.classList.toggle('hide',i===0);const p=Math.round(i/(S.length-1)*100);animP(p)}
+setP(0);
 </script>
 </body>
 </html>
