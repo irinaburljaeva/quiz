@@ -185,6 +185,13 @@ h2{font-size:clamp(20px,5vw,30px);line-height:1.18;margin:6px 0 12px}
 .aha strong{font-weight:800}
 .aha small{color:#666}
 .aha img{width:100%;display:block;border-radius:12px;margin-top:8px;box-shadow:0 8px 22px rgba(0,0,0,.08)}
+      
+/* Limited-time offer: box + timer */
+.offer{border:2px solid var(--g);border-radius:16px;padding:12px;background:#fff;margin:10px 0}
+.offer h3{margin:0 0 6px;font-size:1.02rem}
+.timer{display:inline-flex;align-items:center;gap:8px;font-weight:800}
+.timer .tbox{display:inline-block;min-width:48px;padding:6px 10px;border:2px solid var(--y);border-radius:10px;text-align:center;letter-spacing:.02em}
+.timer small{color:#666;font-weight:600}
 </style>
 </head>
 <body>
@@ -368,11 +375,23 @@ section('intro',`
   <div class="loader2"><div class="ring" id="lring"><div class="pct" id="lpct">0%</div></div>
   <div class="lmsg" id="lmsg">Собираем данные…</div><p class="hint" id="lsub">Возраст • ИМТ • Активность • Цель</p></div>
 `)
-+section('result',`
++section('result',
   <h2 id="rTitle">Готово!</h2>
   <div class="counter" id="nums">0 кг за 0 недель</div>
   <p class="hint" id="rSub"></p>
+
   <div id="caseBox" class="case hide"></div>
+
+  <!-- 🔥 спецпредложение прямо на экране результата -->
+  <div id="resOffer" class="offer" style="display:none">
+    <h3>Только для вас действует специальное предложение: <b>−70% на все абонементы</b>!</h3>
+    <div class="timer"><small>Предложение ограничено:</small><span class="tbox" id="resTimer">15:00</span></div>
+    <div class="actions" style="margin-top:10px">
+      <a class="btn primary" id="resGoSale" href="https://walk-walk.ru/?utm_source=website&utm_medium=quiz&utm_campaign=looseweight" target="_blank" rel="noopener">Получить абонемент со скидкой 70%</a>
+      <button class="btn ghost" id="resGoProgram">К программе →</button>
+    </div>
+  </div>
+
   <p class="hint" id="rDisc">Прогноз носит ознакомительный характер и не является медицинской рекомендацией.</p>
   <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="toCTA">Перейти к предложению!</button></div>
 `)
@@ -409,6 +428,9 @@ section('intro',`
     <li>Поддержка и мотивация в чате</li>
     <li>Помощь куратора и сообщество единомышленниц </li>
   </ul>
+      <div class="timer" style="margin:10px 0 0">
+    <small>Предложение ограничено:</small><span class="tbox" id="saleTimer">15:00</span>
+  </div>
   <div class="actions">
     <a class="btn primary" id="cta" href="https://walk-walk.ru/?utm_source=website&utm_medium=quiz&utm_campaign=looseweight" target="_blank" rel="noopener">Получить абонемент со скидкой 70% </a>
     <button class="btn ghost" data-prev>Назад</button>
@@ -647,9 +669,13 @@ function calculate(){
   const dur=fmtDuration(wks);
 
   $('#rTitle').textContent=`${name}, ваш прогноз готов ✨`;
-  animNum(dur.start,dur.value,1400,v=>{
-    $('#nums').textContent=`−${kg} кг за ${v} ${dur.unitText}`;
-  });
+ animNum(dur.start,dur.value,1400,v=>{
+  if(kg>0){
+    $('#nums').textContent = −${kg} кг за ${v} ${dur.unitText};
+  }else{
+    $('#nums').textContent = Чтобы прийти к цели за ${v} ${dur.unitText}…;
+  }
+});
   const rtText=rt.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1});
   $('#rSub').innerHTML=
     `С тренировками ШАГАЙ ДОМА ⚡️ вы будете проходить <b>${t.toLocaleString('ru-RU')}</b> шагов каждый день!<br>
@@ -657,14 +683,21 @@ function calculate(){
 
   const caseObj = pickCase(Math.round(kg));
   renderCaseBox(caseObj);
-
+// показываем спецпредложение на экране результата + запускаем таймер
+$('#resOffer')?.style.removeProperty('display');
+startOfferTimer();
   $('#sTitle').textContent=`${name}, присоединяйтесь к клубу «ШАГАЙ ДОМА» ⚡`;
-  $('#sLead').innerHTML=`Чтобы прийти к цели <b>−${kg} кг</b> за <b>${dur.label}</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.`;
-
+ if(kg>0){
+  $('#sLead').innerHTML = Чтобы прийти к цели <b>−${kg} кг</b> за <b>${dur.label}</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.;
+}else{
+  $('#sLead').innerHTML = Чтобы прийти к цели за <b>${dur.label}</b> — подключите готовые планы и поддержку. Первые изменения уже через 1–2 недели.;
+}
   show(idxBy('result'))
 }
 function animNum(a,b,d,cb){const s=performance.now(),ease=t=>1-Math.pow(1-t,3);function fr(n){const p=Math.min(1,(n-s)/d);cb(Math.round(a+(b-a)*ease(p)));if(p<1)requestAnimationFrame(fr)}requestAnimationFrame(fr)}
 
+      $('#resGoProgram')?.addEventListener('click',()=>{ renderProgram(); show(idxBy('program')); });
+      
 /* Кейс + лайтбокс */
 function renderCaseBox(c){
   const box=document.getElementById('caseBox'); if(!box) return;
@@ -774,6 +807,37 @@ hv?.addEventListener('loadeddata',hideS,{once:true});
 hv?.addEventListener('canplay',hideS,{once:true});
 hv?.addEventListener('error',()=>setTimeout(hideS,1000),{once:true});
 setTimeout(hideS,2000);
+      
+/* ===== Limited-time offer timer (15 минут) ===== */
+function getOfferUntil(){
+  let until = A.offerUntil ? +A.offerUntil : 0;
+  const now = Date.now();
+  if(!until || until < now){
+    until = now + 15*60*1000; // 15 минут
+    A.offerUntil = until; save();
+  }
+  return until;
+}
+let offerTimerId;
+function startOfferTimer(){
+  const until = getOfferUntil();
+  function fmt(ms){
+    const s = Math.max(0, Math.floor(ms/1000));
+    const m = Math.floor(s/60), ss = s%60;
+    return String(m).padStart(2,'0') + ':' + String(ss).padStart(2,'0');
+  }
+  clearInterval(offerTimerId);
+  const resT = $('#resTimer'), saleT = $('#saleTimer');
+  function tick(){
+    const left = until - Date.now();
+    const txt  = fmt(left);
+    if(resT)  resT.textContent  = txt;
+    if(saleT) saleT.textContent = txt;
+    if(left <= 0) clearInterval(offerTimerId);
+  }
+  tick();
+  offerTimerId = setInterval(tick, 1000);
+}
 
 /* progress init */
 setP(0);
