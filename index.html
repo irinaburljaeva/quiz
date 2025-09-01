@@ -337,17 +337,17 @@ section('intro',`
 +section('health',`<h2>Есть ли состояния, которые важно учитывать?</h2>${chips('healthChips',HEALTH)}<p class="hint">Если есть сомнения — проконсультируйтесь с врачом.</p>${actions()}`)
 +section('nutrition',`<h2>Питание</h2>${opts('nutriOpts',[{label:'Буду питаться по меню-конструктору в клубе',key:'menu'},{label:'Хочу научиться правильно составлять тарелку',key:'plate'},{label:'Нет, пока без питания',key:'no'}])}${actions()}`)
 +section('food',`
-  <h2>Привычки и продукты</h2>
+  <h2>Расскажите нам о ваших текущих привычках</h2>
   <div class="habit">
     <div class="habit-grid">
       <div class="col">
-        <h3>Тормозит прогресс</h3>
+        <h3>Плохие привычки</h3>
         <div class="chips chips--pills" id="bad">
           ${BAD.map(x=>`<button type="button" class="chip" data-kind="bad" data-v="${x}">${x}</button>`).join('')}
         </div>
       </div>
       <div class="col">
-        <h3>Ускоряет результат</h3>
+        <h3>Хорошие привычки</h3>
         <div class="chips chips--pills" id="good">
           ${GOOD.map(x=>`<button type="button" class="chip" data-kind="good" data-v="${x}">${x}</button>`).join('')}
         </div>
@@ -374,7 +374,7 @@ section('intro',`
   <p class="hint" id="rSub"></p>
   <div id="caseBox" class="case hide"></div>
   <p class="hint" id="rDisc">Прогноз носит ознакомительный характер и не является медицинской рекомендацией.</p>
-  <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="toCTA">Хочу такой результат!</button></div>
+  <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="toCTA">Перейти к предложению!</button></div>
 `)
 +section('program',`
   <div class="prog-wrap">
@@ -410,7 +410,7 @@ section('intro',`
     <li>Помощь куратора и сообщество единомышленниц </li>
   </ul>
   <div class="actions">
-    <a class="btn primary" id="cta" href="https://walk-walk.ru/?utm_source=website&utm_medium=quiz&utm_campaign=looseweight" target="_blank" rel="noopener">Получить абонемент со скидкой</a>
+    <a class="btn primary" id="cta" href="https://walk-walk.ru/?utm_source=website&utm_medium=quiz&utm_campaign=looseweight" target="_blank" rel="noopener">Получить абонемент со скидкой 70% </a>
     <button class="btn ghost" data-prev>Назад</button>
   </div>
 `);
