@@ -197,6 +197,10 @@ h2{font-size:clamp(20px,5vw,30px);line-height:1.18;margin:6px 0 12px}
 .promo-hero{margin:0;border-radius:16px;overflow:hidden;box-shadow:0 10px 22px rgba(0,0,0,.06)}
 .promo-hero img,.promo-hero video{width:100%;display:block;border-radius:16px;object-fit:cover}
 .promo h2{margin-top:2px}
+ /* Скрыть кнопку "Посмотреть программу" только в инлайн-оффере экрана результата */
+section[data-id="result"] #offerInline .actions { 
+display: none !important; 
+}
 </style>
 </head>
 <body>
