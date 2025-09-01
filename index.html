@@ -243,7 +243,23 @@ const section=(id,html)=>`<section class="screen${id==='intro'?' is':''}" data-i
 const chips=(id,arr)=>`<div class="chips" id="${id}">`+arr.map(t=>`<button type="button" class="chip" data-v="${t}">${t}</button>`).join('')+`</div>`;
 const opts=(id,arr)=>`<div class="grid cols2" id="${id}">`+arr.map(t=>{let label,key;if(typeof t==='string'){label=t;key=t}else if(Array.isArray(t)){label=t[0];key=t[1]??t[0]}else if(t&&typeof t==='object'){label=t.label??t.value??t.key??'';key=t.key??t.value??t.label??''}else{label=String(t);key=String(t)}return `<label class="opt" data-v="${String(key)}"><span>${String(label)}</span></label>`}).join('')+`</div>`;
 const actions=()=>`<div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" data-next>Далее</button></div>`;
+/* FIX: кнопка «Поехали →» на интро всегда запускает квиз */
+(()=>{
+  const introNext = document.querySelector('section[data-id="intro"] [data-next]');
+  if (introNext) {
+    introNext.addEventListener('click', (e)=>{
+      e.preventDefault();
+      vibrate && vibrate();
+      // Переходим с интро на следующий экран
+      // Вариант 1 (жёстко на 1-й вопрос):
+      // show(1);
 
+      // Вариант 2 (надёжно, если вдруг порядок изменился):
+      show(Math.min(S.length - 1, (typeof idx==='number'? idx:0) + 1));
+    }, { once:true });
+  }
+})();
+      
 /* screens */
 const html=
 section('intro',`
