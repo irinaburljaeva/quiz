@@ -104,7 +104,7 @@ h2{font-size:clamp(20px,5vw,30px);line-height:1.18;margin:6px 0 12px}
 .hcard.is{border-color:var(--o);background:linear-gradient(180deg,#fff 0,#fff9f3 100%);box-shadow:0 12px 26px rgba(232,93,4,.18)}
 .hhead{display:flex;gap:10px;align-items:center;letter-spacing:-.02em}
 .hicon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:#fff6f1;border:2px solid #ffd5c2}
-.hhead,.hhead *{font-weight:500 !important} /* убрать bold */
+.hhead,.hhead *{font-weight:500 !important}
 
 /* Goal UI */
 .goalw{display:grid;gap:12px}
@@ -174,7 +174,6 @@ h2{font-size:clamp(20px,5vw,30px);line-height:1.18;margin:6px 0 12px}
 .p-chip.emph{border-color:#cfeede; background:#e9f9f0}
 .prog-hero{margin:0 0 6px; border-radius:16px; overflow:hidden}
 .prog-hero img{width:100%; display:block; border-radius:16px; object-fit:cover; box-shadow:0 12px 28px rgba(0,0,0,.08)}
-/* убрали рамку у блока "почему это подойдёт" */
 .prog-card{border:0; border-radius:0; padding:0; background:transparent; box-shadow:none}
 .prog-card h3{margin:.2rem 0 .6rem}
 .prog-list{padding-left:18px; margin:.2rem 0}
@@ -192,6 +191,12 @@ h2{font-size:clamp(20px,5vw,30px);line-height:1.18;margin:6px 0 12px}
 .deal-badge{border:2px solid #ffd5c2;background:#fff7ef;border-radius:999px;padding:6px 10px;font-weight:800}
 .deal-timer{margin-left:auto;font-weight:800;font-size:1.1rem;letter-spacing:.02em}
 .offer-inline{border:2px solid var(--g);border-radius:16px;padding:12px;background:#fff;margin:10px 0}
+
+/* Promo interstitials */
+.promo{display:grid;gap:10px}
+.promo-hero{margin:0;border-radius:16px;overflow:hidden;box-shadow:0 10px 22px rgba(0,0,0,.06)}
+.promo-hero img,.promo-hero video{width:100%;display:block;border-radius:16px;object-fit:cover}
+.promo h2{margin-top:2px}
 </style>
 </head>
 <body>
@@ -263,6 +268,19 @@ section('intro',`
   <div class="actions sticky"><button class="btn primary" data-next>Поехали →</button></div>
 `)
 +section('age',`<h2>Ваш возраст</h2>${opts('ageOpts',AGE)}${actions()}`)
+
+/* PROMO 1: 1 млн подписчиков — 2.jpg */
++section('promo1',`
+  <div class="promo">
+    <figure class="promo-hero">
+      <img src="2.jpg" alt="ШАГАЙ ДОМА⚡ — больше 1 млн подписчиков" loading="lazy" decoding="async">
+    </figure>
+    <h2>У ШАГАЙ ДОМА⚡ уже больше <b>1&nbsp;миллиона</b> подписчика во всех соцсетях!</h2>
+    <p class="hint">Присоединяйтесь к самому дружелюбному фитнес-сообществу.</p>
+    ${actions()}
+  </div>
+`)
+
 +section('body',`
   <h2>Телосложение сейчас</h2>
   <div class="grid cols2" id="bodyOpts">
@@ -276,6 +294,19 @@ section('intro',`
   <p class="hint"><b>Подсказка:</b> найти шаги можно в приложении вашего телефона/браслета</p>
   ${actions()}
 `)
+
+/* PROMO 2: 10 000 в клубе — otzyv.jpg */
++section('promo2',`
+  <div class="promo">
+    <figure class="promo-hero">
+      <img src="otzyv.jpg" alt="Уже больше 10 000 людей в клубе" loading="lazy" decoding="async">
+    </figure>
+    <h2>Уже больше <b>10&nbsp;000</b> людей в клубе ШАГАЙ ДОМА ⚡</h2>
+    <p class="hint">Каждый на своём уровне, но вместе — сильнее.</p>
+    ${actions()}
+  </div>
+`)
+
 +section('bmi',`
   <h2>Давайте посчитаем ваш ИМТ</h2>
   <p class="hint">Укажите ваш рост и вес — можно приблизительно.</p>
@@ -288,6 +319,19 @@ section('intro',`
 `)
 +section('life',`<h2>Образ жизни</h2>${opts('lifeOpts',LIFE)}${actions()}`)
 +section('exp',`<h2>Опыт тренировок</h2>${opts('expOpts',EXP)}${actions()}`)
+
+/* PROMO 3: 20 млн шагов — walkwalk.jpg */
++section('promo3',`
+  <div class="promo">
+    <figure class="promo-hero">
+      <img src="walkwalk.jpg" alt="20 миллионов шагов каждый день" loading="lazy" decoding="async">
+    </figure>
+    <h2><b>20&nbsp;миллионов</b> шагов каждый день набирают участницы клуба 😍</h2>
+    <p class="hint">Короткие шагательные тренировки — легко вписать в день.</p>
+    ${actions()}
+  </div>
+`)
+
 +section('goal',`
   <h2>Ваша цель</h2>
   <div class="goalw">
@@ -307,7 +351,7 @@ section('intro',`
           <img src="fit.png"      data-i="1" alt="fit"      loading="lazy" decoding="async">
           <img src="skinny.png"   data-i="2" alt="skinny"   loading="lazy" decoding="async">
           <img src="slim.png"     data-i="3" alt="slim"     loading="lazy" decoding="async">
-  <img src="s.png"        data-i="4" alt="s"        loading="lazy" decoding="async">
+          <img src="s.png"        data-i="4" alt="s"        loading="lazy" decoding="async">
           <img src="m.png"        data-i="5" alt="m"        loading="lazy" decoding="async">
           <img src="l.png"        data-i="6" alt="l"        loading="lazy" decoding="async">
           <img src="xl.png"       data-i="7" alt="xl"       loading="lazy" decoding="async">
@@ -327,6 +371,19 @@ section('intro',`
   <div id="aha" class="aha hidden"></div>
   ${actions()}
 `)
+
+/* PROMO 4: 85% похудели — doposle.jpg */
++section('promo4',`
+  <div class="promo">
+    <figure class="promo-hero">
+      <img src="doposle.jpg" alt="85% клубников похудели на 1–2 кг за первую неделю" loading="lazy" decoding="async">
+    </figure>
+    <h2><b>85%</b> клубников похудели на <b>1–2&nbsp;кг</b> за первую неделю тренировок 🔥</h2>
+    <p class="hint">Стартовать легко — результаты мотивируют продолжать.</p>
+    ${actions()}
+  </div>
+`)
+
 +section('hard',`
   <h2>Что сейчас даётся тяжелее всего?</h2>
   <div class="hardw">
@@ -365,7 +422,8 @@ section('intro',`
       <div class="hm-track" id="hmTrack"><div class="hm-pointer" id="hmPtr"></div></div>
       <div class="hm-scale"><span>тормозит</span><span>нейтрально</span><span>ускоряет</span></div>
     </div>
-        <p class="hint">Отметьте только то, что про вас — индикатор появится автоматически ✨</p>
+
+    <p class="hint">Отметьте только то, что про вас — индикатор появится автоматически ✨</p>
     <div class="actions sticky"><button class="btn ghost" data-prev>Назад</button><button class="btn primary" id="calc">Рассчитать результат →</button></div>
   </div>
 `)
@@ -492,7 +550,6 @@ document.querySelector('section[data-id="intro"] [data-next]')?.addEventListener
 $('#name').oninput=e=>{A.name=e.target.value.trim();save()};
 const steps=$('#steps'),sv=$('#sv');function updRange(){const min=+steps.min||0,max=+steps.max||100,val=+steps.value||0,p=((val-min)/(max-min))*100;steps.style.setProperty('--pct',p+'%')}
 if(steps){updRange();steps.oninput=e=>{A.steps=+e.target.value;sv.textContent=A.steps;updRange();save();updateAha()}}
-
 /* BMI calc + label */
 ['h','w'].forEach(id=>{$('#'+id)?.addEventListener('input',()=>{updBMI();updateGoalPreview()})});
 function bmiCat(b){if(b<18.5)return{label:'Дефицит массы',cls:'bmi-warn',note:'ниже нормы (18,5–24,9)'};if(b<25)return{label:'Норма',cls:'bmi-ok',note:'в пределах нормы'};if(b<30)return{label:'Избыточная масса',cls:'bmi-warn',note:'выше нормы'};if(b<35)return{label:'Ожирение I ст.',cls:'bmi-bad',note:'выше нормы'};if(b<40)return{label:'Ожирение II ст.',cls:'bmi-bad',note:'значительно выше нормы'};return{label:'Ожирение III ст.',cls:'bmi-bad',note:'значительно выше нормы'}}
@@ -525,11 +582,12 @@ function updMeter(){
   let cls='hm-ok',txt='нейтрально',border='#FFBA08';
   if(acc<=-15){cls='hm-bad';txt='сильно тормозит';border='#E85D04'}
   else if(acc<-5){cls='hm-bad';txt='тормозит';border='#E85D04'}
-  else if(acc>15){cls='hm-good';txt='суперускорение';border='#12A06A'}
-  else if(acc>5){cls='hm-good';txt='ускоряет';border='#12A06A'}
+  else if(acc>15){cls='hm-good';txt='суперускорение';border:'#12A06A'}
+  else if(acc>5){cls='hm-good';txt='ускоряет';border:'#12A06A'}
   badge.className='hm-badge '+cls;badge.textContent=txt;ptr.style.borderColor=border;
 }
 updMeter();
+
 /* hard cards */
 (function setupHard(){const w=$('#hardCards');if(!w)return;const cs=$$('.hcard',w);if(A.hardKey){cs.find(c=>c.dataset.k===A.hardKey)?.classList.add('is')}w.addEventListener('click',e=>{const c=e.target.closest('.hcard');if(!c)return;cs.forEach(x=>x.classList.toggle('is',x===c));A.hardKey=c.dataset.k;A.hard={'walk':'Долгая прогулка утомляет','stairs':'Каждый пролёт по лестнице — испытание','games':'Стыдно включаться в активные игры','jumps':'Прыжки','none':'Ничего из этого'}[A.hardKey];save();vibrate(8)})})();
 
@@ -620,7 +678,8 @@ function updateAha(){
   box.classList.remove('hidden');
 }
 updateAha();
-      /* Загрузка + результат */
+
+/* Загрузка + результат */
 function runLoading(done){
   const ring=$('#lring'),lpct=$('#lpct'),lmsg=$('#lmsg'),lsub=$('#lsub');
   const stepsTxt=['Учитываем ваш возраст','Смотрим телосложение и ИМТ','Проверяем активность и опыт','Добавляем шаги и питание','Готовим персональный прогноз…'];
@@ -723,7 +782,6 @@ function openLightbox(src, caption){ if(!src) return; lbImg.src=src; lbCap.textC
 function closeLightbox(){ lightbox.classList.remove('show'); lightbox.setAttribute('aria-hidden','true'); lbImg.src=''; lbCap.textContent=''; document.body.style.overflow=''; }
 lightbox.addEventListener('click', e => { if(e.target===lightbox) closeLightbox(); });
 lbClose.addEventListener('click', closeLightbox);
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLightbox(); });
 
 /* Программы */
 function chooseProgram(){
@@ -754,6 +812,7 @@ function chooseProgram(){
     meta:{workouts:'8 тренировок', duration:'15–20 минут', tempo:'Темп низкий'}
   };
       }
+
       /* Персонализируем пункты «почему это вам подойдёт» */
 function buildProgramBullets(p){
   const B=[];
@@ -851,7 +910,7 @@ function startTimers(){
   __sdqTimerInt=setInterval(tick,1000);
 }
 
-/* Перестановка на sale (на всякий случай, если порядок изменят) */
+/* Перестановка на sale (на всякий случай) */
 function layoutSaleOffer(){
   const saleSection = document.querySelector('section[data-id="sale"]');
   if(!saleSection) return;
@@ -895,12 +954,12 @@ setTimeout(hideS,2000);
   }catch(e){ console.error(e); }
 })();
 
-/* Перезапуск таймера после расчёта результата (если перезашли) */
+/* Перезапуск таймера после расчёта результата */
 const __oldCalculate = (typeof calculate === 'function') ? calculate : null;
 if (__oldCalculate){
   window.calculate = function(){
     __oldCalculate.apply(this, arguments);
-    // После показа результата подчистим инлайн-оффер и таймер
+    // После показа результата обновляем таймер
     startTimers();
   };
 }
