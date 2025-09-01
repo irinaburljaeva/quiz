@@ -450,6 +450,51 @@ section('intro',`
 ;
 
 screensRoot.innerHTML=html;
+      /* Fallback-навигация: запускает квиз с интро и двигает [data-next]/[data-prev],
+   даже если ваши исходные хендлеры не подвесились */
+(function bindFallbackNav(){
+  if (window.__navFallbackBound) return;
+  window.__navFallbackBound = true;
+
+  // 1) Поехали → (интро)
+  const introNext = document.querySelector('section[data-id="intro"] [data-next]');
+  if (introNext) {
+    introNext.addEventListener('click', function(e){
+      e.preventDefault();
+      try{ typeof vibrate==='function' && vibrate(); }catch(_){}
+      goToRelative(+1);
+    }, { once:true });
+  }
+
+  // 2) Общий делегатор на любые [data-next]/[data-prev]
+  document.addEventListener('click', function(e){
+    const next = e.target.closest('[data-next]');
+    const prev = e.target.closest('[data-prev]');
+    if (!next && !prev) return;
+
+    e.preventDefault();
+    try{ typeof vibrate==='function' && vibrate(); }catch(_){}
+
+    if (next) goToRelative(+1);
+    if (prev) goToRelative(-1);
+  }, true); // capture — чтобы сработать даже если где-то stopPropagation
+
+  // Универсальный переход без зависимостей от ваших переменных
+  function goToRelative(step){
+    const screens = Array.from(document.querySelectorAll('#screens > section.screen'));
+    let cur = screens.findIndex(s => s.classList.contains('is'));
+    if (cur < 0) cur = 0;
+    let to = Math.min(screens.length - 1, Math.max(0, cur + step));
+
+    // Если у вас есть функция show(index) — используем её
+    if (typeof window.show === 'function') {
+      try { window.show(to); return; } catch(_) {}
+    }
+    // Иначе — аккуратно переключим экраны вручную
+    screens.forEach(s => s.classList.remove('is'));
+    screens[to]?.classList.add('is');
+  }
+})();
 
 /* ===== Countdown timers (15:00 by default) ===== */
 function startTimer(idOrEl, seconds){
